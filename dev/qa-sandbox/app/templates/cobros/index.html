@@ -1,0 +1,366 @@
+{% extends "base.html" %}
+
+{% block title %}Cobros & Morosidad | DLAB CRM{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Módulo de Cobros & Morosidad (Aging)</h1>
+            <p class="text-sm text-slate-500">Monitoreo de entradas de flujo de caja, cuotas y cuentas por cobrar.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="/carga-archivos" class="btn-action-outline">
+                <i class="bx bx-upload text-lg"></i> Carga Masiva
+            </a>
+            <button onclick="abrirModal('modal-cobro')" class="btn-action-solid">
+                <i class="bx bx-plus-circle text-lg"></i> Registrar Nuevo Cobro
+            </button>
+        </div>
+    </div>
+
+    <!-- Tabla de Cobros -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+      <div id="contador-modulo" class="text-sm font-semibold text-slate-600 mb-2 mt-4 ml-4">Total de registros: <span id="total-badge">0</span></div>
+      <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-100 flex-wrap">
+      <div class="relative flex-1 min-w-[180px] max-w-sm">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" aria-hidden="true"><i class="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg' aria-hidden='true"></i></span>
+        <label for="searchInput" class="sr-only">Buscar cobro, concepto...</label>
+        <input type="search" id="searchInput" name="search" oninput="filtrarLocal()" placeholder="Buscar cobro, concepto..."
+          class="w-full pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 bg-slate-50 focus:bg-white transition">
+      </div>
+      <label for="filtroTipo" class="sr-only">Filtrar por tipo</label>
+      <select id="filtroTipo" name="tipo" onchange="filtrarLocal()"
+        class="px-3 py-1.5 text-sm border border-slate-200 rounded-lg bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+        <option value="">Todos los tipos</option>
+        <option value="cuota">Cuota</option>
+        <option value="separacion">Separación</option>
+        <option value="inicial">Inicial</option>
+        <option value="otro">Otro</option>
+      </select>
+      <span id="rowCount" class="text-xs text-slate-400 ml-auto" aria-live="polite"></span>
+    </div>
+
+    <div id="tabla-container" class="overflow-x-auto min-h-[200px]" aria-live="polite">
+        <p class="text-center text-slate-400 py-8">Cargando cuentas por cobrar...</p>
+    </div>
+    </div>
+</div>
+
+<!-- MODAL REGISTRO DE COBRO -->
+<div id="modal-cobro" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden max-h-[90vh] overflow-y-auto">
+        <div class="bg-slate-900 px-6 py-4 flex items-center justify-between">
+            <h2 class="text-white font-bold text-base"><svg class="inline w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> Registrar Cobro Manual</h2>
+            <button onclick="cerrarModal('modal-cobro')" aria-label="Cerrar modal" class="text-white/60 hover:text-white text-xl font-bold leading-none focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-slate-900 rounded"><span aria-hidden="true">✕</span></button>
+        </div>
+        <form id="form-cobro" onsubmit="guardarCobro(event)" class="p-6 space-y-4">
+            <div class="space-y-1">
+                <label for="fc-trans" class="text-xs font-bold text-slate-500 uppercase tracking-wide">ID de Transacción (Cierre) *</label>
+                <select id="fc-trans" name="transaccion" required class="w-full border border-slate-300 rounded-lg p-2 text-sm"><option value="">-- Buscar / Seleccionar --</option></select>
+            </div>
+            <div class="space-y-1">
+                <label for="fc-concepto" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Concepto *</label>
+                <input type="text" id="fc-concepto" name="concepto" required placeholder="Ej. Cuota Inicial #2" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label for="fc-tipo" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Tipo</label>
+                    <select id="fc-tipo" name="tipo" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                        <option value="separacion">Separación</option>
+                        <option value="inicial">Inicial</option>
+                        <option value="cuota">Cuota de Pago</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label for="fc-monto" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Monto Total (USD) *</label>
+                    <input type="number" id="fc-monto" name="monto" required placeholder="2500" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="cerrarModal('modal-cobro')" class="px-4 py-2 text-xs font-semibold text-slate-600">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-lg">Guardar Cobro</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL REGISTRO DE PAGO (ABONO) -->
+<div id="modal-pago" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden border-t-4 border-emerald-500 max-h-[90vh] overflow-y-auto">
+        <div class="bg-emerald-700 px-6 py-4 flex items-center justify-between">
+            <h2 class="text-white font-bold text-base"><i class="bx bx-dollar-circle"></i> Registrar Abono</h2>
+            <button onclick="cerrarModal('modal-pago')" aria-label="Cerrar modal" class="text-white/60 hover:text-white text-xl font-bold leading-none focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 focus:ring-offset-emerald-700 rounded"><span aria-hidden="true">✕</span></button>
+        </div>
+        <form id="form-pago" onsubmit="guardarPago(event)" class="p-6 space-y-4">
+            <input type="hidden" id="p-id" name="id">
+            <div id="p-info" class="bg-slate-50 rounded-lg p-3 text-sm text-slate-600 border border-slate-200" aria-live="polite"></div>
+            <div class="space-y-1">
+                <label for="p-monto" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Monto del Abono (USD) *</label>
+                <input type="number" id="p-monto" name="monto" min="0.01" step="0.01" required placeholder="0.00" class="w-full border border-slate-300 rounded-lg p-2 text-sm font-bold bg-emerald-50">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label for="p-metodo" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Método de Pago</label>
+                    <select id="p-metodo" name="metodo" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                        <option value="efectivo">Efectivo</option>
+                        <option value="transferencia">Transferencia</option>
+                        <option value="cheque">Cheque</option>
+                        <option value="tarjeta">Tarjeta</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label for="p-ref" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Referencia</label>
+                    <input type="text" id="p-ref" name="referencia" placeholder="# ref." class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+                <div class="space-y-1 col-span-2">
+                    <label for="p-dropbox" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Enlace Dropbox (Factura/Recibo)</label>
+                    <input type="url" id="p-dropbox" name="dropbox_link" placeholder="https://www.dropbox.com/..." class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="cerrarModal('modal-pago')" class="px-4 py-2 text-xs font-semibold text-slate-600">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm">Confirmar Pago</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+
+    let dtCobros = null;
+
+    async function cargarCobros() {
+        const container = document.getElementById('tabla-container');
+        container.innerHTML = '<div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm mt-4"><table id="dt-cobros" class="w-full text-left text-sm text-slate-600"><thead class="bg-slate-50 text-xs uppercase font-bold text-slate-500 border-b border-slate-200"><tr>' +
+            '<th class="px-4 py-3">Transaccion</th><th class="px-4 py-3">Inmueble</th><th class="px-4 py-3">Concepto</th><th class="px-4 py-3">Tipo</th><th class="px-4 py-3">Total</th><th class="px-4 py-3">Pendiente</th><th class="px-4 py-3">Atraso</th><th class="px-4 py-3">Estado</th><th class="px-4 py-3">Acciones</th>' +
+            '</tr></thead><tbody class="divide-y divide-slate-100"></tbody></table></div>';
+
+        if (dtCobros) { try { dtCobros.destroy(); } catch(e) {} dtCobros = null; }
+
+        dtCobros = $('#dt-cobros').DataTable({
+            serverSide: true,
+            processing: true,
+            ajax: {
+                url: '/api/cobros/cobros',
+                type: 'GET'
+            },
+            columns: [
+                { data: 'transaccion', defaultContent: '&#x2014;', render: function(d){ return '<span class="font-mono font-bold text-amber-600">'+(d||'&#x2014;')+'</span>'; } },
+                { data: null, render: function(d,t,r){ 
+                    let nom = r.nombre_propiedad || ''; let num = r.numero_inmueble || '';
+                    return '<span class="text-slate-700">' + (nom||'-') + '</span>' + (num ? ' <span class="text-slate-400">#'+num+'</span>' : '');
+                }},
+                { data: 'concepto', render: function(d){ return '<span class="font-semibold text-slate-900">'+(d||'')+'</span>'; } },
+                { data: 'tipo', render: function(d){ return '<span class="uppercase text-xs font-medium">'+(d||'')+'</span>'; } },
+                { data: 'monto_total', className: 'text-right font-medium', render: function(d){ return '$'+Number(d||0).toLocaleString(); } },
+                { data: 'balance_pendiente', className: 'text-right font-medium', render: function(d,t,r){
+                    var cls = (r.balance_pendiente > 0) ? 'text-rose-600 font-bold' : 'text-emerald-600 font-bold';
+                    return '<span class="'+cls+'">$'+Number(d||0).toLocaleString()+'</span>';
+                }},
+                { data: 'dias_mora_calculados', render: function(d,t,r){
+                    var cls2 = (d > 0) ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800';
+                    return '<span class="px-2 py-0.5 rounded text-xs font-semibold '+cls2+'">'+d+' dias</span>';
+                }},
+                { data: 'estado_mora', render: function(d){
+                    var badgeCls = 'badge-proceso';
+                    if(d === 'CRÍTICO') badgeCls = 'bg-rose-600 text-white shadow-sm shadow-rose-200';
+                    else if(d === 'ALERTA') badgeCls = 'bg-amber-500 text-white shadow-sm shadow-amber-200';
+                    else if(d === 'PAGADO' || d === 'AL DÍA') badgeCls = 'badge-aprobado';
+                    else if(d === 'POR VENCER') badgeCls = 'badge-proceso';
+                    return '<span class="px-2 py-1 rounded text-xs font-bold uppercase tracking-wider '+badgeCls+'">'+d+'</span>';
+                }},
+                { data: null, orderable: false, className: 'text-right', render: function(d,t,r){
+                    let btnDoc = '';
+                    let link = r.enlace_dropbox || r.referencia;
+                    if (link && link.startsWith('http')) {
+                        btnDoc = '<a href="'+link+'" target="_blank" class="px-2 py-1 bg-sky-100 hover:bg-sky-200 text-sky-800 text-xs font-bold rounded mr-2">Ver Doc</a>';
+                    }
+                    return btnDoc + '<button onclick="abrirPago('+r.id+',\''+r.concepto+'\','+r.balance_pendiente+')" class="px-2 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold rounded mr-2">Pagar</button>'
+                          +'<button onclick="editarCobro('+r.id+',\''+r.concepto+'\',\''+r.tipo+'\','+r.monto_total+')" class="table-icon-btn edit mr-2" title="Editar"><i class="bx bx-edit-alt"></i> Editar</button>'
+                          +'<button onclick="borrarCobro('+r.id+')" class="table-icon-btn delete" title="Eliminar"><i class="bx bx-trash"></i> Borrar</button>';
+                }}
+            ],
+            pageLength: 20,
+            deferRender: true,
+            order: [[0,'desc']],
+            language: {
+                search: 'Buscar:', lengthMenu: 'Mostrar _MENU_',
+                info: '_START_-_END_ de _TOTAL_', zeroRecords: 'Sin resultados',
+                paginate: { first:'«', last:'»', next:'›', previous:'‹' },
+                processing: 'Cargando datos...'
+            },
+            dom: '<"flex items-center justify-between mb-4 flex-wrap gap-2"lf>rt<"flex items-center justify-between mt-4 flex-wrap gap-2"ip>',
+            drawCallback: function(settings) {
+                document.getElementById('rowCount').innerText = settings.fnRecordsTotal() + ' registros';
+                const badge = document.getElementById('total-badge');
+                if (badge) badge.innerText = settings.fnRecordsTotal();
+            }
+        });
+    }
+
+    function filtrarLocal() {
+        if (dtCobros) dtCobros.search(document.getElementById('searchInput').value).draw();
+    }
+
+    async function guardarCobro(e) {
+        e.preventDefault();
+        const payload = {
+            transaccion_id: parseInt(document.getElementById('fc-trans').value),
+            concepto: document.getElementById('fc-concepto').value,
+            monto_total: parseFloat(document.getElementById('fc-monto').value),
+            tipo: document.getElementById('fc-tipo').value
+        };
+        const res = await fetch('/api/cobros', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+        const d = await res.json();
+        if (d.success) { showToast('OK: ' + d.message, 'success'); cerrarModal('modal-cobro'); cargarCobros(); }
+        else { showToast(d.error, 'error'); }
+    }
+
+    async function borrarCobro(id) {
+        if (!confirm('Desea borrar este cobro?')) return;
+        try {
+            const res = await fetch('/api/cobros/' + id, { method: 'DELETE' });
+            const d = await res.json();
+            if (d.success) { cargarCobros(); }
+            else { showToast(d.error, 'warning'); }
+        } catch(e) { showToast('Error de conexion al intentar borrar.', 'error'); }
+    }
+
+    function editarCobro(id, conceptoActual, tipoActual, montoActual) {
+        document.getElementById('edit-cob-id').value = id;
+        document.getElementById('edit-cob-concepto').value = conceptoActual;
+        document.getElementById('edit-cob-tipo').value = tipoActual;
+        document.getElementById('edit-cob-monto').value = montoActual;
+        document.getElementById('modal-editar-cobro').classList.remove('hidden');
+    }
+    
+    async function guardarEdicionCobro(e) {
+        e.preventDefault();
+        const id = document.getElementById('edit-cob-id').value;
+        const concepto = document.getElementById('edit-cob-concepto').value;
+        const tipo = document.getElementById('edit-cob-tipo').value;
+        const monto = parseFloat(document.getElementById('edit-cob-monto').value);
+        
+        const payload = { concepto: concepto.trim(), tipo: tipo.trim(), monto_total: monto };
+        try {
+            const res = await fetch('/api/cobros/' + id, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const d = await res.json();
+            if (d.success) { 
+                showToast('Cobro actualizado.', 'success'); 
+                document.getElementById('modal-editar-cobro').classList.add('hidden');
+                cargarCobros(); 
+            } else { showToast(d.error, 'error'); }
+        } catch(e) { showToast('Error de conexion al actualizar.', 'error'); }
+    }
+
+    function abrirPago(id, concepto, balance) {
+        document.getElementById('p-id').value = id;
+        document.getElementById('p-info').innerText = 'Cobro: ' + concepto + ' | Balance: $' + Number(balance).toLocaleString();
+        document.getElementById('p-monto').value = '';
+        document.getElementById('p-ref').value = '';
+        if (document.getElementById('p-dropbox')) document.getElementById('p-dropbox').value = '';
+        abrirModal('modal-pago');
+    }
+
+    async function guardarPago(e) {
+        e.preventDefault();
+
+        const dropboxInput = document.getElementById('p-dropbox');
+        if (dropboxInput && dropboxInput.value) {
+            const enlaceVal = dropboxInput.value;
+            const dropboxRegex = /^https?:\/\/(www\.)?dropbox\.com\/.*/;
+            if (!dropboxRegex.test(enlaceVal.toLowerCase())) {
+                showToast('El enlace debe ser un enlace de Dropbox válido (https://www.dropbox.com/...)', 'error');
+                dropboxInput.focus();
+                return;
+            }
+        }
+
+        const id = document.getElementById('p-id').value;
+        const payload = {
+            monto_abono: document.getElementById('p-monto').value,
+            metodo: document.getElementById('p-metodo').value,
+            referencia: document.getElementById('p-ref').value,
+            enlace_dropbox: (document.getElementById('p-dropbox') ? document.getElementById('p-dropbox').value : '')
+        };
+        try {
+            const res = await fetch('/api/cobros/' + id + '/pagar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const d = await res.json();
+            if (d.success) {
+                alert('Pago registrado. Nuevo Balance: $' + Number(d.nuevo_balance).toLocaleString() + ' USD');
+                cerrarModal('modal-pago');
+                cargarCobros();
+            } else {
+                showToast(d.error, 'error');
+            }
+        } catch(err) {
+            alert('Error de red al procesar el pago.');
+        }
+    }
+
+    function cargarTransacciones() {
+        if ($.fn.select2) {
+            $('#fc-trans').select2({
+                width: '100%',
+                dropdownParent: $('#modal-cobro'),
+                ajax: {
+                    url: '/api/cierres/cierres',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return { buscar: params.term, page: params.page || 1, per_page: 20 };
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: (data.items || []).map(i => ({ id: i.id, text: '[' + i.codigo + '] ' + (i.cliente||'') + ' - ' + (i.proyecto||'') })),
+                            pagination: { more: (params.page * 20) < data.total }
+                        };
+                    },
+                    cache: true
+                },
+                minimumInputLength: 0
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarCobros();
+        cargarTransacciones();
+    });
+</script>
+<!-- MODAL EDITAR COBRO -->
+<div id="modal-editar-cobro" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
+        <h3 class="text-lg font-bold text-slate-900">Editar Cobro</h3>
+        <form id="form-editar-cobro" onsubmit="guardarEdicionCobro(event)" class="space-y-4">
+            <input type="hidden" id="edit-cob-id" value="">
+            <div>
+                <label for="edit-cob-concepto" class="block text-xs font-semibold text-slate-600 mb-1">Concepto</label>
+                <input type="text" id="edit-cob-concepto" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+            </div>
+            <div>
+                <label for="edit-cob-tipo" class="block text-xs font-semibold text-slate-600 mb-1">Tipo de Cobro</label>
+                <select id="edit-cob-tipo" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                    <option value="cuota">Cuota</option>
+                    <option value="mora">Mora</option>
+                    <option value="legal">Legal</option>
+                    <option value="otro">Otro</option>
+                </select>
+            </div>
+            <div>
+                <label for="edit-cob-monto" class="block text-xs font-semibold text-slate-600 mb-1">Monto Total</label>
+                <input type="number" step="0.01" id="edit-cob-monto" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+            </div>
+            <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+                <button type="button" onclick="document.getElementById('modal-editar-cobro').classList.add('hidden')" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancelar</button>
+                <button type="submit" class="px-4 py-2 text-sm font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-lg shadow-sm transition-colors">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

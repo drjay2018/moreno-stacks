@@ -1,0 +1,191 @@
+table _Medidas
+	lineageTag: 35f9fb3a-1cc7-44f9-bace-d04039461ddb
+
+	measure Ingreso_Bruto = CALCULATE(SUM(transacciones[monto]), transacciones[estado] = "completado")
+		lineageTag: 87b37d93-1f9a-450b-930c-e2a898686513
+
+	measure Comision_Asesores_Pagada = CALCULATE(SUM(comisiones_pagos[monto]), comisiones_pagos[estado] = "pagado")
+		lineageTag: 8eef3e7a-771b-4a3f-aa6d-94d3414f46ee
+
+	measure Comision_Asesores_Pendiente = CALCULATE(SUM(comisiones_pagos[monto]), comisiones_pagos[estado] IN {"aprobado", "pendiente"})
+		lineageTag: 14fa98cd-8e96-405c-b228-48c1db164243
+
+	measure Retencion_Neta = [Ingreso_Bruto] - [Comision_Asesores_Pagada]
+		lineageTag: 4d85b1c6-506a-4442-9a24-98445bf89b9b
+
+	measure Indicador_R = DIVIDE([Retencion_Neta], CALCULATE(COUNTROWS(transacciones), transacciones[estado] = "completado"), 0)
+		lineageTag: 0362d0f4-5ea7-415a-87e3-a75d35292f54
+
+	measure Linea_Base_R =
+			VAR _cfg = CALCULATE(MAX(kpi_config[meta]), kpi_config[kpi_id] = "indicador_r")
+			RETURN IF(ISBLANK(_cfg), 150000, _cfg)
+		lineageTag: be82bced-974d-4dc9-bdbb-b70130847f22
+
+	measure Delta_R = [Indicador_R] - [Linea_Base_R]
+		lineageTag: 1e68a3a6-7d8f-474e-9385-5e427345a576
+
+	measure Estado_R_Texto =
+			SWITCH(
+			    TRUE(),
+			    [Delta_R] >= 25000, "▲ Sobre línea base",
+			    [Delta_R] >= 0, "● En rango",
+			    "▼ Bajo línea base"
+			)
+		lineageTag: 8cece2a9-1cad-43bd-8570-c0ee3f68aaf7
+
+	measure Color_R =
+			SWITCH(
+			    TRUE(),
+			    [Delta_R] >= 25000, "#4A9E7C",
+			    [Delta_R] >= 0, "#D9A441",
+			    "#C4574B"
+			)
+		lineageTag: 185b910b-4b4d-4fb0-8813-a6c5edd043f1
+
+	measure WF_Ingreso_Bruto = [Ingreso_Bruto]
+		lineageTag: 8d7af802-03e8-420c-9e71-184a0b64a165
+
+	measure WF_Menos_Comisiones = -[Comision_Asesores_Pagada]
+		lineageTag: 6e3ec71b-d621-4ef1-a683-49788c084e0c
+
+	measure WF_Gastos_Operativos = -CALCULATE(SUM(gastos[monto]), gastos[estado] = "aprobado")
+		lineageTag: 2b73ae68-31c3-4b79-845d-ccf6abd1dd60
+
+	measure WF_Retencion_Final = [Retencion_Neta] + [WF_Gastos_Operativos]
+		lineageTag: 1a21f626-9c7c-4805-b42b-c1ca8874f646
+
+	measure Cobros_Plus60_Dias =
+			CALCULATE(
+			    SUM(cobros[monto_total]),
+			    cobros[dias_mora_calculados] > 60,
+			    cobros[estado_aging_id] <> 4
+			)
+		lineageTag: ded29ad3-cab8-4514-a6eb-1e46d1adbc7e
+
+	measure Color_Fila_Aging =
+			IF(
+			    MAX(cobros[dias_mora_calculados]) > 60,
+			    "#C4574B",
+			    IF(MAX(cobros[dias_mora_calculados]) > 30, "#D9A441", "#4A9E7C")
+			)
+		lineageTag: 49ec6b29-dd60-41e3-8147-0258afe560e7
+
+	measure Unidades_Vendidas = CALCULATE(COUNTROWS(transacciones), transacciones[estado] = "completado")
+		lineageTag: ae05f353-c198-4582-b0fa-47575ea28c67
+
+	measure Pct_Absorcion = DIVIDE([Unidades_Vendidas], MAX(proyectos[unidades_totales]), 0)
+		lineageTag: 36dd3674-40c2-4f07-bd13-f0e23dbdc37e
+
+	measure Color_Absorcion =
+			SWITCH(
+			    TRUE(),
+			    [Pct_Absorcion] >= 0.75, "#4A9E7C",
+			    [Pct_Absorcion] >= 0.40, "#D9A441",
+			    "#C4574B"
+			)
+		lineageTag: 7bf00742-ec1c-4b66-8e62-6f5a32e379a9
+
+	measure Dias_Para_Entrega = DATEDIFF(TODAY(), MAX(proyectos[fecha_entrega_estimada]), DAY)
+		lineageTag: 5f4ef425-d21d-408d-ba39-4575933e04e2
+
+	measure Pct_SLA_Cumplido =
+			DIVIDE(
+			    CALCULATE(COUNTROWS(transacciones), transacciones[estado] = "completado", transacciones[dias_ciclo_cierre] <= transacciones[sla_dias_meta]),
+			    CALCULATE(COUNTROWS(transacciones), transacciones[estado] = "completado"),
+			    0
+			)
+		lineageTag: 3318f195-66be-438b-b05b-82e972c0c575
+
+	measure Pct_AEI_Vigente =
+			DIVIDE(
+			    CALCULATE(COUNTROWS(entidades), entidades[fecha_vencimiento_aei] >= TODAY(), entidades[tipo] = "asesor", entidades[activo] = TRUE()),
+			    CALCULATE(COUNTROWS(entidades), entidades[tipo] = "asesor", entidades[activo] = TRUE()),
+			    0
+			)
+		lineageTag: 9d78934b-3fb8-4960-b2d5-ab9bb3334d00
+
+	measure AEI_Por_Vencer_30d =
+			CALCULATE(
+			    COUNTROWS(entidades),
+			    entidades[fecha_vencimiento_aei] >= TODAY(),
+			    entidades[fecha_vencimiento_aei] <= TODAY() + 30,
+			    entidades[activo] = TRUE()
+			)
+		lineageTag: 81a3ac40-e5f1-4d18-88b0-e1e2bcbf6add
+
+	measure R_Por_Asesor = DIVIDE([Retencion_Neta], COUNTROWS(entidades), 0)
+		lineageTag: b4fa9a93-d278-445f-b92a-0ccf5b263dcd
+
+	measure Incidentes_N3_N4_Abiertos = CALCULATE(COUNTROWS(incidentes), incidentes[nivel] >= 3, ISBLANK(incidentes[fecha_cierre]))
+		lineageTag: 24f21509-7b1a-4013-afb4-142942af0e71
+
+	measure Color_Incidentes_N3N4 = IF([Incidentes_N3_N4_Abiertos] > 0, "#C4574B", "#2E353D")
+		lineageTag: 8118cc6e-6fa2-4ab1-8a85-404b5f987757
+
+	measure Costo_Por_Lead = DIVIDE(SUM(campanas[monto_invertido]), SUM(campanas[leads_generados]), 0)
+		lineageTag: a55564a9-bbfa-49f6-9b43-dcd253c4f25d
+
+	measure Tasa_Conversion_Lead = DIVIDE([Unidades_Vendidas], SUM(campanas[leads_generados]), 0)
+		lineageTag: 37c37a9b-304a-4d35-97d3-b8a0fe2acfa1
+
+	measure SVG_Gauge_R = ```
+			
+			VAR _R       = [Indicador_R]
+			VAR _Meta    = [Linea_Base_R]
+			VAR _RMax    = _Meta * 1.5
+			VAR _Pct     = MIN(DIVIDE(_R, _RMax, 0), 1)
+			VAR _Ang     = _Pct * 180
+			VAR _AngRad  = (_Ang - 180) * (3.14159265 / 180)
+			VAR _Px      = 100 + 80 * COS(_AngRad)
+			VAR _Py      = 105 + 80 * SIN(_AngRad)
+			VAR _Color   = SUBSTITUTE([Color_R], "#", "%23")
+			VAR _Delta_Fmt = IF([Delta_R] >= 0, "+" & FORMAT([Delta_R], "#,##0", "es-DO"), FORMAT([Delta_R], "#,##0", "es-DO"))
+			VAR _LargeSweep = IF(_Pct > 0.5, 1, 0)
+			VAR _ActiveStroke = IF(_Pct > 0.01, "<path d='M 20 105 A 80 80 0 " & _LargeSweep & " 1 " & FORMAT(_Px, "0.00") & " " & FORMAT(_Py, "0.00") & "' fill='none' stroke='" & _Color & "' stroke-width='14' stroke-linecap='round'/>", "")
+			
+			VAR _SVG = 
+			"data:image/svg+xml;utf8," &
+			"<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 120' width='100%' height='100%'>" &
+			"<path d='M 20 105 A 80 80 0 0 1 180 105' fill='none' stroke='%232E353D' stroke-width='14' stroke-linecap='round'/>" &
+			_ActiveStroke &
+			"<text x='100' y='75' font-family='Segoe UI, sans-serif' font-size='22' font-weight='bold' fill='%23EDEFF2' text-anchor='middle'>" & "RD$ " & FORMAT(_R, "#,##0", "es-DO") & "</text>" &
+			"<text x='100' y='100' font-family='Segoe UI, sans-serif' font-size='12' fill='" & _Color & "' text-anchor='middle'>" & _Delta_Fmt & " vs base" & "</text>" &
+			"</svg>"
+			RETURN _SVG
+			```
+		lineageTag: dd4f54ab-b657-457c-9503-e5b8d2c53bc7
+		dataCategory: ImageUrl
+
+	measure Nav_Finanzas = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23EDEFF2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='2' y='4' width='20' height='16' rx='2'/><path d='M2 10h20'/><path d='M6 14h.01'/></svg>"
+		lineageTag: f25b985f-48ef-440e-aa1d-0ac18858873d
+		dataCategory: ImageUrl
+
+	measure Nav_Proyectos = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23EDEFF2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M3 3v18h18'/><path d='M18 17V9'/><path d='M13 17V5'/><path d='M8 17v-3'/></svg>"
+		lineageTag: 2ab9850e-dc02-4287-abc7-8848a4d8a441
+		dataCategory: ImageUrl
+
+	measure Nav_RRHH = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23EDEFF2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='4'/><path d='M23 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/></svg>"
+		lineageTag: ce44a754-af4b-45b5-ab66-9409ee52837a
+		dataCategory: ImageUrl
+
+	measure Nav_Mapas = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23EDEFF2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polygon points='3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21'/><line x1='9' y1='3' x2='9' y2='18'/><line x1='15' y1='6' x2='15' y2='21'/></svg>"
+		lineageTag: 7886dcae-9cb9-4982-baee-123d8b74da64
+		dataCategory: ImageUrl
+
+	column Column
+		formatString: 0
+		lineageTag: 1c2ede43-e74a-4f3b-9cd4-43a10eedd21e
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Column]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition _Medidas = calculated
+		mode: import
+		source = Row("Column", BLANK())
+
+	annotation PBI_Id = 614d67097b024c73850c7058f44c7f23
+
+	annotation 436ba87b-9c83-4389-a31b-ebd06a36be98 = {"Expression":""}
+

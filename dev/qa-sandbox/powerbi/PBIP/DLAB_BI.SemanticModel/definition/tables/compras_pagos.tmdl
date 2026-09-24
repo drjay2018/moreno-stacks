@@ -1,0 +1,65 @@
+table compras_pagos
+	lineageTag: f11796a7-0c1a-4516-95c4-030309fc660f
+
+	column id
+		dataType: double
+		lineageTag: 1ca3b5d9-0717-404c-8bf9-6b0ab980fa0c
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column compra_id
+		dataType: double
+		lineageTag: 31197553-09d2-4d01-aecd-dd9586b9ec7c
+		summarizeBy: sum
+		sourceColumn: compra_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column monto_pagado
+		dataType: double
+		lineageTag: 8182529e-691e-48f8-b2e7-e6b669e8c4d4
+		summarizeBy: sum
+		sourceColumn: monto_pagado
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fecha_pago
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 0710c08d-3074-4a5c-b7cd-c86b0260bde3
+		summarizeBy: none
+		sourceColumn: fecha_pago
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column referencia
+		dataType: string
+		lineageTag: 8379c454-bae6-40ac-b7fe-adb523a445d6
+		summarizeBy: none
+		sourceColumn: referencia
+
+		annotation SummarizationSetBy = Automatic
+
+	partition compras_pagos = m
+		mode: import
+		source =
+				let
+				    Origen = Odbc.DataSource("driver={SQLite3 ODBC Driver};database=H:\Mi unidad\Proyecto - CRM Inmobiliaria\dlab-data\data\dlab.db;notxn=1;dsn=SQLite3 Datasource", [HierarchicalNavigation=true, SqlCapabilities=[LimitClauseKind=LimitClauseKind.Limit]]),
+				    compras_pagos_Table = Origen{[Name="compras_pagos",Kind="Table"]}[Data]
+				in
+				    compras_pagos_Table
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

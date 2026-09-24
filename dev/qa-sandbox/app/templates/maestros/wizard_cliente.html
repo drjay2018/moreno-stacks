@@ -1,0 +1,610 @@
+{% extends "base.html" %}
+
+{% block title %}Wizard Completo Cliente & Preferencias | DLAB CRM{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900">Alta Unificada de Cliente & Preferencias de Compra</h1>
+        <p class="text-sm text-slate-500">Captura estructurada de datos para Inteligencia de Negocios y Modelos Predictivos (Look-alike).</p>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
+        
+        <!-- Stepper Indicator (7 Pasos) -->
+        <div class="flex items-center justify-between mb-8 relative overflow-x-auto py-2">
+            <div class="w-full bg-slate-200 h-1 absolute top-1/2 -translate-y-1/2 z-0"></div>
+            <div id="step-bar" class="bg-amber-600 h-1 absolute top-1/2 -translate-y-1/2 z-0 transition-all duration-300" style="width: 0%;"></div>
+            
+            <div class="step-indicator z-10 w-9 h-9 rounded-full bg-amber-600 text-white font-bold flex items-center justify-center text-xs shadow-sm">1</div>
+            <div class="step-indicator z-10 w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-xs shadow-sm">2</div>
+            <div class="step-indicator z-10 w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-xs shadow-sm">3</div>
+            <div class="step-indicator z-10 w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-xs shadow-sm">4</div>
+            <div class="step-indicator z-10 w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-xs shadow-sm">5</div>
+            <div class="step-indicator z-10 w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-xs shadow-sm">6</div>
+            <div class="step-indicator z-10 w-9 h-9 rounded-full bg-slate-200 text-slate-600 font-bold flex items-center justify-center text-xs shadow-sm">7</div>
+        </div>
+
+        <form id="wizard-form" onsubmit="guardarClienteCompleto(event)">
+            
+            <!-- PASO 1: Identificación Personal & Demografía -->
+            <div class="wizard-step space-y-4" data-step="1">
+                <h2 class="text-base font-semibold text-slate-800 border-b border-slate-100 pb-2">Paso 1: Identificación & Demografía Básica</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Nombres *</label>
+                        <input type="text" id="nombre" required placeholder="Ej. Juan" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Apellidos *</label>
+                        <input type="text" id="apellido" required placeholder="Ej. Pérez" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Cédula / Identificación (11 dígitos) *</label>
+                        <input type="text" id="cedula" maxlength="11" required placeholder="00100000009" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-mono outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Género</label>
+                        <select id="genero" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha de Nacimiento *</label>
+                        <input type="date" id="fecha_nacimiento" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Estado Civil</label>
+                        <select id="estado_civil" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"></select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 2: Origen & Residencia (Cascada Geográfica en JS) -->
+            <div class="wizard-step hidden space-y-4" data-step="2">
+                <h2 class="text-base font-semibold text-slate-800 border-b border-slate-100 pb-2">Paso 2: Origen & Residencia (Local RD vs. Diáspora)</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Nacionalidad</label>
+                        <select id="nacionalidad" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">País de Residencia Actual *</label>
+                        <select id="pais" onchange="actualizarFlujoGeografico()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"></select>
+                    </div>
+
+                    <!-- Cascada RD: Provincia → Municipio → Sector -->
+                    <div id="contenedor-provincia-rd" class="sm:col-span-1 hidden">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Provincia</label>
+                        <select id="provincia" onchange="cargarMunicipiosPorProvincia()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                            <option value="">Seleccione provincia...</option>
+                        </select>
+                    </div>
+                    <div id="contenedor-municipio-rd" class="sm:col-span-1 hidden">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Municipio / Ciudad</label>
+                        <select id="municipio" onchange="cargarSectoresPorMunicipio()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                            <option value="">Seleccione municipio...</option>
+                        </select>
+                    </div>
+                    <div id="contenedor-sector-rd" class="sm:col-span-1 hidden">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Sector</label>
+                        <select id="sector" onchange="toggleSectorCustom()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                            <option value="">Seleccione sector...</option>
+                        </select>
+                    </div>
+                    <div id="contenedor-sector-custom" class="sm:col-span-1 hidden">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Escriba el sector</label>
+                        <input type="text" id="sector_custom" placeholder="Ej. Villa Juana, Los Molidos..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+
+                    <!-- Fuera de RD: solo campo de ubicación libre -->
+                    <div id="contenedor-estado-exterior" class="sm:col-span-2 hidden">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Estado / Ciudad en el Exterior</label>
+                        <input type="text" id="provincia_exterior" placeholder="Ej. New York, FL / Miami, Madrid, Barcelona..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Dirección / Referencia</label>
+                        <textarea id="direccion" rows="2" placeholder="Ej. Calle 12 #45, Edificio Sol Piso 3, Apart. 3B, cerca del Parque Central" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"></textarea>
+                        <p class="text-[10px] text-slate-400 mt-1">Incluya: calle, número, edificio, piso, apartamento y referencia cercana</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 3: Perfil Socioeconómico -->
+            <div class="wizard-step hidden space-y-4" data-step="3">
+                <h2 class="text-base font-semibold text-slate-800 border-b border-slate-100 pb-2">Paso 3: Perfil Socioeconómico & Ocupacional</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Ocupación / Sector Laboral</label>
+                        <select id="ocupacion" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Rango de Ingreso Mensual</label>
+                        <select id="rango_ingreso_mensual" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"></select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 4: Contacto & Atribución Comercial -->
+            <div class="wizard-step hidden space-y-4" data-step="4">
+                <h2 class="text-base font-semibold text-slate-800 border-b border-slate-100 pb-2">Paso 4: Contacto & Atribución Comercial</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Teléfono Móvil (WhatsApp)</label>
+                        <input type="text" id="telefono" placeholder="809-555-0100" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Teléfono Residencial / Alt.</label>
+                        <input type="text" id="telefono_residencial" placeholder="809-555-0101" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Correo Electrónico</label>
+                        <input type="email" id="email" placeholder="cliente@ejemplo.com" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Vía de Captación (Referencia)</label>
+                        <select id="via_referida" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha de Captación</label>
+                        <input type="date" id="fecha_captacion" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Vendedor Captador (Empleado) *</label>
+                        <select id="vendedor_captador_id" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Proyecto de Interés (Opcional)</label>
+                        <select id="proyecto_interes_id" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                            <option value="">-- Seleccione un Proyecto --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 5: Preferencias de Compra (LeadPreferencia) -->
+            <div class="wizard-step hidden space-y-4" data-step="5">
+                <h2 class="text-base font-semibold text-slate-800 border-b border-slate-100 pb-2">Paso 5: Preferencias de Compra & Presupuesto</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Motivo de Compra</label>
+                        <select id="motivo_compra" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Moneda del Presupuesto</label>
+                        <select id="moneda_presupuesto" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Rango de Presupuesto</label>
+                        <select id="presupuesto_rango" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                            <option value="">-- Seleccionar Rango --</option>
+                            <option value="RD$ 850,000 – 1,500,000">RD$ 850,000 – 1,500,000 (aprox. USD 14k - 25k)</option>
+                            <option value="RD$ 1,500,001 – 3,000,000">RD$ 1,500,001 – 3,000,000 (aprox. USD 25k - 50k)</option>
+                            <option value="RD$ 3,000,001 – 5,000,000">RD$ 3,000,001 – 5,000,000 (aprox. USD 50k - 83k)</option>
+                            <option value="Más de RD$ 5,000,000">Más de RD$ 5,000,000 (aprox. USD >83k)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Institución Bancaria</label>
+                        <select id="institucion_bancaria" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                            <option value="">-- Seleccionar Institución --</option>
+                            <option value="Banreservas">Banreservas</option>
+                            <option value="Scotiabank">Scotiabank</option>
+                            <option value="Banco Popular">Banco Popular</option>
+                            <option value="Banco BHD">Banco BHD</option>
+                            <option value="ANAP">ANAP</option>
+                            <option value="APAP">APAP</option>
+                            <option value="Banco Santa Cruz">Banco Santa Cruz</option>
+                            <option value="Banco Caribe">Banco Caribe</option>
+                            <option value="Banco Vimenca">Banco Vimenca</option>
+                            <option value="Banco Promerica">Banco Promerica</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Método de Pago Preferido</label>
+                        <select id="metodo_pago_preferido" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Habitaciones Mínimas</label>
+                        <input type="number" id="habitaciones_min" min="1" max="10" value="2" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 6: Inmueble & Amenidades Must-Have -->
+            <div class="wizard-step hidden space-y-4" data-step="6">
+                <h2 class="text-base font-semibold text-slate-800 border-b border-slate-100 pb-2">Paso 6: Inmueble, Tiempos & Amenidades Must-Have</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tiempo Estimado de Mudanza</label>
+                        <select id="tiempo_mudanza" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-2">Amenidades Indispensables (Must-Have)</label>
+                        <div id="grid-amenidades" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PASO 7: Estado Comercial & Confirmación -->
+            <div class="wizard-step hidden space-y-4" data-step="7">
+                <h2 class="text-base font-semibold text-slate-800 border-b border-slate-100 pb-2">Paso 7: Estado del Embudo & Confirmación Atómica</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Etapa del Embudo</label>
+                        <select id="etapa_embudo" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"></select>
+                    </div>
+                </div>
+                
+                <div id="resumen-confirmacion" class="bg-slate-50 p-4 rounded-xl text-sm text-slate-700 space-y-2 border border-slate-200"></div>
+                <div id="form-error" class="hidden p-3 bg-rose-50 text-rose-700 text-xs rounded-lg"></div>
+            </div>
+
+            <!-- Botones de Navegación -->
+            <div class="flex justify-between items-center mt-8 pt-4 border-t border-slate-100">
+                <button type="button" id="btn-prev" onclick="cambiarPaso(-1)" class="hidden px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-lg transition-colors">
+                    &larr; Anterior
+                </button>
+                <button type="button" id="btn-next" onclick="cambiarPaso(1)" class="ml-auto px-6 py-2 bg-slate-900 hover:bg-slate-800 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm">
+                    Siguiente &rarr;
+                </button>
+                <button type="submit" id="btn-submit" class="hidden ml-auto px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm">
+                    Guardar Cliente & Preferencias
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let pasoActual = 1;
+    let catalogosGlobales = {};
+
+    async function cargarCatalogosAPI() {
+        try {
+            const res = await fetch('/api/catalogos');
+            catalogosGlobales = await res.json();
+
+            if (catalogosGlobales.success) {
+                poblarSelect('genero', catalogosGlobales.generos);
+                poblarSelect('estado_civil', catalogosGlobales.estados_civiles);
+                // Paises: usar DB si hay datos, fallback a lista estatica
+                const paisesLista = (catalogosGlobales.paises_db && catalogosGlobales.paises_db.length)
+                    ? catalogosGlobales.paises_db : catalogosGlobales.paises;
+                poblarSelect('nacionalidad', paisesLista, 'Dominican Republic');
+                poblarSelect('pais', paisesLista, 'Dominican Republic');
+                poblarSelect('ocupacion', catalogosGlobales.ocupaciones);
+                poblarSelect('rango_ingreso_mensual', catalogosGlobales.rangos_ingreso_mensual);
+                poblarSelect('via_referida', catalogosGlobales.vias_referidas);
+                poblarSelect('motivo_compra', catalogosGlobales.motivos_compra);
+                poblarSelect('moneda_presupuesto', catalogosGlobales.monedas, 'US$');
+                poblarSelect('metodo_pago_preferido', catalogosGlobales.metodos_pago_preferido);
+                poblarSelect('tiempo_mudanza', catalogosGlobales.tiempos_mudanza);
+                poblarSelect('etapa_embudo', catalogosGlobales.etapas_embudo, 'Nuevo');
+
+                // Cargar provincias del país por defecto (RD)
+                cargarProvinciasPais('Dominican Republic');
+                renderAmenidadesGrid(catalogosGlobales.amenidades_disponibles);
+            }
+            
+            // Cargar Asesores y Proyectos
+            const resAsesores = await fetch('/api/maestros/empleados?per_page=200');
+            const dataAsesores = await resAsesores.json();
+            if (dataAsesores.success && dataAsesores.items) {
+                const sel = document.getElementById('vendedor_captador_id');
+                sel.innerHTML = '<option value="">-- Seleccionar Vendedor --</option>';
+                dataAsesores.items.forEach(a => {
+                    sel.add(new Option(a.nombre + ' ' + a.apellido, a.id));
+                });
+            }
+
+            const resProyectos = await fetch('/api/maestros/proyectos?per_page=200');
+            const dataProyectos = await resProyectos.json();
+            if (dataProyectos.success && dataProyectos.items) {
+                const selP = document.getElementById('proyecto_interes_id');
+                selP.innerHTML = '<option value="">-- Ninguno Específico --</option>';
+                dataProyectos.items.forEach(p => {
+                    selP.add(new Option(p.nombre, p.id));
+                });
+            }
+        } catch (e) {
+            console.error("Error al cargar catálogos:", e);
+        }
+    }
+
+    function poblarSelect(idSelect, opciones, valorDefault = '') {
+        const select = document.getElementById(idSelect);
+        select.innerHTML = '';
+        const firstOpt = document.createElement('option');
+        firstOpt.value = '';
+        firstOpt.innerText = 'Seleccione...';
+        select.appendChild(firstOpt);
+        opciones.forEach(opt => {
+            const el = document.createElement('option');
+            el.value = opt;
+            el.innerText = opt;
+            if (opt === valorDefault) el.selected = true;
+            select.appendChild(el);
+        });
+    }
+
+    function actualizarFlujoGeografico() {
+        const pais = document.getElementById('pais').value;
+        const contProv = document.getElementById('contenedor-provincia-rd');
+        const contMuni = document.getElementById('contenedor-municipio-rd');
+        const contSector = document.getElementById('contenedor-sector-rd');
+        const contSectorCustom = document.getElementById('contenedor-sector-custom');
+        const contExt = document.getElementById('contenedor-estado-exterior');
+        const esRD = (pais === "República Dominicana" || pais === "Dominican Republic");
+
+        if (esRD) {
+            contProv.classList.remove('hidden');
+            contMuni.classList.remove('hidden');
+            contSector.classList.remove('hidden');
+            contExt.classList.add('hidden');
+        } else {
+            contProv.classList.add('hidden');
+            contMuni.classList.add('hidden');
+            contSector.classList.add('hidden');
+            contSectorCustom.classList.add('hidden');
+            contExt.classList.remove('hidden');
+        }
+        // Cargar provincias del país seleccionado
+        cargarProvinciasPais(pais);
+    }
+
+    function cargarProvinciasPais(pais) {
+        const geo = catalogosGlobales.geo_data || {};
+        const paisData = geo[pais];
+        const esRD = (pais === "República Dominicana" || pais === "Dominican Republic");
+        if (paisData && paisData.provincias && paisData.provincias.length) {
+            // geo_data viene de cat_ciudades (sincronizado desde AlterEstate)
+            poblarSelect('provincia', paisData.provincias);
+        } else if (esRD) {
+            // Fallback: si AlterEstate aun no ha sincronizado cat_ciudades
+            // (instalacion nueva o CRM sin esa integracion configurada),
+            // usar el catalogo estatico de provincias de RD para que el
+            // formulario siga siendo utilizable.
+            poblarSelect('provincia', catalogosGlobales.provincias_rd || []);
+        } else {
+            poblarSelect('provincia', []);
+        }
+        poblarSelect('municipio', []);
+        poblarSelect('sector', []);
+        document.getElementById('contenedor-sector-custom').classList.add('hidden');
+    }
+
+    function cargarMunicipiosPorProvincia() {
+        const pais = document.getElementById('pais').value;
+        const prov = document.getElementById('provincia').value;
+        const geo = catalogosGlobales.geo_data || {};
+        const esRD = (pais === "República Dominicana" || pais === "Dominican Republic");
+        let ciudades = geo[pais]?.ciudades?.[prov] || [];
+        if (!ciudades.length && esRD) {
+            // Mismo fallback que cargarProvinciasPais: municipios estaticos
+            // por provincia cuando no hay datos sincronizados de AlterEstate.
+            ciudades = (catalogosGlobales.municipios_por_provincia || {})[prov] || [];
+        }
+        poblarSelect('municipio', ciudades);
+        poblarSelect('sector', []);
+        document.getElementById('contenedor-sector-custom').classList.add('hidden');
+    }
+
+    function cargarSectoresPorMunicipio() {
+        const muni = document.getElementById('municipio').value;
+        const select = document.getElementById('sector');
+        select.innerHTML = '<option value="">Seleccione sector...</option>';
+        if (!muni) return;
+        const sectores = catalogosGlobales.sectores_por_ciudad?.[muni] || [];
+        sectores.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s; opt.text = s;
+            select.appendChild(opt);
+        });
+        const optFree = document.createElement('option');
+        optFree.value = '__custom__'; optFree.text = '✏️ Otro (escribir)';
+        select.appendChild(optFree);
+    }
+
+    function toggleSectorCustom() {
+        const sel = document.getElementById('sector');
+        const contCustom = document.getElementById('contenedor-sector-custom');
+        if (sel.value === '__custom__') {
+            contCustom.classList.remove('hidden');
+            document.getElementById('sector_custom').focus();
+        } else {
+            contCustom.classList.add('hidden');
+        }
+    }
+
+    function getSectorValue() {
+        const sel = document.getElementById('sector');
+        if (!sel) return '';
+        if (sel.value === '__custom__') {
+            return document.getElementById('sector_custom')?.value || '';
+        }
+        return sel.value;
+    }
+
+    function renderAmenidadesGrid(amenidades) {
+        const grid = document.getElementById('grid-amenidades');
+        grid.innerHTML = amenidades.map(a => `
+            <label class="flex items-center gap-2 p-2 rounded border border-slate-200 text-xs hover:bg-slate-50 cursor-pointer">
+                <input type="checkbox" name="amenidad" value="${a}" class="rounded text-amber-600 focus:ring-amber-500">
+                <span>${a}</span>
+            </label>
+        `).join('');
+    }
+
+    async function cambiarPaso(direccion) {
+        if (direccion === 1) {
+            const isValid = await validarPaso(pasoActual);
+            if (!isValid) return;
+        }
+
+        const pasos = document.querySelectorAll('.wizard-step');
+        pasos[pasoActual - 1].classList.add('hidden');
+        
+        pasoActual += direccion;
+        pasos[pasoActual - 1].classList.remove('hidden');
+
+        actualizarUI();
+    }
+
+    async function validarPaso(paso) {
+        if (paso === 1) {
+            const nombre = document.getElementById('nombre').value.trim();
+            const apellido = document.getElementById('apellido').value.trim();
+            const cedula = document.getElementById('cedula').value.trim();
+            const fechaNac = document.getElementById('fecha_nacimiento').value;
+
+            if (!nombre || !apellido) {
+                showToast('Nombre y Apellido son obligatorios.', 'warning');
+                return false;
+            }
+            if (cedula.length !== 11 || isNaN(cedula)) {
+                showToast('La cédula debe contener exactamente 11 dígitos numéricos.', 'warning');
+                return false;
+            }
+            if (!fechaNac) {
+                showToast('La fecha de nacimiento es obligatoria.', 'warning');
+                return false;
+            } else {
+                const birthDate = new Date(fechaNac);
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                if (age < 18) {
+                    showToast('El cliente debe ser mayor de 18 años.', 'warning');
+                    return false;
+                }
+            }
+
+            try {
+                // Check duplicate cedula via GET using datatables endpoint
+                const res = await fetch(`/api/maestros/clientes?columns[0][data]=cedula&columns[0][search][value]=${cedula}&search[value]=${cedula}`);
+                const data = await res.json();
+                if (data.data && data.data.some(c => c.cedula === cedula)) {
+                    showToast('La cédula ya se encuentra registrada.', 'warning');
+                    return false;
+                }
+            } catch (e) {
+                console.error("Error al validar cédula", e);
+            }
+        }
+        return true;
+    }
+
+    function actualizarUI() {
+        document.getElementById('btn-prev').classList.toggle('hidden', pasoActual === 1);
+        document.getElementById('btn-next').classList.toggle('hidden', pasoActual === 7);
+        document.getElementById('btn-submit').classList.toggle('hidden', pasoActual !== 7);
+
+        const indicators = document.querySelectorAll('.step-indicator');
+        indicators.forEach((ind, idx) => {
+            if (idx + 1 <= pasoActual) {
+                ind.classList.remove('bg-slate-200', 'text-slate-600');
+                ind.classList.add('bg-amber-600', 'text-white');
+            } else {
+                ind.classList.remove('bg-amber-600', 'text-white');
+                ind.classList.add('bg-slate-200', 'text-slate-600');
+            }
+        });
+
+        document.getElementById('step-bar').style.width = `${((pasoActual - 1) / 6) * 100}%`;
+
+        if (pasoActual === 7) {
+            const amenidadesSel = Array.from(document.querySelectorAll('input[name="amenidad"]:checked')).map(cb => cb.value);
+            document.getElementById('resumen-confirmacion').innerHTML = `
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <div><span class="text-slate-400 block">Nombre:</span> <strong>${document.getElementById('nombre').value} ${document.getElementById('apellido').value}</strong></div>
+                    <div><span class="text-slate-400 block">Cédula:</span> <strong class="font-mono">${document.getElementById('cedula').value}</strong></div>
+                    <div><span class="text-slate-400 block">Ubicación:</span> ${document.getElementById('pais').value === 'República Dominicana' ? document.getElementById('provincia').value + ', ' + document.getElementById('municipio').value : document.getElementById('provincia_exterior').value + ' (' + document.getElementById('pais').value + ')'}</div>
+                    <div><span class="text-slate-400 block">Presupuesto:</span> <strong class="text-amber-600">${document.getElementById('moneda_presupuesto').value} ${document.getElementById('presupuesto_min').value} - ${document.getElementById('presupuesto_max').value}</strong></div>
+                    <div><span class="text-slate-400 block">Motivo:</span> ${document.getElementById('motivo_compra').value}</div>
+                    <div><span class="text-slate-400 block">Amenidades Must-Have:</span> ${amenidadesSel.join(', ') || 'Ninguna'}</div>
+                </div>
+            `;
+        }
+    }
+
+    async function guardarClienteCompleto(event) {
+        event.preventDefault();
+        const errorDiv = document.getElementById('form-error');
+        errorDiv.classList.add('hidden');
+
+        const paisVal = document.getElementById('pais').value;
+        const amenidadesSel = Array.from(document.querySelectorAll('input[name="amenidad"]:checked')).map(cb => cb.value);
+
+        const esRD = (paisVal === "República Dominicana" || paisVal === "Dominican Republic");
+        const sectorVal = esRD ? getSectorValue() : '';
+
+        const payload = {
+            nombre: document.getElementById('nombre').value,
+            apellido: document.getElementById('apellido').value,
+            cedula: document.getElementById('cedula').value,
+            genero: document.getElementById('genero').value,
+            fecha_nacimiento: document.getElementById('fecha_nacimiento').value,
+            estado_civil: document.getElementById('estado_civil').value,
+            nacionalidad: document.getElementById('nacionalidad').value,
+            pais: paisVal,
+            provincia: esRD ? document.getElementById('provincia').value : document.getElementById('provincia_exterior').value,
+            municipio: esRD ? document.getElementById('municipio').value : null,
+            sector: sectorVal,
+            direccion: document.getElementById('direccion').value,
+            telefono: document.getElementById('telefono').value,
+            telefono_residencial: document.getElementById('telefono_residencial').value,
+            email: document.getElementById('email').value,
+            via_referida: document.getElementById('via_referida').value,
+            fecha_captacion: document.getElementById('fecha_captacion').value,
+            etapa_embudo: document.getElementById('etapa_embudo').value,
+            vendedor_captador_id: document.getElementById('vendedor_captador_id').value,
+            proyecto_interes_id: document.getElementById('proyecto_interes_id').value,
+
+            // Preferencias de Compra
+            motivo_compra: document.getElementById('motivo_compra').value,
+            moneda_presupuesto: document.getElementById('moneda_presupuesto').value,
+            presupuesto_rango: document.getElementById('presupuesto_rango') ? document.getElementById('presupuesto_rango').value : '',
+            presupuesto_min: 0,
+            presupuesto_max: 0,
+            metodo_pago_preferido: document.getElementById('metodo_pago_preferido').value,
+            habitaciones_min: parseInt(document.getElementById('habitaciones_min').value) || 1,
+            tiempo_mudanza: document.getElementById('tiempo_mudanza').value,
+            amenidades_must_have: amenidadesSel,
+            ocupacion: document.getElementById('ocupacion').value,
+            rango_ingreso_mensual: document.getElementById('rango_ingreso_mensual').value,
+            institucion_bancaria: document.getElementById('institucion_bancaria') ? document.getElementById('institucion_bancaria').value : ''
+        };
+
+        try {
+            const res = await fetch('/api/maestros/clientes-completo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                showToast('✓ ' + data.message, 'success');
+                setTimeout(() => { window.location.href = "/maestros/"; }, 1500);
+            } else {
+                errorDiv.innerText = data.error || "Ocurrió un error al guardar el cliente.";
+                errorDiv.classList.remove('hidden');
+                errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        } catch (err) {
+            console.error(err);
+            errorDiv.innerText = "Error de conexión con el servidor.";
+            errorDiv.classList.remove('hidden');
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarCatalogosAPI);
+</script>
+{% endblock %}

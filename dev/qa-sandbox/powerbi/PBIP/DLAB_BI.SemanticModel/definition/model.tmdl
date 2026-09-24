@@ -1,0 +1,40 @@
+model Model
+	culture: es-ES
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: es-DO
+	valueFilterBehavior: independent
+	dataAccessOptions
+		fastCombine
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 0
+
+annotation PBI_QueryOrder = ["campanas","cat_captadores","cat_gastos_pub","cat_niveles","clientes","cobros","comisiones_pagos","compras","compras_facturas","compras_pagos","compromisos","entidades","gastos","incidentes","kpi_config","pagos","proveedores","proyectos","transacciones"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table campanas
+ref table cat_captadores
+ref table cat_gastos_pub
+ref table cat_niveles
+ref table clientes
+ref table cobros
+ref table comisiones_pagos
+ref table compras
+ref table compras_facturas
+ref table compras_pagos
+ref table compromisos
+ref table entidades
+ref table gastos
+ref table incidentes
+ref table kpi_config
+ref table pagos
+ref table proveedores
+ref table proyectos
+ref table transacciones
+ref table Dim_Fecha
+ref table _Medidas
+
+ref cultureInfo es-ES
+

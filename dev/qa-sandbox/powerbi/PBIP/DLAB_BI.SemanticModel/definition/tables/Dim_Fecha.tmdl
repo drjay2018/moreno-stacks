@@ -1,0 +1,91 @@
+table Dim_Fecha
+	lineageTag: 753ce17c-4137-4d6f-9f4b-88223c95570a
+	dataCategory: Time
+
+	column Date
+		isKey
+		formatString: General Date
+		lineageTag: 7aff01d3-abda-41d3-9137-9cb457226592
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Año
+		formatString: 0
+		lineageTag: 1c2fab0e-8c96-4d37-9e33-9a94c629560b
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Año]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Mes_Num
+		formatString: 0
+		lineageTag: 4bdbf4f6-fa85-4214-b266-f79519d7f392
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Mes_Num]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Mes_Nombre
+		lineageTag: e8257a26-4771-40c9-8175-dcb7b312d9ba
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Mes_Nombre]
+
+		annotation SummarizationSetBy = Automatic
+
+	column Trimestre
+		lineageTag: de6b75d2-c71d-4f07-a3f0-ec506eeb3c1b
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Trimestre]
+
+		annotation SummarizationSetBy = Automatic
+
+	column AñoMes
+		lineageTag: cc85e4c6-3e95-4db6-bff8-25ae7a29fbe4
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [AñoMes]
+
+		annotation SummarizationSetBy = Automatic
+
+	column DiaSemana
+		formatString: 0
+		lineageTag: 7b877d61-a4cb-489f-a855-1a6c0748bac0
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [DiaSemana]
+
+		annotation SummarizationSetBy = Automatic
+
+	column EsFinDeSemana
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: d07f0ce1-9cca-47d2-8dfc-973eb99df6a8
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [EsFinDeSemana]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Dim_Fecha = calculated
+		mode: import
+		source =
+				
+				ADDCOLUMNS(
+				    CALENDAR(DATE(2023,1,1), DATE(2027,12,31)),
+				    "Año",          YEAR([Date]),
+				    "Mes_Num",      MONTH([Date]),
+				    "Mes_Nombre",   FORMAT([Date], "MMM", "es-DO"),
+				    "Trimestre",    "Q" & QUARTER([Date]),
+				    "AñoMes",       FORMAT([Date], "YYYY-MM"),
+				    "DiaSemana",    WEEKDAY([Date], 2),
+				    "EsFinDeSemana", IF(WEEKDAY([Date],2) >= 6, TRUE(), FALSE())
+				)
+
+	annotation PBI_Id = 7da0d71167504a45af29dbea9629ea20
+

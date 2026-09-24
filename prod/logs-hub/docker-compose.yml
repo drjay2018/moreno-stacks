@@ -1,0 +1,32 @@
+services:
+  db-logs:
+    image: postgres:16
+    container_name: db-logs-hub
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - db-logs-data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - logs-net
+
+  agent:
+    build: ./agent
+    container_name: logs-hub
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://logsuser:logspass123@db-logs:5432/logsdb
+    ports:
+      - "8010:8000"
+    depends_on:
+      - db-logs
+    networks:
+      - logs-net
+
+volumes:
+  db-logs-data:
+
+networks:
+  logs-net:
+    driver: bridge

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+    <!-- Background -->
+    <rect width="1280" height="720" fill="#171A1F" />
+
+    <!-- Filters / Header Bar -->
+    <rect x="24" y="24" width="1232" height="64" fill="#21252D" stroke="#2E353D" stroke-width="1.5" rx="12" />
+    <text x="48" y="62" font-family="Segoe UI, sans-serif" font-size="20" fill="#E0E4EA" font-weight="600">Dashboard de Proyectos</text>
+    <rect x="1000" y="40" width="232" height="32" rx="4" fill="#171A1F" stroke="#2E353D" stroke-width="1" />
+    <text x="1012" y="61" font-family="Segoe UI, sans-serif" font-size="12" fill="#8A939F">Filtros Globales...</text>
+
+    <!-- Card 1: % de Absorción de proyectos -->
+    <rect x="24" y="112" width="604" height="200" fill="#21252D" stroke="#2E353D" stroke-width="1.5" rx="12" />
+    <!-- Header Card 1 -->
+    <text x="48" y="148" font-family="Segoe UI, sans-serif" font-size="16" fill="#E0E4EA" font-weight="600">% de Absorción de Proyectos</text>
+    <line x1="24" y1="164" x2="628" y2="164" stroke="#2E353D" stroke-width="1" />
+    <!-- Placeholder hint -->
+    <rect x="48" y="184" width="556" height="104" fill="#171A1F" rx="8" stroke="#2E353D" stroke-width="1" stroke-dasharray="4" />
+    <text x="326" y="240" font-family="Segoe UI, sans-serif" font-size="12" fill="#8A939F" text-anchor="middle">Área para Visual (Medidor / Gráfico de Barras)</text>
+
+    <!-- Card 2: % de SLA Cumplido de construcción/entrega -->
+    <rect x="652" y="112" width="604" height="200" fill="#21252D" stroke="#2E353D" stroke-width="1.5" rx="12" />
+    <!-- Header Card 2 -->
+    <text x="676" y="148" font-family="Segoe UI, sans-serif" font-size="16" fill="#E0E4EA" font-weight="600">% de SLA Cumplido (Construcción/Entrega)</text>
+    <line x1="652" y1="164" x2="1256" y2="164" stroke="#2E353D" stroke-width="1" />
+    <!-- Placeholder hint -->
+    <rect x="676" y="184" width="556" height="104" fill="#171A1F" rx="8" stroke="#2E353D" stroke-width="1" stroke-dasharray="4" />
+    <text x="954" y="240" font-family="Segoe UI, sans-serif" font-size="12" fill="#8A939F" text-anchor="middle">Área para Visual (Anillo / KPI)</text>
+
+    <!-- Card 3: Días para entrega (Gantt o timeline) -->
+    <rect x="24" y="336" width="1232" height="360" fill="#21252D" stroke="#2E353D" stroke-width="1.5" rx="12" />
+    <!-- Header Card 3 -->
+    <text x="48" y="372" font-family="Segoe UI, sans-serif" font-size="16" fill="#E0E4EA" font-weight="600">Días para Entrega (Gantt / Timeline)</text>
+    <line x1="24" y1="388" x2="1256" y2="388" stroke="#2E353D" stroke-width="1" />
+    <!-- Placeholder hint -->
+    <rect x="48" y="408" width="1184" height="264" fill="#171A1F" rx="8" stroke="#2E353D" stroke-width="1" stroke-dasharray="4" />
+    <text x="640" y="544" font-family="Segoe UI, sans-serif" font-size="14" fill="#8A939F" text-anchor="middle">Área para Visual (Matriz Gantt / Gráfico de Cascada)</text>
+</svg>

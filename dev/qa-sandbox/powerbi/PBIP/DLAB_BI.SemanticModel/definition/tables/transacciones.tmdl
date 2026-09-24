@@ -1,0 +1,447 @@
+table transacciones
+	lineageTag: 941aa139-ddbe-419b-bdc2-373c830bf498
+
+	column id
+		dataType: double
+		lineageTag: 833626c9-2f71-4f20-b740-85b0bf91f545
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column codigo
+		dataType: string
+		lineageTag: 0cddce48-ebb3-48b9-88af-a1d0cb173784
+		summarizeBy: none
+		sourceColumn: codigo
+
+		annotation SummarizationSetBy = Automatic
+
+	column proyecto_id
+		dataType: double
+		lineageTag: f579ec65-1744-4ca0-be9e-4b18e3d67e3d
+		summarizeBy: sum
+		sourceColumn: proyecto_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column entidad_id
+		dataType: double
+		lineageTag: 3967fb2d-1f5b-4357-901a-5dc92217247f
+		summarizeBy: sum
+		sourceColumn: entidad_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column cliente_id
+		dataType: double
+		lineageTag: 3cf54ed0-d6a5-42e5-9629-78b9b06094d4
+		summarizeBy: sum
+		sourceColumn: cliente_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column edificio
+		dataType: string
+		lineageTag: 351bb985-a505-4eaf-a8a8-308f5e22489e
+		summarizeBy: none
+		sourceColumn: edificio
+
+		annotation SummarizationSetBy = Automatic
+
+	column piso
+		dataType: string
+		lineageTag: d59be51f-ca49-432b-a4fb-a8088694ce47
+		summarizeBy: none
+		sourceColumn: piso
+
+		annotation SummarizationSetBy = Automatic
+
+	column unidad
+		dataType: string
+		lineageTag: ab978272-6280-4490-8a55-cf8367b8cc99
+		summarizeBy: none
+		sourceColumn: unidad
+
+		annotation SummarizationSetBy = Automatic
+
+	column calle
+		dataType: string
+		lineageTag: 1c3434fe-03a4-40f2-ae46-f155d7d7978a
+		summarizeBy: none
+		sourceColumn: calle
+
+		annotation SummarizationSetBy = Automatic
+
+	column tipo_inmueble
+		dataType: string
+		lineageTag: 028d45bf-9cfd-4190-922c-049a95198b93
+		summarizeBy: none
+		sourceColumn: tipo_inmueble
+
+		annotation SummarizationSetBy = Automatic
+
+	column financiamiento
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 06efddb0-2972-48a1-bcb4-a4c4ef1354ce
+		summarizeBy: none
+		sourceColumn: financiamiento
+
+		annotation SummarizationSetBy = Automatic
+
+	column financiamiento_bancario
+		dataType: double
+		lineageTag: 5ead550b-62a2-4301-8804-239a8f111cb9
+		summarizeBy: sum
+		sourceColumn: financiamiento_bancario
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column banco_financiador_id
+		dataType: double
+		lineageTag: f6c1e5b3-d0bb-4316-acb0-9eff84907326
+		summarizeBy: sum
+		sourceColumn: banco_financiador_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column institucion_bancaria
+		dataType: string
+		lineageTag: 17a8b4ca-38a1-4a6b-86d3-6b602ab08c10
+		summarizeBy: none
+		sourceColumn: institucion_bancaria
+
+		annotation SummarizationSetBy = Automatic
+
+	column kyc_completo
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 100d48fc-ad39-407e-a022-0f897dd4ec5f
+		summarizeBy: none
+		sourceColumn: kyc_completo
+
+		annotation SummarizationSetBy = Automatic
+
+	column canal
+		dataType: string
+		lineageTag: 821a1747-0835-4495-89ee-201a2f0d82f9
+		summarizeBy: none
+		sourceColumn: canal
+
+		annotation SummarizationSetBy = Automatic
+
+	column tipo_canal_externo
+		dataType: string
+		lineageTag: 0f9aa3da-98bf-45cc-8b86-f8aef1e552e5
+		summarizeBy: none
+		sourceColumn: tipo_canal_externo
+
+		annotation SummarizationSetBy = Automatic
+
+	column origen_prospecto
+		dataType: string
+		lineageTag: ef41ead3-6b1d-4c29-bb19-c482de835e44
+		summarizeBy: none
+		sourceColumn: origen_prospecto
+
+		annotation SummarizationSetBy = Automatic
+
+	column categoria_asesor_congelada
+		dataType: string
+		lineageTag: d4ab080b-d3e5-4402-a539-0ccb0d259e17
+		summarizeBy: none
+		sourceColumn: categoria_asesor_congelada
+
+		annotation SummarizationSetBy = Automatic
+
+	column monto
+		dataType: double
+		lineageTag: a452530b-2c64-44f3-897d-ee3dcabcb4f6
+		summarizeBy: sum
+		sourceColumn: monto
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column monto_separacion
+		dataType: double
+		lineageTag: cde31f0f-2d32-44c7-b5ce-612dcd3ef0e8
+		summarizeBy: sum
+		sourceColumn: monto_separacion
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column monto_inicial
+		dataType: double
+		lineageTag: 731e33f4-b5a8-4246-952b-a77a6395b6b2
+		summarizeBy: sum
+		sourceColumn: monto_inicial
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column num_cuotas
+		dataType: double
+		lineageTag: 61cb8473-a924-477e-953a-c03c97f2b281
+		summarizeBy: sum
+		sourceColumn: num_cuotas
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_comision
+		dataType: double
+		lineageTag: 3c6284ee-b213-449d-a44e-ee9c7297abe7
+		summarizeBy: sum
+		sourceColumn: pct_comision
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_retencion_empresa
+		dataType: double
+		lineageTag: 6ab34238-116b-4cdf-97c8-ec797702b4e9
+		summarizeBy: sum
+		sourceColumn: pct_retencion_empresa
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fecha_evento
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: cda86f65-2cdd-4537-84f4-876f5b072590
+		summarizeBy: none
+		sourceColumn: fecha_evento
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column fecha_hito_intermedio
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: ebc6ea0e-fc02-4001-b228-b04c9e9856e8
+		summarizeBy: none
+		sourceColumn: fecha_hito_intermedio
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column fecha_hito_final
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 8f7789d4-8d8d-45c7-b4c0-bbb8776c3bd9
+		summarizeBy: none
+		sourceColumn: fecha_hito_final
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column dias_ciclo_cierre
+		dataType: double
+		lineageTag: 139847a5-d418-4e1f-b210-7bb38ffca7dd
+		summarizeBy: sum
+		sourceColumn: dias_ciclo_cierre
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column sla_dias_meta
+		dataType: double
+		lineageTag: 0271a583-3e97-4627-bc10-796ee38d1bf0
+		summarizeBy: sum
+		sourceColumn: sla_dias_meta
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column estado
+		dataType: string
+		lineageTag: 9379d4c9-8f41-4039-af83-0a38b8f44114
+		summarizeBy: none
+		sourceColumn: estado
+
+		annotation SummarizationSetBy = Automatic
+
+	column motivo_perdida
+		dataType: string
+		lineageTag: 3d6b4a6e-cf5f-476e-8e35-fc7f6c5d6450
+		summarizeBy: none
+		sourceColumn: motivo_perdida
+
+		annotation SummarizationSetBy = Automatic
+
+	column motivo_perdida_id
+		dataType: double
+		lineageTag: fe99b437-bd3f-4a15-be7a-66aad2a6145c
+		summarizeBy: sum
+		sourceColumn: motivo_perdida_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column estado_plan_pagos
+		dataType: string
+		lineageTag: 3474d726-288a-4194-a175-dceed65ea1b2
+		summarizeBy: none
+		sourceColumn: estado_plan_pagos
+
+		annotation SummarizationSetBy = Automatic
+
+	column atributos_extra
+		dataType: string
+		lineageTag: 29fbc290-4564-4465-a218-62d9b934f3bb
+		summarizeBy: none
+		sourceColumn: atributos_extra
+
+		annotation SummarizationSetBy = Automatic
+
+	column nivel_id
+		dataType: double
+		lineageTag: c68508b3-2c73-419a-99e9-9b196dc4a78d
+		summarizeBy: sum
+		sourceColumn: nivel_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column captador_id
+		dataType: double
+		lineageTag: 3b601a64-82e4-49a9-bacc-52496086da2a
+		summarizeBy: sum
+		sourceColumn: captador_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column gastos_pub_id
+		dataType: double
+		lineageTag: 317e765c-62da-4202-8239-56be326edf47
+		summarizeBy: sum
+		sourceColumn: gastos_pub_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_a
+		dataType: double
+		lineageTag: 5f95b3d6-6284-46f9-9826-c82f07647433
+		summarizeBy: sum
+		sourceColumn: pct_a
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_n
+		dataType: double
+		lineageTag: 28982ae0-54e8-43f6-9456-e5bd9cb4c6bd
+		summarizeBy: sum
+		sourceColumn: pct_n
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_ase1
+		dataType: double
+		lineageTag: 40c68ace-4300-404f-a561-9499fb0b20b3
+		summarizeBy: sum
+		sourceColumn: pct_ase1
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_ase2
+		dataType: double
+		lineageTag: 53e8d0c3-037b-4a75-9d64-fb9086a1e016
+		summarizeBy: sum
+		sourceColumn: pct_ase2
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_proyecto
+		dataType: double
+		lineageTag: adc10acc-348b-4d3b-8cd5-0803eb05b91c
+		summarizeBy: sum
+		sourceColumn: pct_proyecto
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_admin
+		dataType: double
+		lineageTag: b364ed7a-6b0e-4ee8-8452-13dfacd9617f
+		summarizeBy: sum
+		sourceColumn: pct_admin
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_extra
+		dataType: double
+		lineageTag: cb7e8522-d24b-4f7e-9a45-a8e039a89dce
+		summarizeBy: sum
+		sourceColumn: pct_extra
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pct_pub_gfm
+		dataType: double
+		lineageTag: 685c8e99-5a4d-484b-900c-01612cc328e8
+		summarizeBy: sum
+		sourceColumn: pct_pub_gfm
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition transacciones = m
+		mode: import
+		source =
+				let
+				    Origen = Odbc.DataSource("driver={SQLite3 ODBC Driver};database=H:\Mi unidad\Proyecto - CRM Inmobiliaria\dlab-data\data\dlab.db;notxn=1;dsn=SQLite3 Datasource", [HierarchicalNavigation=true, SqlCapabilities=[LimitClauseKind=LimitClauseKind.Limit]]),
+				    transacciones_Table = Origen{[Name="transacciones",Kind="Table"]}[Data]
+				in
+				    transacciones_Table
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

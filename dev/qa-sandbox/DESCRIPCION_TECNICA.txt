@@ -1,0 +1,518 @@
+DLAB CRM INMOBILIARIA - DESCRIPCION TECNICA Y ESTRUCTURAL
+=========================================================
+Fecha: 26 de agosto de 2026
+Version: 1.0.0 (build 20260826)
+Codename: "Seguridad"
+Proposito: Actualizacion de contrato de venta
+
+1. RESUMEN EJECUTIVO
+---------------------
+DLAB CRM Inmobiliaria es una plataforma web de gestion integral para empresas
+inmobiliarias. Combina funciones de CRM, analitica de negocio, gestion de
+ventas, cobros, comisiones, marketing y reportes con dashboard en tiempo real.
+
+La aplicacion esta disenada como una solucion de escritorio distribuible como
+ejecutable (.exe) o desplegable via Docker, con base de datos SQLite local
+compatible con Power BI para exportacion de datos.
+
+2. ARQUITECTURA TECNICA
+-------------------------
+
+2.1 Stack Tecnologico
+
+  Capa               | Tecnologia
+  -------------------|------------------------------------------
+  Lenguaje           | Python 3.10+ (compat. hasta 3.14)
+  Framework Web      | Flask >= 3.0.0
+  ORM                | SQLAlchemy >= 2.0.0
+  Base de Datos      | SQLite (archivos .db)
+  Template Engine    | Jinja2 (server-rendered HTML)
+  Frontend CSS       | Tailwind CSS (CDN)
+  Tablas de Datos    | DataTables jQuery (CDN)
+  Migraciones        | Alembic >= 1.13.0
+  Testing            | pytest >= 9.0.0 + pytest-cov
+  Seguridad          | Flask-WTF (CSRF), Werkzeug (hashing)
+  Encriptacion       | cryptography >= 42.0.0 (Fernet/AES)
+  Rate Limiting      | flask-limiter >= 3.5.0
+  CORS               | flask-cors >= 4.0.0
+  Exportacion        | pandas, openpyxl, pyarrow
+  Integracion        | Google Calendar API, OAuth2
+  Despliegue         | Docker, PyInstaller (.exe)
+  Servidor Produccion| gunicorn >= 21.2.0
+
+2.2 Arquitectura de Capas
+
+  ┌─────────────────────────────────────────────────────┐
+  │                    FRONTEND                         │
+  │   Jinja2 Templates + Tailwind CSS + DataTables      │
+  └──────────────────────┬──────────────────────────────┘
+                         │ HTTP
+  ┌──────────────────────▼──────────────────────────────┐
+  │                 FLASK APP                            │
+  │  ┌─────────────┐  ┌──────────────────────────────┐  │
+  │  │ View        │  │ API Blueprints                │  │
+  │  │ Blueprints  │  │ (JSON REST)                   │  │
+  │  │ (HTML)      │  │ CSRF-exempt                   │  │
+  │  └──────┬──────┘  └──────────────┬───────────────┘  │
+  │         │                        │                   │
+  │  ┌──────▼────────────────────────▼───────────────┐  │
+  │  │            MIDDLEWARE DE SEGURIDAD             │  │
+  │  │  before_request: check_login                  │  │
+  │  │  @requiere_login / @requiere_rol              │  │
+  │  │  Rate Limiting / Brute Force Protection       │  │
+  │  └──────────────────────┬───────────────────────┘  │
+  │                         │                           │
+  │  ┌──────────────────────▼───────────────────────┐  │
+  │  │            CORE / BUSINESS LOGIC              │  │
+  │  │  FinancialEngine / LeadsEngine / Updater     │  │
+  │  │  Crypto / Integrity / Auditoria / Scheduler  │  │
+  │  └──────────────────────┬───────────────────────┘  │
+  └─────────────────────────┼───────────────────────────┘
+                            │
+  ┌─────────────────────────▼───────────────────────────┐
+  │              SQLAlchemy ORM + SQLite                  │
+  │         Base de datos: %APPDATA%/DLAB_CRM/data/      │
+  └─────────────────────────────────────────────────────┘
+
+2.3 Seguridad Implementada (OWASP)
+
+  - Proteccion contra fuerza bruta (bloqueo por intentos)
+  - Rate limiting configurable por endpoint
+  - CSRF protection en formularios HTML
+  - Headers de seguridad OWASP (X-Frame-Options, CSP, HSTS)
+  - Cookies de sesion HttpOnly + SameSite=Lax
+  - Encriptacion de campos sensibles (Fernet/AES) - ACTIVADO
+  - SQL Injection prevencion (queries parametrizados)
+  - Verificacion de integridad de DB (HMAC-SHA256)
+  - Validacion de contrasenas (min 12 chars, complejidad)
+  - PRAGMAs SQLite reforzados (WAL, foreign_keys, secure_delete)
+  - Proteccion contra open redirect
+  - Auditoria con firma hash
+  - Diccionario de identidades cifrado (Excel password-protected)
+
+2.4 Auditoria de Seguridad (26 agosto 2026)
+
+  RESULTADO: 30/30 endpoints verificados - TODOS FUNCIONALES
+
+  Controles auditados:
+  [OK] Cifrado Fernet/AES activo (FIELD_ENCRYPTION_KEY configurado)
+  [OK] Tokens Google OAuth cifrados en DB
+  [OK] Client secrets cifrados en DB
+  [OK] SQL Injection corregido en exportaciones_api.py
+  [OK] Queries parametrizados (4 exportaciones)
+  [OK] Whitelist de tablas en queries dinamicos
+  [OK] Diccionario de identidades cifrado (msoffcrypto)
+  [OK] Password hashing (scrypt/bcrypt)
+  [OK] RBAC (Admin, Gerente, Asesor)
+  [OK] Brute force protection
+  [OK] Rate limiting
+  [OK] CSRF protection
+  [OK] OWASP headers
+  [OK] Auditoria con firma hash
+
+  Riesgos identificados y mitigados:
+  - SQL injection en exportaciones: CORREGIDO
+  - Google tokens en texto plano: CORREGIDO (Fernet)
+  - Diccionario identidades sin proteccion: CORREGIDO (cifrado)
+  - Password hash exportable: MITIGADO (excluido de historico)
+
+  Riesgos pendientes (requieren decision de negocio):
+  - SQLite sin cifrado a nivel de archivo (requiere migracion a PostgreSQL o cifrado disco)
+  - No existe RLS nativo (implementar en capa de aplicacion)
+  - Power BI accede a DB sin autenticacion (solo usuario Windows)
+
+3. ESTRUCTURA DE ARCHIVOS
+---------------------------
+
+  DLAB CRM Inmobiliaria/
+  ├── .gitignore                    # Control de versiones
+  ├── README.md
+  ├── dlab-app/                     # Aplicacion principal
+  │   ├── app/                      # Codigo fuente
+  │   │   ├── __init__.py           # Application Factory
+  │   │   ├── config.py             # Configuracion (dev/prod)
+  │   │   ├── extensions.py         # SQLAlchemy, etc.
+  │   │   ├── version.py            # Versionado centralizado
+  │   │   ├── api/                  # 16 blueprints REST API
+  │   │   │   ├── catalogos_api.py
+  │   │   │   ├── kpis_api.py
+  │   │   │   ├── maestros_api.py
+  │   │   │   ├── cierres_api.py
+  │   │   │   ├── cobros_api.py
+  │   │   │   ├── compras_api.py
+  │   │   │   ├── comisiones_api.py
+  │   │   │   ├── facturas_api.py
+  │   │   │   ├── marketing_api.py
+  │   │   │   ├── incidentes_api.py
+  │   │   │   ├── alertas_api.py
+  │   │   │   ├── configuracion_api.py
+  │   │   │   ├── carga_archivos_api.py
+  │   │   │   ├── exportaciones_api.py
+  │   │   │   ├── google_calendar_api.py
+  │   │   │   └── usuarios_api.py
+  │   │   ├── views/                # 12 blueprints HTML
+  │   │   │   ├── auth_views.py
+  │   │   │   ├── dashboard_views.py
+  │   │   │   ├── maestros_views.py
+  │   │   │   ├── cierres_views.py
+  │   │   │   ├── cobros_views.py
+  │   │   │   ├── compras_views.py
+  │   │   │   ├── comisiones_views.py
+  │   │   │   ├── marketing_views.py
+  │   │   │   ├── incidentes_views.py
+  │   │   │   ├── exportaciones_views.py
+  │   │   │   ├── carga_archivos_views.py
+  │   │   │   └── configuracion_views.py
+  │   │   ├── core/                 # Logica de negocio
+  │   │   │   ├── financial_engine.py
+  │   │   │   ├── leads_engine.py
+  │   │   │   ├── auth_middleware.py
+  │   │   │   ├── brute_force.py
+  │   │   │   ├── crypto.py
+  │   │   │   ├── integrity.py
+  │   │   │   ├── auditoria.py
+  │   │   │   ├── updater.py
+  │   │   │   ├── scheduler.py
+  │   │   │   ├── diagnostics.py
+  │   │   │   └── google_models.py
+  │   │   ├── templates/            # Jinja2 HTML
+  │   │   └── static/               # CSS, JS, imagenes
+  │   ├── tests/                    # 17 archivos de prueba
+  │   ├── migrations/               # Alembic migrations
+  │   ├── requirements.txt          # Dependencias Python
+  │   ├── Dockerfile                # Contenedor Docker
+  │   ├── docker-compose.yml        # Orquestacion
+  │   ├── conftest.py               # Fixtures de testing
+  │   ├── pytest.ini                # Configuracion pytest
+  │   ├── run_local.py              # Entry point local
+  │   ├── run.py                    # Entry point produccion
+  │   ├── DLAB.bat                  # Ejecutable Windows
+  │   ├── DLAB_dev.bat              # Ejecutable desarrollo
+  │   ├── .env                      # Variables de entorno
+  │   ├── .env.example              # Plantilla de .env
+  │   ├── .env.production           # Configuracion produccion
+  │   ├── build_app.spec            # PyInstaller spec
+  │   └── build_release.py          # Script de release
+  └── dlab-data/                    # Datos auxiliares
+      └── data/                     # DB plantilla
+
+4. BASE DE DATOS (SQLite)
+---------------------------
+
+4.1 Ubicacion
+
+  - Desarrollo: dlab-app/data/dlab.db (local)
+  - Produccion: %APPDATA%/DLAB_CRM/data/dlab.db (Windows)
+  - Docker: /data/dlab/dlab.db (volumen persistente)
+  - Testing: SQLite en memoria (sqlite:///:memory:)
+
+4.2 Tablas Principales (27 tablas)
+
+  Modulo          | Tablas
+  ----------------|------------------------------------------
+  Maestros        | clientes, entidades, proveedores, proyectos
+  Ventas          | transacciones, cierres (en transacciones)
+  Cobros          | cobros, pagos, compras, compras_pagos
+  Compras         | compras, compras_facturas, compras_pagos
+  Comisiones      | comisiones_pagos, config_matriz_comisiones
+  Marketing       | campanas
+  Incidentes      | incidentes
+  Configuracion   | app_config, kpi_config, auditoria
+  Seguridad       | usuarios
+  Google          | google_oauth_tokens, configuracion_sistema
+  Catalogos       | cat_niveles, cat_captadores, cat_gastos_pub
+  Compromisos     | compromisos, lead_preferencias, contrapartes
+
+4.3 PRAGMAs de Seguridad SQLite
+
+  PRAGMA journal_mode=WAL           # Write-Ahead Logging
+  PRAGMA synchronous=NORMAL         # Balance rendimiento/seguridad
+  PRAGMA cache_size=-64000          # 64MB cache
+  PRAGMA foreign_keys=ON            # Integridad referencial
+  PRAGMA secure_delete=OFF          # Preservar datos para auditoria
+  PRAGMA temp_store=MEMORY          # Temporales en RAM
+  PRAGMA mmap_size=268435456        # 256MB memory-mapped I/O
+  PRAGMA busy_timeout=5000          # 5s espera si DB bloqueada
+
+5. ENDPOINTS API (70+)
+------------------------
+
+5.1 Autenticacion
+
+  Metodo | Ruta                         | Descripcion
+  -------|------------------------------|---------------------------
+  GET    | /login                       | Pagina de login
+  POST   | /login                       | Autenticar usuario
+  GET    | /logout                      | Cerrar sesion
+  POST   | /cambiar-password            | Cambio obligatorio
+
+5.2 API REST (JSON) - 16 Blueprints
+
+  Modulo       | Metodo | Ruta                                    | Auth
+  -------------|--------|-----------------------------------------|--------
+  Catalogos    | GET    | /api/catalogos                          | Si
+  KPIs         | GET    | /api/kpis/resumen                       | Si
+  KPIs         | POST   | /api/kpis/evaluar_leads                 | Si
+  Maestros     | GET    | /api/maestros/clientes                  | Si
+  Maestros     | POST   | /api/maestros/clientes-completo         | Si
+  Maestros     | PUT    | /api/maestros/clientes/<id>             | Si
+  Maestros     | DELETE | /api/maestros/clientes/<id>             | Si
+  Maestros     | GET    | /api/maestros/empleados                 | Si
+  Maestros     | POST   | /api/maestros/empleados                 | Si
+  Maestros     | PUT    | /api/maestros/empleados/<id>            | Si
+  Maestros     | DELETE | /api/maestros/empleados/<id>            | Si
+  Maestros     | GET    | /api/maestros/constructoras             | Si
+  Maestros     | POST   | /api/maestros/constructoras             | Si
+  Maestros     | PUT    | /api/maestros/constructoras/<id>        | Si
+  Maestros     | DELETE | /api/maestros/constructoras/<id>        | Si
+  Maestros     | GET    | /api/maestros/proyectos                 | Si
+  Maestros     | POST   | /api/maestros/proyectos                 | Si
+  Maestros     | PUT    | /api/maestros/proyectos/<id>            | Si
+  Maestros     | DELETE | /api/maestros/proyectos/<id>            | Si
+  Maestros     | GET    | /api/maestros/proveedores               | Si
+  Maestros     | POST   | /api/maestros/proveedores               | Si
+  Maestros     | PUT    | /api/maestros/proveedores/<id>          | Si
+  Maestros     | DELETE | /api/maestros/proveedores/<id>          | Si
+  Maestros     | GET    | /api/maestros/inmobiliarias             | Si
+  Cierres      | GET    | /api/cierres/cierres                    | Si
+  Cierres      | POST   | /api/cierres                            | Si
+  Cierres      | PUT    | /api/cierres/<id>                       | Si
+  Cierres      | DELETE | /api/cierres/<id>                       | Si
+  Cobros       | GET    | /api/cobros/cobros                      | Si
+  Cobros       | POST   | /api/cobros                             | Si
+  Cobros       | POST   | /api/cobros/<id>/pagar                  | Si
+  Cobros       | PUT    | /api/cobros/<id>                        | Si
+  Cobros       | DELETE | /api/cobros/<id>                        | Si
+  Compras      | GET    | /api/compras/compras                    | Si
+  Compras      | POST   | /api/compras                            | Si
+  Compras      | POST   | /api/compras/<id>/aprobar               | Si
+  Compras      | POST   | /api/compras/<id>/rechazar              | Si
+  Compras      | POST   | /api/compras/<id>/pagar                 | Si
+  Compras      | PUT    | /api/compras/<id>                       | Si
+  Compras      | DELETE | /api/compras/<id>                       | Si
+  Comisiones   | GET    | /api/comisiones/comisiones              | Si
+  Comisiones   | POST   | /api/comisiones/<id>/aprobar            | Si
+  Comisiones   | POST   | /api/comisiones/<id>/pagar              | Si
+  Facturas     | GET    | /api/facturas/                          | Si
+  Facturas     | POST   | /api/facturas/upload                    | Si
+  Facturas     | GET    | /api/facturas/view/<id>                 | Si
+  Marketing    | GET    | /api/marketing/campanas                 | Si
+  Marketing    | POST   | /api/marketing/campanas                 | Si
+  Marketing    | PUT    | /api/marketing/campanas/<id>            | Si
+  Marketing    | DELETE | /api/marketing/campanas/<id>            | Si
+  Incidentes   | GET    | /api/incidentes/incidentes              | Si
+  Incidentes   | POST   | /api/incidentes                         | Si
+  Incidentes   | PUT    | /api/incidentes/<id>                    | Si
+  Incidentes   | POST   | /api/incidentes/<id>/cerrar             | Si
+  Alertas      | GET    | /api/alertas/dashboard                  | Si
+  Config       | GET    | /api/configuracion/kpis                 | Si
+  Config       | POST   | /api/configuracion/kpis                 | Si
+  Config       | POST   | /api/configuracion/empresa              | Si
+  Config       | GET    | /api/configuracion/auditoria            | Si
+  Config       | GET    | /api/configuracion/matriz_comisiones    | Si
+  Config       | POST   | /api/configuracion/matriz_comisiones    | Si
+  Config       | PUT    | /api/configuracion/matriz_comisiones/<id>| Si
+  Config       | GET    | /api/configuracion/logs/recientes       | Si
+  Config       | GET    | /api/configuracion/smtp                 | Si
+  Config       | POST   | /api/configuracion/smtp                 | Si
+  Config       | POST   | /api/configuracion/smtp/probar          | Si
+  Config       | GET    | /api/configuracion/version              | Si
+  Config       | GET    | /api/configuracion/update/check         | Si
+  Config       | GET    | /api/configuracion/update/status        | Si
+  Config       | POST   | /api/configuracion/update/apply         | Si
+  Config       | GET    | /api/configuracion/diagnostics          | Si
+  Config       | POST   | /api/configuracion/diagnostics/report   | Si
+  Config       | GET    | /api/configuracion/instalaciones        | Si
+  Config       | GET    | /api/configuracion/backup/descargar     | Si
+  Config       | POST   | /api/configuracion/backup/restaurar     | Si
+  Google       | GET    | /api/google/estado                      | No
+  Google       | POST   | /api/google/config/credenciales         | Si
+  Google       | GET    | /api/google/oauth/autorizar             | Si
+  Google       | GET    | /api/google/oauth/callback              | No
+  Google       | POST   | /api/google/oauth/desconectar           | Si
+  Google       | POST   | /api/google/test-evento                 | Si
+  Carga        | GET    | /api/carga-archivos/plantilla/<modulo>  | Si
+  Carga        | POST   | /api/carga-archivos/procesar            | Si
+  Usuarios     | GET    | /api/usuarios                           | Si
+  Usuarios     | POST   | /api/usuarios                           | Si
+  Usuarios     | PUT    | /api/usuarios/<id>                      | Si
+  Usuarios     | DELETE | /api/usuarios/<id>                      | Si
+  Usuarios     | POST   | /api/usuarios/aceptar-politicas         | Si
+
+5.3 Paginas HTML (12 vistas)
+
+  Ruta                        | Descripcion
+  ----------------------------|----------------------------------
+  /                           | Dashboard principal
+  /dashboard                  | Dashboard (alias)
+  /maestros/                  | Catalogo maestros
+  /maestros/cliente-wizard    | Wizard de creacion de cliente
+  /cierres/                   | Cierres de venta
+  /cobros/                    | Cobros y facturacion
+  /compras/                   | Compras a proveedores
+  /compras/facturas           | Facturas de compras
+  /comisiones/                | Comisiones de agents
+  /marketing/                 | Campanas de marketing
+  /incidentes/                | Gestion de incidentes
+  /exportaciones/             | Exportar datos
+  /carga-archivos/            | Carga masiva CSV
+  /configuracion/             | Configuracion del sistema
+
+6. MODULOS DE LOGICA DE NEGOCIO
+----------------------------------
+
+6.1 FinancialEngine (core/financial_engine.py)
+
+  - Estructuracion de ventas
+  - Calculo de pool de comisiones
+  - Distribucion Fortune
+  - Retenciones fiscales
+  - Utilidades financieras
+
+6.2 LeadsEngine (core/leads_engine.py)
+
+  - Evaluacion y recategorizacion de asesores
+  - Analisis de rendimiento
+
+6.3 Autenticacion y Seguridad
+
+  - Sesiones basadas en cookies
+  - RBAC (Role-Based Access Control): Admin, Gerente, Asesor
+  - Proteccion contra fuerza bruta (in-memory + DB)
+  - Rate limiting configurable
+  - Validacion de contrasenas fuertes
+
+6.4 Exportaciones
+
+  - Power BI: Parquet, JSON, Excel (via ODBC directo a DB)
+  - AI/ML: CSV anonimizado + diccionario cifrado
+  - Historico operativo: Excel completo (9 hojas)
+  - Compatibilidad: Power BI lee DB sin cifrar, columnas sensibles cifradas con Fernet
+
+6.5 Conector Power BI
+
+  Metodo: ODBC (sqliteodbc_w64.exe incluido)
+  Ruta DB: %APPDATA%/DLAB_CRM/data/dlab.db
+  Relaciones:
+    compromisos.cliente_id       -> clientes.id
+    compromisos.proyecto_id      -> entidades.id
+    transacciones.compromiso_id  -> compromisos.id
+    cobros.cierre_id             -> transacciones.id
+    pagos.transaccion_id         -> transacciones.id
+    incidentes.cliente_id        -> clientes.id
+
+  NOTA: Power BI tiene acceso directo a la DB. Solo usuarios autorizados
+  en la misma maquina Windows pueden acceder via ODBC.
+
+6.6 Integraciones
+
+  - Google Calendar: OAuth2, sincronizacion de eventos
+  - Dropbox: Enlaces de archivos
+  - SMTP: Notificaciones por email
+  - GitHub Releases: Auto-actualizacion
+
+7. TESTING
+-----------
+
+7.1 Framework
+
+  - pytest >= 9.0.0
+  - pytest-cov >= 7.0.0
+  - Base de datos en memoria (sqlite:///:memory:)
+  - Fixtures en conftest.py (session/function scoped)
+
+7.2 Cobertura (17 archivos de prueba)
+
+  Archivo                           | Cobertura
+  ----------------------------------|----------------------------------
+  test_auth.py                      | Login, logout, CSRF
+  test_auth_middleware.py            | @requiere_login, @requiere_rol
+  test_financial_engine.py          | Unit tests motor financiero
+  test_cierres.py                   | Endpoints cierres
+  test_cobros.py                    | Endpoints cobros
+  test_crud_cierres.py              | CRUD completo cierres
+  test_crud_cobros.py               | CRUD completo cobros
+  test_crud_comisiones.py           | CRUD completo comisiones
+  test_crud_compras.py              | CRUD completo compras
+  test_crud_maestros.py             | CRUD maestros
+  test_crud_marketing_incidentes.py | CRUD marketing + incidentes
+  test_crud_exportaciones.py        | Exportaciones
+  test_crud_carga_archivos.py       | Carga masiva CSV
+  test_crud_facturas.py             | Facturas/upload
+  test_crud_usuarios_config.py      | Usuarios + configuracion
+  test_crud_google_calendar.py      | Google Calendar
+
+7.3 Ejecucion
+
+  pytest tests/ -v                           # Todos los tests
+  pytest tests/ --cov=app --cov-report=html  # Con cobertura
+
+8. DESPLIEGUE
+--------------
+
+8.1 Desarrollo (Windows)
+
+  cd dlab-app
+  python -m venv .venv
+  .venv\Scripts\activate
+  pip install -r requirements.txt
+  python run_local.py
+  # Servidor en http://127.0.0.1:5000
+
+8.2 Produccion (Windows)
+
+  DLAB.bat
+  # O: python run.py
+
+8.3 Docker
+
+  cd dlab-app
+  docker compose up --build
+  # Puerto 5000, volumen persistente app-data
+
+8.4 Ejecutable Windows (.exe)
+
+  pip install pyinstaller pillow
+  pyinstaller build_app.spec --clean -y
+  python build_release.py
+
+9. VARIABLES DE ENTorno
+-------------------------
+
+  Variable                | Requerida | Descripcion
+  ------------------------|-----------|----------------------------------
+  FLASK_ENV               | No        | development | production
+  SECRET_KEY              | Si        | Clave secreta Flask (32+ chars)
+  FIELD_ENCRYPTION_KEY    | Si        | Clave Fernet/AES para campos
+  DB_INTEGRITY_SECRET     | No        | HMAC para integridad DB
+  RATE_LIMIT_STORAGE_URI  | No        | memory:// o redis://
+  MAX_LOGIN_ATTEMPTS      | No        | Max intentos (default: 5)
+  LOCKOUT_SECONDS         | No        | Bloqueo en segundos (default: 1800)
+  ADMIN_PASSWORD          | No        | Password admin inicial
+  GOOGLE_CLIENT_ID        | No        | OAuth2 Google
+  GOOGLE_CLIENT_SECRET    | No        | OAuth2 Google
+  GOOGLE_REDIRECT_URI     | No        | Callback OAuth2
+  DLAB_GITHUB_OWNER       | No        | Owner repo GitHub
+  DLAB_GITHUB_REPO        | No        | Nombre repo GitHub
+
+10. COMPATIBILIDAD Y REQUISITOS
+----------------------------------
+
+  Requisito         | Minimo
+  ------------------|------------------------------------------
+  Python            | 3.10+ (probado hasta 3.14)
+  SO                | Windows 10+, Linux, macOS
+  RAM               | 512MB minimo
+  Disco             | 100MB (sin datos)
+  Navegador         | Chrome, Firefox, Edge (ultimas versiones)
+  Docker            | 20.10+ (opcional)
+
+11. LICENCIA Y DERECHOS
+-------------------------
+
+  Propiedad: DLab Data / DLAB CRM Inmobiliaria
+  Version: 1.0.0
+  Fecha: Agosto 2026
+  Todos los derechos reservados.
+
+FIN DEL DOCUMENTO

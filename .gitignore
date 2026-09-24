@@ -1,0 +1,13 @@
+**/.env
+**/.cf-api
+**/.cf-api.save
+**/*.save*
+**/creds.json
+**/config.yml
+**/config.yml.tmp
+**/data/
+**/logs/
+**/*.log
+**/__pycache__/
+**/*.pyc
+dev/core/opencode-manager/

@@ -1,0 +1,357 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-end">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Registro de Incidentes</h1>
+        <p class="text-sm text-slate-500 mt-1">Reporte, seguimiento y auditoría de incidentes operativos</p>
+    </div>
+    <div class="flex gap-2">
+        <button onclick="abrirModal('modal-incidente')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded font-medium shadow-sm transition-colors text-sm">
+            + Reportar Incidente
+        </button>
+    </div>
+</div>
+
+<div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+    <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-4">
+        <h2 class="text-lg font-semibold text-slate-800">Incidentes Registrados</h2>
+        <div class="relative">
+            <input type="text" id="searchInput" onkeyup="filtrarLocal()" placeholder="Buscar incidente..." class="field-input pl-9 max-w-xs text-sm">
+            <span class="absolute left-3 top-2.5 text-slate-400"><i class="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg' aria-hidden='true"></i></span>
+        </div>
+    </div>
+    
+    <div id="contador-modulo" class="text-sm font-semibold text-slate-600 mb-2">Total de registros: <span id="total-badge">0</span></div>
+    <div id="table-container" class="overflow-x-auto min-h-[300px]">
+        <p class="text-center text-slate-400 py-8">Cargando datos...</p>
+    </div>
+</div>
+
+<!-- Modal Reportar Incidente -->
+<div id="modal-incidente" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 animate-fade-in-up border-t-4 border-rose-500 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+            <h3 class="text-xl font-bold text-slate-800">Reportar Incidente</h3>
+            <button onclick="cerrarModal('modal-incidente')" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
+        </div>
+        
+        <form onsubmit="guardarIncidente(event)" class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Tipo de Incidente</label>
+                    <input type="text" id="fi-tipo" required class="field-input" placeholder="Ej. Retraso, Disputa, Fallo">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nivel (1 a 4)</label>
+                    <select id="fi-nivel" class="field-input" required onchange="verificarNivelIncidente()">
+                        <option value="1">1 - Menor</option>
+                        <option value="2">2 - Moderado</option>
+                        <option value="3">3 - Grave (Solo Directivo)</option>
+                        <option value="4">4 - Crítico (Solo Directivo)</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Severidad</label>
+                <select id="fi-severidad" class="field-input" required>
+                    <option value="baja">Baja</option>
+                    <option value="media" selected>Media</option>
+                    <option value="alta">Alta</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Área Responsable</label>
+                <input type="text" id="fi-area" class="field-input" placeholder="Ej. Ventas, Legal, Administración">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Descripción Detallada</label>
+                <textarea id="fi-descripcion" required class="field-input h-24 resize-none" placeholder="Describa el incidente con detalle..."></textarea>
+            </div>
+            
+            <div id="div-enlace-f05" class="hidden">
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Enlace Informe F-05</label>
+                <input type="url" id="fi-enlace" class="field-input" placeholder="https://...">
+                <p class="text-[10px] text-rose-500 mt-1 font-bold">Obligatorio para Incidentes Nivel 3 y 4.</p>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 mt-6">
+                <button type="button" onclick="cerrarModal('modal-incidente')" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded transition-colors text-sm">Cancelar</button>
+                <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white px-6 py-2 rounded font-medium shadow-sm transition-colors text-sm">Registrar Incidente</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
+</style>
+
+<!-- Modal Resolver Incidente -->
+<div id="modal-resolver" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 animate-fade-in-up border-t-4 border-emerald-500 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+            <h3 class="text-xl font-bold text-slate-800">Resolver Incidente</h3>
+            <button onclick="cerrarModal('modal-resolver')" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
+        </div>
+        <form onsubmit="guardarResolucion(event)" class="space-y-4">
+            <input type="hidden" id="res-id">
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Fecha de Resolución *</label>
+                <input type="date" id="res-fecha" required class="field-input">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Comentario de Resolución *</label>
+                <textarea id="res-comentario" required class="field-input h-24 resize-none" placeholder="Detalle la solución..."></textarea>
+            </div>
+            <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 mt-6">
+                <button type="button" onclick="cerrarModal('modal-resolver')" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded transition-colors text-sm">Cancelar</button>
+                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded font-medium shadow-sm transition-colors text-sm">Marcar Resuelto</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Editar Incidente -->
+<div id="modal-editar-incidente" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 animate-fade-in-up border-t-4 border-blue-500 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+            <h3 class="text-xl font-bold text-slate-800">Editar Incidente</h3>
+            <button onclick="cerrarModal('modal-editar-incidente')" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
+        </div>
+        
+        <form onsubmit="guardarEdicionIncidente(event)" class="space-y-4">
+            <input type="hidden" id="edit-id">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Tipo de Incidente</label>
+                    <input type="text" id="edit-tipo" required class="field-input" placeholder="Ej. Retraso, Disputa, Fallo">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Nivel (1 a 4)</label>
+                    <select id="edit-nivel" class="field-input" required onchange="verificarNivelEditIncidente()">
+                        <option value="1">1 - Menor</option>
+                        <option value="2">2 - Moderado</option>
+                        <option value="3">3 - Grave (Solo Directivo)</option>
+                        <option value="4">4 - Crítico (Solo Directivo)</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Severidad</label>
+                <select id="edit-severidad" class="field-input" required>
+                    <option value="baja">Baja</option>
+                    <option value="media">Media</option>
+                    <option value="alta">Alta</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Área Responsable</label>
+                <input type="text" id="edit-area" class="field-input" placeholder="Ej. Ventas, Legal, Administración">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Descripción Detallada</label>
+                <textarea id="edit-descripcion" required class="field-input h-24 resize-none"></textarea>
+            </div>
+            
+            <div id="edit-div-enlace-f05" class="hidden">
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Enlace Informe F-05</label>
+                <input type="url" id="edit-enlace" class="field-input" placeholder="https://...">
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 mt-6">
+                <button type="button" onclick="cerrarModal('modal-editar-incidente')" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded transition-colors text-sm">Cancelar</button>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded font-medium shadow-sm transition-colors text-sm">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- DataTables + jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    let dtIncidentes = null;
+
+    $(document).ready(() => {
+        cargarIncidentes();
+    });
+
+    function cargarIncidentes() {
+        const container = document.getElementById('table-container');
+        container.innerHTML = '<div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm mt-4"><table id="dt-incidentes" class="w-full text-left text-sm text-slate-600"><thead class="bg-slate-50 text-xs uppercase font-bold text-slate-500 border-b border-slate-200"><tr>' +
+            '<th class="px-4 py-3">Fecha</th><th class="px-4 py-3">Tipo</th><th class="px-4 py-3">Nivel</th><th class="px-4 py-3">Severidad</th><th class="px-4 py-3">Área Resp.</th><th class="px-4 py-3">SLA</th><th class="px-4 py-3">F-05</th><th class="px-4 py-3">Acciones</th>' +
+            '</tr></thead><tbody class="divide-y divide-slate-100"></tbody></table></div>';
+
+        if (dtIncidentes) { try { dtIncidentes.destroy(); } catch(e){} dtIncidentes = null; }
+
+        dtIncidentes = $('#dt-incidentes').DataTable({
+            serverSide: true,
+            processing: true,
+            ajax: {
+                url: '/api/incidentes/incidentes',
+                type: 'GET'
+            },
+            columns: [
+                { data: 'fecha_reporte', render: function(d){ return '<span class="text-slate-600">'+(d ? d.split(' ')[0] : '')+'</span>'; } },
+                { data: 'tipo', render: function(d,t,r){ return '<span class="font-bold text-slate-800">'+(d||'')+'</span><div class="text-[10px] text-slate-500 max-w-[200px] truncate" title="'+r.descripcion+'">'+r.descripcion+'</div>'; } },
+                { data: 'nivel', render: function(d){ 
+                    let c = (d>2)? 'text-rose-600 font-bold' : 'text-slate-600'; 
+                    return '<span class="'+c+'">Nivel '+(d||1)+'</span>'; 
+                }},
+                { data: 'severidad', render: function(d){ return '<span class="capitalize text-slate-600">'+(d||'')+'</span>'; } },
+                { data: 'area_responsable', render: function(d){ return '<span class="text-slate-600">'+(d||'N/A')+'</span>'; } },
+                { data: 'estado_sla', render: function(d){
+                    var badgeCls = 'badge-proceso';
+                    if(d === 'CRÍTICO') badgeCls = 'bg-rose-600 text-white shadow-sm shadow-rose-200';
+                    else if(d === 'EN PROCESO') badgeCls = 'badge-proceso';
+                    else if(d === 'RESUELTO') badgeCls = 'badge-aprobado';
+                    return '<span class="badge-pill '+badgeCls+'">'+d+'</span>';
+                }},
+                { data: 'enlace_f05', orderable: false, render: function(d){
+                    if(d) return '<a href="'+d+'" target="_blank" class="text-sky-600 hover:underline">Ver F-05</a>';
+                    return '-';
+                }},
+                { data: null, orderable: false, className: 'text-right', render: function(d,t,r){
+                    let acts = '<button onclick="abrirEditar('+r.id+',\''+(r.tipo||'')+'\','+(r.nivel||1)+',\''+(r.severidad||'media')+'\',\''+(r.area_responsable||'')+'\',\''+(r.descripcion||'').replace(/'/g, "\\'")+'\',\''+(r.enlace_f05||'')+'\')" class="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 text-xs font-bold rounded mr-2"><i class="bx bx-edit-alt"></i> Editar</button>';
+                    if (!r.fecha_cierre) {
+                        return acts + '<button onclick="abrirResolver('+r.id+')" class="px-2 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold rounded">Resolver</button>';
+                    }
+                    return acts + '<span class="text-slate-400 italic text-xs">Cerrado</span>';
+                }}
+            ],
+            pageLength: 20,
+            deferRender: true,
+            order: [[0,'desc']],
+            language: {
+                search: 'Buscar:', lengthMenu: 'Mostrar _MENU_',
+                info: '_START_-_END_ de _TOTAL_', zeroRecords: 'Sin resultados',
+                paginate: { first:'«', last:'»', next:'›', previous:'‹' },
+                processing: 'Cargando datos...'
+            },
+            dom: '<"flex items-center justify-between mb-4 flex-wrap gap-2"lf>rt<"flex items-center justify-between mt-4 flex-wrap gap-2"ip>',
+            drawCallback: function(settings) {
+                const badge = document.getElementById('total-badge');
+                if (badge) badge.innerText = settings.fnRecordsTotal();
+            }
+        });
+    }
+
+    function filtrarLocal() {
+        if (dtIncidentes) dtIncidentes.search(document.getElementById('searchInput').value).draw();
+    }
+
+
+
+    function verificarNivelIncidente() {
+        const nivel = parseInt(document.getElementById('fi-nivel').value);
+        if (nivel >= 3) {
+            document.getElementById('div-enlace-f05').classList.remove('hidden');
+            document.getElementById('fi-enlace').required = true;
+        } else {
+            document.getElementById('div-enlace-f05').classList.add('hidden');
+            document.getElementById('fi-enlace').required = false;
+        }
+    }
+
+    async function guardarIncidente(e) {
+        e.preventDefault();
+        const payload = {
+            tipo: document.getElementById('fi-tipo').value,
+            descripcion: document.getElementById('fi-descripcion').value,
+            severidad: document.getElementById('fi-severidad').value,
+            nivel: document.getElementById('fi-nivel').value,
+            area_responsable: document.getElementById('fi-area').value,
+            enlace_f05: document.getElementById('fi-enlace').value
+        };
+        try {
+            const res = await fetch('/api/incidentes', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const d = await res.json();
+            if (d.success) {
+                showToast('OK: ' + d.message, 'success');
+                cerrarModal('modal-incidente');
+                cargarIncidentes();
+            } else { showToast(d.error, 'error'); }
+        } catch (err) { alert('Error: ' + err.message); }
+    }
+
+    function abrirResolver(id) {
+        document.getElementById('res-id').value = id;
+        document.getElementById('res-fecha').value = new Date().toISOString().split('T')[0];
+        document.getElementById('res-comentario').value = '';
+        abrirModal('modal-resolver');
+    }
+
+    async function guardarResolucion(e) {
+        e.preventDefault();
+        const id = document.getElementById('res-id').value;
+        const payload = {
+            fecha_resolucion: document.getElementById('res-fecha').value,
+            comentario_resolucion: document.getElementById('res-comentario').value
+        };
+        try {
+            const res = await fetch('/api/incidentes/' + id + '/cerrar', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const d = await res.json();
+            if(d.success) { alert('Incidente resuelto.'); cerrarModal('modal-resolver'); cargarIncidentes(); }
+            else { showToast(d.error, 'error'); }
+        } catch(e) { alert('Error: ' + e.message); }
+    }
+
+    function abrirEditar(id, tipo, nivel, severidad, area, desc, enlace) {
+        document.getElementById('edit-id').value = id;
+        document.getElementById('edit-tipo').value = tipo || '';
+        document.getElementById('edit-nivel').value = nivel || 1;
+        document.getElementById('edit-severidad').value = severidad || 'media';
+        document.getElementById('edit-area').value = area || '';
+        document.getElementById('edit-descripcion').value = desc || '';
+        document.getElementById('edit-enlace').value = enlace || '';
+        verificarNivelEditIncidente();
+        abrirModal('modal-editar-incidente');
+    }
+
+    function verificarNivelEditIncidente() {
+        const nivel = parseInt(document.getElementById('edit-nivel').value);
+        if (nivel >= 3) {
+            document.getElementById('edit-div-enlace-f05').classList.remove('hidden');
+            document.getElementById('edit-enlace').required = true;
+        } else {
+            document.getElementById('edit-div-enlace-f05').classList.add('hidden');
+            document.getElementById('edit-enlace').required = false;
+        }
+    }
+
+    async function guardarEdicionIncidente(e) {
+        e.preventDefault();
+        const id = document.getElementById('edit-id').value;
+        const payload = {
+            tipo: document.getElementById('edit-tipo').value,
+            descripcion: document.getElementById('edit-descripcion').value,
+            severidad: document.getElementById('edit-severidad').value,
+            nivel: document.getElementById('edit-nivel').value,
+            area_responsable: document.getElementById('edit-area').value,
+            enlace_f05: document.getElementById('edit-enlace').value
+        };
+        try {
+            const res = await fetch('/api/incidentes/' + id, {
+                method: 'PUT', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const d = await res.json();
+            if (d.success) {
+                showToast('OK: ' + d.message, 'success');
+                cerrarModal('modal-editar-incidente');
+                cargarIncidentes();
+            } else { showToast(d.error, 'error'); }
+        } catch (err) { alert('Error: ' + err.message); }
+    }
+</script>
+{% endblock %}

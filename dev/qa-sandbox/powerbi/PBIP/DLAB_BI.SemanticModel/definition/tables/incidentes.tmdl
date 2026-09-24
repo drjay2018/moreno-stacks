@@ -1,0 +1,117 @@
+table incidentes
+	lineageTag: c8e6e273-5f7c-4074-94da-f29779af1237
+
+	column id
+		dataType: double
+		lineageTag: 043fae24-3349-401e-83e8-0914b879cd38
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column tipo
+		dataType: string
+		lineageTag: d3c77d34-84be-43a1-b700-759251c1e8e8
+		summarizeBy: none
+		sourceColumn: tipo
+
+		annotation SummarizationSetBy = Automatic
+
+	column descripcion
+		dataType: string
+		lineageTag: 7e0e514f-76ff-44f9-a583-154197ed3bf4
+		summarizeBy: none
+		sourceColumn: descripcion
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha_reporte
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: b650e89b-51e2-442a-9f0c-e1d7d050ce4d
+		summarizeBy: none
+		sourceColumn: fecha_reporte
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column severidad
+		dataType: string
+		lineageTag: da38625a-6002-47ea-8b51-c5ead2cf024b
+		summarizeBy: none
+		sourceColumn: severidad
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha_cierre
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: d66ee897-f5a8-4ad4-9bc7-145f46e608b4
+		summarizeBy: none
+		sourceColumn: fecha_cierre
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column nivel
+		dataType: double
+		lineageTag: 8d123931-ebf3-4bfd-a7e1-8fc3c2ce0929
+		summarizeBy: sum
+		sourceColumn: nivel
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column area_responsable
+		dataType: string
+		lineageTag: 767d2c9a-f2e9-4960-a550-6fa21d06c6af
+		summarizeBy: none
+		sourceColumn: area_responsable
+
+		annotation SummarizationSetBy = Automatic
+
+	column enlace_f05
+		dataType: string
+		lineageTag: 498c2837-6ffa-4020-bde1-00a18c1f0d68
+		summarizeBy: none
+		sourceColumn: enlace_f05
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha_resolucion
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 08cc0773-cf45-4002-af90-74b1eea27ac9
+		summarizeBy: none
+		sourceColumn: fecha_resolucion
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column comentario_resolucion
+		dataType: string
+		lineageTag: c001e37c-2128-4bba-93c1-ec94a8a94054
+		summarizeBy: none
+		sourceColumn: comentario_resolucion
+
+		annotation SummarizationSetBy = Automatic
+
+	partition incidentes = m
+		mode: import
+		source =
+				let
+				    Origen = Odbc.DataSource("driver={SQLite3 ODBC Driver};database=H:\Mi unidad\Proyecto - CRM Inmobiliaria\dlab-data\data\dlab.db;notxn=1;dsn=SQLite3 Datasource", [HierarchicalNavigation=true, SqlCapabilities=[LimitClauseKind=LimitClauseKind.Limit]]),
+				    incidentes_Table = Origen{[Name="incidentes",Kind="Table"]}[Data]
+				in
+				    incidentes_Table
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

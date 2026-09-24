@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "SemanticModel",
+    "displayName": "DLAB_BI"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "58012d5b-0e14-4850-a5b0-92628a566a6f"
+  }
+}

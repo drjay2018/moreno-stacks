@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/gitIntegration/platformProperties/2.0.0/schema.json",
+  "metadata": {
+    "type": "Report",
+    "displayName": "DLAB_BI"
+  },
+  "config": {
+    "version": "2.0",
+    "logicalId": "23e0b4c9-e3cf-492c-89aa-cedaedafbcb2"
+  }
+}

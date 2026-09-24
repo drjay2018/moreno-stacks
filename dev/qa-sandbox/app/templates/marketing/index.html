@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}Marketing & Atribución | DLAB CRM{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Módulo de Marketing & Atribución (CPL / CAC)</h1>
+            <p class="text-sm text-slate-500">Rendimiento de campañas de captación, inversión publicitaria y retorno de inversión.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="/carga-archivos" class="btn-action-outline" aria-label="Ir a carga masiva">
+                <i class="bx bx-upload text-lg"></i> Carga Masiva
+            </a>
+            <button onclick="abrirModal('modal-campana')" class="btn-action-solid" aria-label="Abrir modal para crear nueva campaña">
+                <i class="bx bx-plus-circle text-lg"></i> Nueva Campaña Marketing
+            </button>
+        </div>
+    </div>
+
+    <!-- Tabla de Campañas -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <div class="mb-4 relative max-w-md">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400"><i class="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg' aria-hidden='true"></i></span>
+            <input type="text" id="marketing-search" onkeyup="filtrarTabla('marketing-search', 'dynamic-tbody')" placeholder="Buscar campañas..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:border-amber-500 focus:ring-amber-500" aria-label="Buscar campañas">
+        </div>
+        <div id="contador-modulo" class="text-sm font-semibold text-slate-600 mb-2">Total de registros: <span id="total-badge">0</span></div>
+        <div id="marketing-table-container" class="overflow-x-auto" aria-live="polite">
+            <p class="text-center text-slate-400 py-8">Cargando campañas activas...</p>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CREAR CAMPAÑA -->
+<div id="modal-campana" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <h3 class="text-lg font-bold text-slate-900">Crear Nueva Campaña de Marketing</h3>
+        <form onsubmit="guardarCampana(event)" class="space-y-3">
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre de la Campaña *</label>
+                <input type="text" id="cam-nombre" required placeholder="Ej. Meta Ads - Diáspora NY Q3" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha Inicio</label>
+                    <input type="date" id="cam-fecha-inicio" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Fecha Fin</label>
+                    <input type="date" id="cam-fecha-fin" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Canal Publicitario</label>
+                <select id="cam-canal" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                    <option value="Instagram Ads">Instagram Ads</option>
+                    <option value="Facebook Ads">Facebook Ads</option>
+                    <option value="Google Ads">Google Ads</option>
+                    <option value="Portal Inmobiliario">Portal Inmobiliario</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Inversión (USD) *</label>
+                <input type="number" id="cam-monto" required placeholder="1500" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Impresiones</label>
+                    <input type="number" id="cam-impresiones" value="0" class="w-full border border-slate-300 rounded-lg p-2 text-sm" oninput="calcularMetricas()">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Clics</label>
+                    <input type="number" id="cam-clics" value="0" class="w-full border border-slate-300 rounded-lg p-2 text-sm" oninput="calcularMetricas()">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Leads Generados</label>
+                    <input type="number" id="cam-leads" value="0" class="w-full border border-slate-300 rounded-lg p-2 text-sm" oninput="calcularMetricas()">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Alcance</label>
+                    <input type="number" id="cam-alcance" value="0" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">CTR Estimado (%)</label>
+                    <input type="text" id="cam-ctr" readonly class="w-full border border-slate-300 bg-slate-50 text-slate-500 rounded-lg p-2 text-sm font-mono" value="0.00%">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">CPL Estimado (USD)</label>
+                    <input type="text" id="cam-cpl" readonly class="w-full border border-slate-300 bg-slate-50 text-slate-500 rounded-lg p-2 text-sm font-mono" value="$0.00">
+                </div>
+            </div>
+            <script>
+                function calcularMetricas() {
+                    let imp = parseInt(document.getElementById('cam-impresiones').value) || 0;
+                    let cli = parseInt(document.getElementById('cam-clics').value) || 0;
+                    let leads = parseInt(document.getElementById('cam-leads').value) || 0;
+                    let monto = parseFloat(document.getElementById('cam-monto').value) || 0;
+                    
+                    let ctr = imp > 0 ? (cli / imp * 100).toFixed(2) : '0.00';
+                    document.getElementById('cam-ctr').value = ctr + '%';
+                    
+                    let cpl = leads > 0 ? (monto / leads).toFixed(2) : '0.00';
+                    document.getElementById('cam-cpl').value = '$' + cpl;
+                }
+                
+                // Add event listener to monto to update CPL
+                document.addEventListener('DOMContentLoaded', () => {
+                    const montoEl = document.getElementById('cam-monto');
+                    if(montoEl) montoEl.addEventListener('input', calcularMetricas);
+                });
+            </script>
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" onclick="cerrarModal('modal-campana')" class="px-4 py-2 text-xs font-semibold text-slate-600">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-lg">Guardar Campaña</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+
+    let dtCampanas = null;
+
+    async function cargarCampanas() {
+        const container = document.getElementById('marketing-table-container');
+        container.innerHTML = '<div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm mt-4"><table id="dt-campanas" class="w-full text-left text-sm text-slate-600"><thead class="bg-slate-50 text-xs uppercase font-bold text-slate-500 border-b border-slate-200"><tr>' +
+            '<th class="px-4 py-3">Campaña</th><th class="px-4 py-3">Canal</th><th class="px-4 py-3">Proyecto</th><th class="px-4 py-3">Inversión (USD)</th><th class="px-4 py-3">Impresiones</th><th class="px-4 py-3">Clics</th><th class="px-4 py-3">CTR</th><th class="px-4 py-3">Leads</th><th class="px-4 py-3">CPL</th><th class="px-4 py-3">Alcance</th><th class="px-4 py-3">Estado</th><th class="px-4 py-3">Acciones</th>' +
+            '</tr></thead><tbody class="divide-y divide-slate-100"></tbody></table></div>';
+
+        if (dtCampanas) { try { dtCampanas.destroy(); } catch(e) {} dtCampanas = null; }
+
+        dtCampanas = $('#dt-campanas').DataTable({
+            serverSide: true,
+            processing: true,
+            ajax: {
+                url: '/api/marketing/campanas',
+                type: 'GET'
+            },
+            columns: [
+                { data: 'nombre', render: function(d){ return '<span class="font-semibold text-slate-900">'+(d||'')+'</span>'; } },
+                { data: 'canal', defaultContent: '—' },
+                { data: 'proyecto', defaultContent: '—' },
+                { data: 'monto_invertido', className: 'text-right font-medium', render: function(d){ return '<span class="font-bold text-slate-900">$'+Number(d||0).toLocaleString()+'</span>'; } },
+                { data: 'impresiones', defaultContent: '0', className: 'text-right', render: function(d){ return Number(d||0).toLocaleString(); } },
+                { data: 'clics', defaultContent: '0', className: 'text-right', render: function(d){ return Number(d||0).toLocaleString(); } },
+                { data: 'ctr', defaultContent: '0', className: 'text-right', render: function(d){ return '<span class="font-mono text-xs font-semibold text-dlab-primary">'+d+'%</span>'; } },
+                { data: 'leads_generados', defaultContent: '0', className: 'text-right font-bold', render: function(d){ return Number(d||0).toLocaleString(); } },
+                { data: 'cpl', defaultContent: '0', className: 'text-right font-medium', render: function(d){ return '<span class="text-rose-700">$'+Number(d||0).toLocaleString()+'</span>'; } },
+                { data: 'alcance', defaultContent: '0', className: 'text-right', render: function(d){ return Number(d||0).toLocaleString(); } },
+                { data: 'activo', render: function(d){ 
+                    return d ? '<span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-800">Activa</span>' 
+                             : '<span class="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-600">Inactiva</span>'; 
+                }},
+                { data: null, orderable: false, className: 'text-right', render: function(d,t,r){
+                    return '<button onclick="editarCampana('+r.id+',\''+r.nombre+'\',\''+r.canal+'\','+r.monto_invertido+','+(r.impresiones||0)+','+(r.clics||0)+','+(r.alcance||0)+','+(r.leads_generados||0)+')" class="text-slate-400 hover:text-amber-600 mr-2" title="Editar"><i class="bx bx-edit"></i> Editar</button>'
+                          +'<button onclick="borrarCampana('+r.id+')" class="text-slate-400 hover:text-rose-600" title="Borrar"><i class="bx bx-trash"></i> Borrar</button>';
+                }}
+            ],
+            pageLength: 20,
+            deferRender: true,
+            order: [[0,'asc']],
+            language: {
+                search: 'Buscar:', lengthMenu: 'Mostrar _MENU_',
+                info: '_START_-_END_ de _TOTAL_', zeroRecords: 'Sin resultados',
+                paginate: { first:'«', last:'»', next:'›', previous:'‹' },
+                processing: 'Cargando datos...'
+            },
+            dom: '<"flex items-center justify-between mb-4 flex-wrap gap-2"lf>rt<"flex items-center justify-between mt-4 flex-wrap gap-2"ip>',
+            drawCallback: function(settings) {
+                const badge = document.getElementById('total-badge');
+                if (badge) badge.innerText = settings.fnRecordsTotal();
+            }
+        });
+    }
+
+    function filtrarTabla() {
+        if (dtCampanas) dtCampanas.search(document.getElementById('marketing-search').value).draw();
+    }
+
+    async function guardarCampana(e) {
+        e.preventDefault();
+        const payload = {
+            nombre: document.getElementById('cam-nombre').value,
+            canal: document.getElementById('cam-canal').value,
+            fecha_inicio: document.getElementById('cam-fecha-inicio').value || null,
+            fecha_fin: document.getElementById('cam-fecha-fin').value || null,
+            monto_invertido: parseFloat(document.getElementById('cam-monto').value),
+            impresiones: parseInt(document.getElementById('cam-impresiones').value) || 0,
+            clics: parseInt(document.getElementById('cam-clics').value) || 0,
+            leads_generados: parseInt(document.getElementById('cam-leads').value) || 0,
+            alcance: parseInt(document.getElementById('cam-alcance').value) || 0
+        };
+        const res = await fetch('/api/marketing/campanas', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+        const d = await res.json();
+        if (d.success) { alert("[OK] " + d.message); cerrarModal('modal-campana'); cargarCampanas(); }
+        else { alert("Error: " + d.error); }
+    }
+
+    async function borrarCampana(id) {
+        if (!confirm(`¿Está seguro que desea borrar esta campaña?`)) return;
+        try {
+            const res = await fetch(`/api/marketing/campanas/${id}`, { method: 'DELETE' });
+            const d = await res.json();
+            if (d.success) {
+                cargarCampanas();
+            } else {
+                alert(`<i class="bx bx-error"></i> Atención:\n\n${d.error}`);
+            }
+        } catch(e) {
+            alert('Error de conexión al intentar borrar.');
+        }
+    }
+
+    function editarCampana(id, nombreActual, canalActual, montoActual, impActual, clicsActual, alcanceActual, leadsActual) {
+        document.getElementById('edit-mkt-id').value = id;
+        document.getElementById('edit-mkt-nombre').value = nombreActual || '';
+        document.getElementById('edit-mkt-canal').value = canalActual || '';
+        document.getElementById('edit-mkt-monto').value = montoActual || 0;
+        document.getElementById('edit-mkt-imp').value = impActual || 0;
+        document.getElementById('edit-mkt-clics').value = clicsActual || 0;
+        document.getElementById('edit-mkt-leads').value = leadsActual || 0;
+        document.getElementById('edit-mkt-alcance').value = alcanceActual || 0;
+        document.getElementById('modal-editar-campana').classList.remove('hidden');
+    }
+    
+    async function guardarEdicionCampana(e) {
+        e.preventDefault();
+        const id = document.getElementById('edit-mkt-id').value;
+        const payload = {
+            nombre: document.getElementById('edit-mkt-nombre').value,
+            canal: document.getElementById('edit-mkt-canal').value,
+            monto_invertido: parseFloat(document.getElementById('edit-mkt-monto').value) || 0,
+            impresiones: parseInt(document.getElementById('edit-mkt-imp').value) || 0,
+            clics: parseInt(document.getElementById('edit-mkt-clics').value) || 0,
+            leads_generados: parseInt(document.getElementById('edit-mkt-leads').value) || 0,
+            alcance: parseInt(document.getElementById('edit-mkt-alcance').value) || 0
+        };
+        try {
+            const res = await fetch('/api/marketing/campanas/' + id, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const data = await res.json();
+            if (data.success) { 
+                showToast('Campaña actualizada.', 'success'); 
+                document.getElementById('modal-editar-campana').classList.add('hidden');
+                cargarCampanas(); 
+            } else { alert(data.error); }
+        } catch (e) { alert('Error al actualizar.'); }
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarCampanas);
+</script>
+<!-- MODAL EDITAR CAMPAÑA -->
+<div id="modal-editar-campana" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 space-y-4">
+        <h3 class="text-lg font-bold text-slate-900">Editar Campaña</h3>
+        <form id="form-editar-campana" onsubmit="guardarEdicionCampana(event)" class="space-y-4">
+            <input type="hidden" id="edit-mkt-id" value="">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre</label>
+                    <input type="text" id="edit-mkt-nombre" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Canal</label>
+                    <input type="text" id="edit-mkt-canal" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Inversión (USD)</label>
+                    <input type="number" step="0.01" id="edit-mkt-monto" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Impresiones</label>
+                    <input type="number" id="edit-mkt-imp" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Clics</label>
+                    <input type="number" id="edit-mkt-clics" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Leads Generados</label>
+                    <input type="number" id="edit-mkt-leads" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Alcance</label>
+                    <input type="number" id="edit-mkt-alcance" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+                <button type="button" onclick="document.getElementById('modal-editar-campana').classList.add('hidden')" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancelar</button>
+                <button type="submit" class="px-4 py-2 text-sm font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-lg">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

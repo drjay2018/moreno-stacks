@@ -1,0 +1,81 @@
+table compras_facturas
+	lineageTag: f6981730-7840-4e72-bfc5-714a0039ab29
+
+	column id
+		dataType: double
+		lineageTag: 7529bc72-a9e4-477e-af18-138bf89d08d1
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column compra_id
+		dataType: double
+		lineageTag: 637bfdec-cf18-4e2b-a29d-27243ce80efc
+		summarizeBy: sum
+		sourceColumn: compra_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column proveedor_id
+		dataType: double
+		lineageTag: 9ae2d56c-1f17-41be-afd9-96df8b37dbc2
+		summarizeBy: sum
+		sourceColumn: proveedor_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column numero_factura
+		dataType: string
+		lineageTag: b0730305-921b-43c2-9664-ad4c816de543
+		summarizeBy: none
+		sourceColumn: numero_factura
+
+		annotation SummarizationSetBy = Automatic
+
+	column monto_factura
+		dataType: double
+		lineageTag: 6f93b45f-d753-454c-b3b3-9ea6c596fc1c
+		summarizeBy: sum
+		sourceColumn: monto_factura
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ruta_archivo_pdf
+		dataType: string
+		lineageTag: dd6ada6c-3845-4a61-aecc-19d1d7a1cf95
+		summarizeBy: none
+		sourceColumn: ruta_archivo_pdf
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha_subida
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: b6ea1584-0fa8-40e4-8e66-ec2a8f1e7566
+		summarizeBy: none
+		sourceColumn: fecha_subida
+
+		annotation SummarizationSetBy = Automatic
+
+	partition compras_facturas = m
+		mode: import
+		source =
+				let
+				    Origen = Odbc.DataSource("driver={SQLite3 ODBC Driver};database=H:\Mi unidad\Proyecto - CRM Inmobiliaria\dlab-data\data\dlab.db;notxn=1;dsn=SQLite3 Datasource", [HierarchicalNavigation=true, SqlCapabilities=[LimitClauseKind=LimitClauseKind.Limit]]),
+				    compras_facturas_Table = Origen{[Name="compras_facturas",Kind="Table"]}[Data]
+				in
+				    compras_facturas_Table
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

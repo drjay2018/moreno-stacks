@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Facturas de Compra | DLab Data App{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <div class="flex items-center gap-2 mb-2 text-sm text-slate-500">
+                <a href="{{ url_for('compras_views.index') }}" class="hover:text-indigo-600 transition-colors">← Volver a Compras</a>
+            </div>
+            <h1 class="text-2xl font-bold text-slate-900">Gestión de Facturas (PDF)</h1>
+            <p class="text-sm text-slate-500">Compra ID: <span id="lbl-compra-id" class="font-bold">{{ compra_id or '' }}</span></p>
+        </div>
+        <div>
+            <button onclick="abrirModalUpload()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm px-4 py-2 rounded-lg transition-colors shadow-sm inline-flex items-center gap-1">
+                <i class="bx bx-plus-circle"></i> Subir Factura PDF
+            </button>
+        </div>
+    </div>
+
+    <!-- Lista de Facturas -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <h3 class="text-lg font-bold text-slate-800 mb-4">Facturas Registradas</h3>
+        <div id="table-container" class="overflow-x-auto">
+            <p class="text-center text-slate-400 py-8">Cargando...</p>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Upload -->
+<div id="modal-upload" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-fade-in-up border-t-4 border-indigo-500">
+        <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-4">
+            <h3 class="text-lg font-bold text-slate-800">Subir Factura</h3>
+            <button onclick="cerrarModal('modal-upload')" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
+        </div>
+        <form onsubmit="subirFactura(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Monto (Opcional)</label>
+                <input type="number" step="0.01" id="up-monto" class="w-full border border-slate-300 rounded-lg p-2 text-sm" placeholder="0.00">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Archivo PDF *</label>
+                <input type="file" id="up-file" accept="application/pdf" required class="w-full border border-slate-300 rounded-lg p-2 text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded font-bold shadow-sm transition-colors mt-4" id="btn-upload">Subir Archivo</button>
+        </form>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    const compraId = "{{ compra_id or '' }}";
+    let dtFacturas = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!compraId) {
+            alert("No se proporcionó ID de compra.");
+            window.location.href = "/compras";
+            return;
+        }
+        cargarFacturas();
+    });
+
+    function abrirModalUpload() { document.getElementById('modal-upload').classList.remove('hidden'); }
+    function cerrarModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    async function cargarFacturas() {
+        const container = document.getElementById('table-container');
+        container.innerHTML = '<div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm mt-4"><table id="dt-facturas" class="w-full text-left text-sm text-slate-600"><thead class="bg-slate-50 text-xs uppercase font-bold text-slate-500 border-b border-slate-200"><tr>' +
+            '<th>ID</th><th>Monto</th><th>Fecha Carga</th><th>Acciones</th></tr></thead><tbody></tbody></table></div>';
+        
+        if (dtFacturas) {
+            dtFacturas.destroy();
+            dtFacturas = null;
+        }
+
+        dtFacturas = $('#dt-facturas').DataTable({
+            serverSide: true,
+            processing: true,
+            ajax: {
+                url: '/api/facturas',
+                type: 'GET',
+                data: function(d) {
+                    d.compra_id = compraId;
+                }
+            },
+            columns: [
+                { data: 'id', render: function(d){ return '<span class="font-mono text-slate-400">#'+(d||'')+'</span>'; } },
+                { data: 'monto_factura', render: function(d){ return d ? '<span class="font-semibold text-slate-800">$' + Number(d).toLocaleString() + '</span>' : '-'; } },
+                { data: 'fecha_subida', defaultContent: '-' },
+                { data: null, orderable: false, className: 'text-right', render: function(d,t,r){
+                    return '<a href="/api/facturas/view/' + r.id + '" target="_blank" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded mr-2" title="Ver PDF"><svg class="inline w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Ver</a>' +
+                           '<button onclick="borrarFactura('+r.id+')" class="text-slate-400 hover:text-rose-600 px-2 py-1" title="Borrar"><i class="bx bx-trash"></i> Borrar</button>';
+                }}
+            ],
+            pageLength: 20,
+            deferRender: true,
+            order: [[0,'desc']],
+            language: {
+                search: 'Buscar:', lengthMenu: 'Mostrar _MENU_',
+                info: '_START_-_END_ de _TOTAL_', zeroRecords: 'Sin resultados',
+                paginate: { first:'«', last:'»', next:'›', previous:'‹' },
+                processing: 'Cargando datos...'
+            },
+            dom: '<"flex items-center justify-between mb-4 flex-wrap gap-2"lf>rt<"flex items-center justify-between mt-4 flex-wrap gap-2"ip>'
+        });
+    }
+
+    async function subirFactura(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn-upload');
+        btn.disabled = true;
+        btn.innerText = 'Subiendo...';
+
+        const fileInput = document.getElementById('up-file');
+        const montoInput = document.getElementById('up-monto');
+
+        if (!fileInput.files.length) {
+            alert("Debe seleccionar un archivo PDF.");
+            btn.disabled = false;
+            btn.innerText = 'Subir Archivo';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('compra_id', compraId);
+        if (montoInput.value) {
+            formData.append('monto_factura', montoInput.value);
+        }
+        formData.append('file', fileInput.files[0]);
+
+        try {
+            const res = await fetch('/api/facturas/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const d = await res.json();
+            if (d.success) {
+                alert('Archivo subido correctamente.');
+                cerrarModal('modal-upload');
+                fileInput.value = '';
+                montoInput.value = '';
+                cargarFacturas();
+            } else {
+                showToast(d.error, 'error');
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.innerText = 'Subir Archivo';
+        }
+    }
+
+    async function borrarFactura(id) {
+        if (!confirm('¿Seguro que desea eliminar esta factura? Esta acción no se puede deshacer.')) return;
+        try {
+            const res = await fetch('/api/facturas/' + id, { method: 'DELETE' });
+            const d = await res.json();
+            if (d.success) {
+                alert('Factura eliminada.');
+                cargarFacturas();
+            } else {
+                showToast(d.error, 'error');
+            }
+        } catch(err) {
+            alert('Error: ' + err.message);
+        }
+    }
+</script>
+{% endblock %}

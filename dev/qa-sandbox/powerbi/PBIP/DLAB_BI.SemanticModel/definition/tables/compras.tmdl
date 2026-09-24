@@ -1,0 +1,128 @@
+table compras
+	lineageTag: 5bbcf030-198b-4ece-a8f2-48955f0e385c
+
+	column id
+		dataType: double
+		lineageTag: 3d69dd12-19cf-4fda-9e5f-5fd25ca386f0
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column concepto
+		dataType: string
+		lineageTag: f39c226c-721e-471b-b938-455895d4da66
+		summarizeBy: none
+		sourceColumn: concepto
+
+		annotation SummarizationSetBy = Automatic
+
+	column monto_total
+		dataType: double
+		lineageTag: 96aff553-49d4-4c56-a6c0-08b284e0bea3
+		summarizeBy: sum
+		sourceColumn: monto_total
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fecha_solicitud
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: a284da78-4492-440f-81c8-d7176e302db0
+		summarizeBy: none
+		sourceColumn: fecha_solicitud
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column aprobado_ceo
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 21088d60-5785-4ef3-82db-a6b81f520b6f
+		summarizeBy: none
+		sourceColumn: aprobado_ceo
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha_aprobacion
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: e3ca9caa-ab8a-4a63-869e-40ac4ba54cc9
+		summarizeBy: none
+		sourceColumn: fecha_aprobacion
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column sla_dias_aprobacion
+		dataType: double
+		lineageTag: c73081d6-68aa-4014-91cb-355bffa55299
+		summarizeBy: sum
+		sourceColumn: sla_dias_aprobacion
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column enlace_dropbox
+		dataType: string
+		lineageTag: a8a7e989-55fe-434a-a189-8e7abe908ddf
+		summarizeBy: none
+		sourceColumn: enlace_dropbox
+
+		annotation SummarizationSetBy = Automatic
+
+	column numero_registro_erp
+		dataType: string
+		lineageTag: 653e7144-df6c-4585-823d-8669c1b47937
+		summarizeBy: none
+		sourceColumn: numero_registro_erp
+
+		annotation SummarizationSetBy = Automatic
+
+	column f03_completado
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: e7ef2e82-3e07-45ce-b2e8-5c899ee714de
+		summarizeBy: none
+		sourceColumn: f03_completado
+
+		annotation SummarizationSetBy = Automatic
+
+	column estado
+		dataType: string
+		lineageTag: 3b6f8010-3fac-4a23-936b-8c2a4c554848
+		summarizeBy: none
+		sourceColumn: estado
+
+		annotation SummarizationSetBy = Automatic
+
+	column proveedor_id
+		dataType: double
+		lineageTag: 3f1dc91b-5aa9-40df-9a44-1276b672aa7c
+		summarizeBy: sum
+		sourceColumn: proveedor_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition compras = m
+		mode: import
+		source =
+				let
+				    Origen = Odbc.DataSource("driver={SQLite3 ODBC Driver};database=H:\Mi unidad\Proyecto - CRM Inmobiliaria\dlab-data\data\dlab.db;notxn=1;dsn=SQLite3 Datasource", [HierarchicalNavigation=true, SqlCapabilities=[LimitClauseKind=LimitClauseKind.Limit]]),
+				    compras_Table = Origen{[Name="compras",Kind="Table"]}[Data]
+				in
+				    compras_Table
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

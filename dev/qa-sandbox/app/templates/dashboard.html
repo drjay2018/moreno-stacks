@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard de KPIs | DLAB CRM{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    
+    <!-- Header del Dashboard -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Panel de KPIs</h1>
+            <p class="text-sm text-slate-500">Métricas analíticas consolidadas consumidas de forma asíncrona.</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <select id="filtro-periodo" onchange="cargarKPIs()" class="bg-white border border-slate-300 text-slate-700 text-sm rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-amber-500 shadow-sm">
+                <option value="Este mes">Este mes</option>
+                <option value="Mes anterior">Mes anterior</option>
+                <option value="Trimestre">Trimestre</option>
+                <option value="Año">Año</option>
+            </select>
+            <button id="btn-update-kpi" onclick="cargarKPIs()" class="bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors shadow-sm">
+                Actualizar
+            </button>
+        </div>
+    </div>
+
+    <!-- Grid de KPIs (con Skeletons Iniciales) -->
+    <div id="kpi-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" aria-live="polite">
+        <div class="skeleton h-36 rounded-xl border border-slate-200"></div>
+        <div class="skeleton h-36 rounded-xl border border-slate-200"></div>
+        <div class="skeleton h-36 rounded-xl border border-slate-200"></div>
+        <div class="skeleton h-36 rounded-xl border border-slate-200"></div>
+        <div class="skeleton h-36 rounded-xl border border-slate-200"></div>
+        <div class="skeleton h-36 rounded-xl border border-slate-200"></div>
+        <div class="skeleton h-36 rounded-xl border border-slate-200"></div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════ -->
+    <!-- PANEL DE ALERTAS & SEMÁFORO (Async Fetch)          -->
+    <!-- ═══════════════════════════════════════════════════ -->
+    <div id="panel-alertas" class="space-y-4" aria-live="polite">
+        <!-- Skeleton mientras carga -->
+        <div class="skeleton h-48 rounded-xl border border-slate-200"></div>
+    </div>
+
+    <!-- Tabla Paginada en Servidor de Clientes -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-bold text-slate-900">Catálogo Paginado de Clientes (Paginación Servidor)</h2>
+            <span id="clientes-info" class="text-xs text-slate-500">Cargando datos...</span>
+        </div>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-slate-600">
+                <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500 border-b border-slate-200">
+                    <tr>
+                        <th class="py-3 px-4">Nombre</th>
+                        <th class="py-3 px-4">Cédula</th>
+                        <th class="py-3 px-4">Teléfono</th>
+                        <th class="py-3 px-4">Email</th>
+                        <th class="py-3 px-4">País / Ubicación</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-clientes-body" class="divide-y divide-slate-100" aria-live="polite" aria-atomic="true">
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-slate-400">Cargando clientes...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+            <button id="btn-prev-page" onclick="cambiarPagina(-1)" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg disabled:opacity-50">Anterior</button>
+            <span id="page-number" class="text-xs font-medium text-slate-600">Página 1</span>
+            <button id="btn-next-page" onclick="cambiarPagina(1)" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg disabled:opacity-50">Siguiente</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let paginaActual = 1;
+
+    async function cargarKPIs() {
+        const btn = document.getElementById('btn-update-kpi');
+        const textOrig = btn.innerText;
+        btn.disabled = true;
+        btn.innerText = 'Actualizando...';
+        btn.classList.add('opacity-70', 'cursor-not-allowed');
+
+        const grid = document.getElementById('kpi-grid');
+        const periodo = document.getElementById('filtro-periodo').value;
+
+        grid.innerHTML = Array(7).fill(0).map(() => 
+            `<div class="skeleton h-36 rounded-xl border border-slate-200"></div>`
+        ).join('');
+
+        try {
+            const response = await fetch(`/api/kpis/resumen?periodo=${encodeURIComponent(periodo)}`);
+            const data = await response.json();
+
+            if (data.success && data.kpis) {
+                grid.innerHTML = data.kpis.map(kpi => renderCardKPI(kpi)).join('');
+            }
+        } catch (error) {
+            console.error("Error cargando KPIs:", error);
+            grid.innerHTML = `<div class="col-span-full p-4 bg-rose-50 text-rose-700 rounded-lg text-sm">Error al cargar KPIs.</div>`;
+        } finally {
+            btn.disabled = false;
+            btn.innerText = textOrig;
+            btn.classList.remove('opacity-70', 'cursor-not-allowed');
+        }
+    }
+
+    function renderCardKPI(kpi) {
+        const badgeStyles = {
+            en_meta: "bg-emerald-100 text-emerald-800 border-emerald-300",
+            alerta: "bg-amber-100 text-amber-800 border-amber-300",
+            critico: "bg-rose-100 text-rose-800 border-rose-300"
+        };
+        
+        let icon = 'ph-chart-line-up';
+        const cat = (kpi.categoria || '').toLowerCase();
+        const nom = (kpi.nombre || '').toLowerCase();
+        if (cat.includes('venta') || nom.includes('venta')) icon = 'ph-handshake';
+        else if (cat.includes('operati') || cat.includes('cobro')) icon = 'ph-wallet';
+        else if (cat.includes('fuerza') || cat.includes('asesor')) icon = 'ph-users';
+        else if (cat.includes('comision')) icon = 'ph-hand-coins';
+
+        const isPositive = (kpi.delta || '').includes('+') || !(kpi.delta || '').includes('-');
+        const sparklineColor = isPositive ? '#10b981' : '#ef4444';
+        const sparklineSvg = isPositive 
+            ? `<svg class="w-full h-10 opacity-30" preserveAspectRatio="none" viewBox="0 0 100 20"><path d="M0 20 L20 15 L40 18 L60 10 L80 12 L100 2" fill="none" stroke="${sparklineColor}" stroke-width="1.5"/><path d="M0 20 L20 15 L40 18 L60 10 L80 12 L100 2 L100 20 L0 20 Z" fill="${sparklineColor}" opacity="0.1"/></svg>`
+            : `<svg class="w-full h-10 opacity-30" preserveAspectRatio="none" viewBox="0 0 100 20"><path d="M0 2 L20 8 L40 5 L60 15 L80 12 L100 20" fill="none" stroke="${sparklineColor}" stroke-width="1.5"/><path d="M0 2 L20 8 L40 5 L60 15 L80 12 L100 20 L100 20 L0 20 Z" fill="${sparklineColor}" opacity="0.1"/></svg>`;
+
+        return `
+            <div class="relative bg-white/80 backdrop-blur-md rounded-[16px] p-5 shadow-sm border border-slate-200 hover:shadow-md transition-all overflow-hidden flex flex-col justify-between h-full">
+                <!-- Watermark -->
+                <i class="ph-duotone ${icon} absolute -bottom-3 -right-3 text-slate-100" style="font-size: 5.5rem; z-index: 0;"></i>
+                
+                <div class="relative z-10">
+                    <div class="flex items-start justify-between mb-2">
+                        <span class="text-[0.7rem] font-bold tracking-wider uppercase text-slate-400">${kpi.categoria}</span>
+                        <span class="text-[0.65rem] px-2.5 py-0.5 rounded-full font-bold border ${badgeStyles[kpi.estado]}">
+                            ${kpi.estado.replace('_', ' ').toUpperCase()}
+                        </span>
+                    </div>
+                    <h3 class="text-slate-500 text-sm font-medium leading-tight mb-2">${kpi.nombre}</h3>
+                </div>
+                
+                <div class="mt-4 relative z-10">
+                    <div class="flex items-end justify-between mb-1">
+                        <span class="text-3xl font-bold text-slate-900 tracking-tight leading-none">${kpi.valor}</span>
+                        <span class="text-xs font-semibold ${isPositive ? 'text-emerald-600' : 'text-rose-600'} flex items-center gap-1 mb-1">
+                            <i class="${isPositive ? 'bx bx-trending-up' : 'ph-trend-down'}"></i> ${kpi.delta}
+                        </span>
+                    </div>
+                </div>
+                <!-- Sparkline -->
+                <div class="absolute bottom-0 left-0 right-0 pointer-events-none z-0">
+                    ${sparklineSvg}
+                </div>
+            </div>
+        `;
+    }
+
+    async function cargarClientes(page = 1) {
+        const tbody = document.getElementById('tabla-clientes-body');
+        const info = document.getElementById('clientes-info');
+        const pageLabel = document.getElementById('page-number');
+        const btnPrev = document.getElementById('btn-prev-page');
+        const btnNext = document.getElementById('btn-next-page');
+
+        tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">Cargando...</td></tr>`;
+
+        try {
+            const res = await fetch(`/api/maestros/clientes?page=${page}&per_page=5`);
+            const data = await res.json();
+
+            if (data.success) {
+                const clientesList = data.items || data.clientes || [];
+                paginaActual = data.page;
+                pageLabel.innerText = `Página ${data.page} de ${data.total_pages}`;
+                info.innerText = `Mostrando ${clientesList.length} de ${data.total} clientes registrados`;
+
+                btnPrev.disabled = (data.page <= 1);
+                btnNext.disabled = (data.page >= data.total_pages);
+
+                if (clientesList.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">Sin clientes registrados.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = clientesList.map(c => `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="py-3 px-4 font-semibold text-slate-900">${c.nombre} ${c.apellido}</td>
+                        <td class="py-3 px-4 font-mono text-xs">${c.cedula || '—'}</td>
+                        <td class="py-3 px-4">${c.telefono || '—'}</td>
+                        <td class="py-3 px-4">${c.email || '—'}</td>
+                        <td class="py-3 px-4">${c.provincia ? c.provincia + ', ' + c.pais : (c.pais || '—')}</td>
+                    </tr>
+                `).join('');
+            }
+        } catch (e) {
+            console.error("Error al cargar clientes:", e);
+            tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-rose-500">Error al cargar datos.</td></tr>`;
+        }
+    }
+
+    function cambiarPagina(delta) {
+        cargarClientes(paginaActual + delta);
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // PANEL DE ALERTAS & SEMÁFORO — Motor de Notificaciones
+    // ─────────────────────────────────────────────────────────
+    async function cargarAlertas() {
+        const panel = document.getElementById('panel-alertas');
+        try {
+            const res = await fetch('/api/alertas/dashboard');
+            const d = await res.json();
+            if (!d.success) throw new Error();
+
+            const critico   = d.critico;
+            const advert    = d.advertencia;
+            const info      = d.informativo;
+
+            const totalCriticos = critico.cuotas_vencidas.length + critico.compromisos_vencidos.length;
+            const totalAdvert   = advert.cuotas_proximas.length;
+
+            // ── Formateadores ──
+            const fmt = n => `$${Number(n || 0).toLocaleString('es-DO', {minimumFractionDigits: 0})} USD`;
+            const fmtPct = n => `${Number(n || 0).toFixed(2)}%`;
+
+            // ── Render fila de cuota crítica ──
+            const rowCritico = (r) => `
+                <a href="/cierres/?id=${r.transaccion_id}" class="group flex items-center justify-between px-4 py-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-100 transition-colors cursor-pointer shadow-sm" style="border-left: 3px solid #ef4444;">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                            <i class="bx bx-error-circle text-2xl" style="color: #ef4444;"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-bold text-slate-900 text-sm truncate">${r.cliente}</p>
+                            <p class="text-xs text-slate-500 font-medium">${r.concepto || 'Cuota vencida'} — <span class="text-slate-400">Trx: ${r.codigo_transaccion}</span></p>
+                        </div>
+                    </div>
+                    <div class="text-right flex-shrink-0 ml-3">
+                        <p class="font-bold text-sm font-mono" style="color: #991b1b;">${fmt(r.monto_total)}</p>
+                        <p class="text-[0.7rem] text-rose-500 font-semibold">${r.dias_atraso} días de atraso</p>
+                    </div>
+                </a>`;
+
+            // ── Render fila compromiso crítico ──
+            const rowCompromiso = (r) => `
+                <div class="flex items-center justify-between px-4 py-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-100 shadow-sm" style="border-left: 3px solid #ef4444;">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                            <i class="bx bx-error-circle text-2xl" style="color: #ef4444;"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-bold text-slate-900 text-sm truncate">${r.contraparte}</p>
+                            <p class="text-xs text-slate-500 font-medium">${r.categoria || 'Compromiso'} — <span class="text-slate-400">${r.proyecto || 'Sin proyecto'}</span></p>
+                        </div>
+                    </div>
+                    <div class="text-right flex-shrink-0 ml-3">
+                        <p class="font-bold text-sm font-mono" style="color: #991b1b;">${fmtPct(r.valor_pactado_pct)}</p>
+                        <p class="text-[0.7rem] text-rose-500 font-semibold">${r.dias_atraso} días de atraso</p>
+                    </div>
+                </div>`;
+
+            // ── Render fila advertencia ──
+            const rowAdvert = (r) => `
+                <a href="/cierres/?id=${r.transaccion_id}" class="group flex items-center justify-between px-4 py-3 rounded-xl hover:bg-amber-100/50 transition-colors cursor-pointer shadow-sm" style="background-color: #fffbeb; border: 1px solid #fef3c7;">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="flex-shrink-0 w-8 h-8 flex items-center justify-center">
+                            <i class="bx bx-bell text-2xl" style="color: #d97706;"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <p class="font-bold text-slate-900 text-sm truncate">${r.cliente}</p>
+                            <p class="text-xs text-slate-500 font-medium">${r.concepto || 'Cuota próxima'} — <span class="text-slate-400">Trx: ${r.codigo_transaccion}</span></p>
+                        </div>
+                    </div>
+                    <div class="text-right flex-shrink-0 ml-3">
+                        <p class="font-bold text-sm font-mono text-amber-700">${fmt(r.monto_total)}</p>
+                        <p class="text-[0.7rem] text-amber-600 font-semibold">Vence en ${r.dias_para_vencer} día(s)</p>
+                    </div>
+                </a>`;
+
+            // ── Tarjetas Informativas ──
+            const infoCards = `
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-white/70 backdrop-blur-md border border-slate-200 shadow-sm rounded-2xl p-6 flex items-center gap-5 hover:shadow-md transition-all h-full">
+                        <div class="w-14 h-14 rounded-xl bg-sky-50 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-8 h-8 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-[0.7rem] text-slate-500 font-bold uppercase tracking-wider mb-1">Cierres este mes</p>
+                            <p class="text-3xl font-bold text-slate-900 leading-none">${info.cierres_este_mes}</p>
+                        </div>
+                    </div>
+                    <div class="bg-white/70 backdrop-blur-md border border-slate-200 shadow-sm rounded-2xl p-6 flex items-center gap-5 hover:shadow-md transition-all h-full">
+                        <div class="w-14 h-14 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-[0.7rem] text-slate-500 font-bold uppercase tracking-wider mb-1">Volumen de ventas</p>
+                            <p class="text-2xl font-bold text-slate-900 font-mono tracking-tight leading-none">${fmt(info.volumen_ventas_mes)}</p>
+                        </div>
+                    </div>
+                    <div class="bg-white/70 backdrop-blur-md border border-slate-200 shadow-sm rounded-2xl p-6 flex items-center gap-5 hover:shadow-md transition-all h-full">
+                        <div class="w-14 h-14 rounded-xl bg-violet-50 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-8 h-8 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        </div>
+                        <div class="flex-1">
+                            <p class="text-[0.7rem] text-slate-500 font-bold uppercase tracking-wider mb-1">Clientes captados</p>
+                            <p class="text-3xl font-bold text-slate-900 leading-none">${info.clientes_captados_mes}</p>
+                        </div>
+                    </div>
+                </div>`;
+
+            // ── Ensamblar panel ──
+            panel.innerHTML = `
+                <div class="space-y-5">
+
+                    <!-- Header del panel de alertas -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900">Panel de Alertas & Semáforo</h2>
+                            <p class="text-xs text-slate-500">Monitoreo en tiempo real de vencimientos, mora y compromisos críticos.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            ${totalCriticos > 0 ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 text-rose-800 border border-rose-300 text-xs font-bold"><svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="#ef4444" stroke="none" class="inline mr-1"><circle cx="12" cy="12" r="10"/></svg> ${totalCriticos} Crítico${totalCriticos > 1 ? 's' : ''}</span>` : ''}
+                            ${totalAdvert > 0  ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-xs font-bold"><i class="bx bx-error"></i> ${totalAdvert} Advertencia${totalAdvert > 1 ? 's' : ''}</span>` : ''}
+                            ${totalCriticos === 0 && totalAdvert === 0 ? `<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-bold"><i class="bx bx-check-circle"></i> Sin alertas</span>` : ''}
+                        </div>
+                    </div>
+
+                    <!-- ── SECCIÓN CRÍTICA ── -->
+                    ${ critico.cuotas_vencidas.length > 0 || critico.compromisos_vencidos.length > 0 ? `
+                    <div class="bg-white rounded-xl border border-rose-200 shadow-sm p-5 space-y-3">
+                        <h3 class="text-sm font-bold text-rose-700 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-600 inline-block"></span>
+                            Crítico — Cuotas & Compromisos Vencidos
+                        </h3>
+                        <div class="space-y-2">
+                            ${critico.cuotas_vencidas.map(rowCritico).join('')}
+                            ${critico.compromisos_vencidos.map(rowCompromiso).join('')}
+                        </div>
+                    </div>` : '' }
+
+                    <!-- ── SECCIÓN ADVERTENCIA ── -->
+                    ${ advert.cuotas_proximas.length > 0 ? `
+                    <div class="bg-white rounded-xl border border-amber-200 shadow-sm p-5 space-y-3">
+                        <h3 class="text-sm font-bold text-amber-700 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
+                            Advertencia — Próximos a Vencer (7 días)
+                        </h3>
+                        <div class="space-y-2">
+                            ${advert.cuotas_proximas.map(rowAdvert).join('')}
+                        </div>
+                    </div>` : '' }
+
+                    <!-- ── SECCIÓN INFORMATIVA ── -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5 space-y-3">
+                        <h3 class="text-sm font-bold text-slate-600 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+                            Métricas del Mes en Curso
+                        </h3>
+                        ${infoCards}
+                    </div>
+
+                </div>`;
+
+        } catch (e) {
+            document.getElementById('panel-alertas').innerHTML = `
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 text-center text-sm text-slate-400">
+                    No hay datos de alertas disponibles en este momento.
+                </div>`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const initDashboard = () => {
+            cargarKPIs();
+            cargarClientes(1);
+            cargarAlertas();
+        };
+        
+        if (window.requestIdleCallback) {
+            requestIdleCallback(initDashboard);
+        } else {
+            setTimeout(initDashboard, 0);
+        }
+    });
+</script>
+{% endblock %}

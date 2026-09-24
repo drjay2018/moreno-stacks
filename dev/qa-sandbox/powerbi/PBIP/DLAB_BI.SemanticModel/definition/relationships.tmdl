@@ -1,0 +1,4 @@
+relationship AutoDetected_ba759d04-55a6-496c-b154-7f2e68774939
+	fromColumn: cobros.transaccion_id
+	toColumn: comisiones_pagos.transaccion_id
+

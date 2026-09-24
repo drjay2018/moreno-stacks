@@ -1,0 +1,34 @@
+table cat_niveles
+	lineageTag: 709aee01-8ce2-4a39-bedf-1fe51ed1d585
+
+	column id
+		dataType: double
+		lineageTag: 0f7885db-76c2-4f78-bf62-d06faede2d7e
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column nombre
+		dataType: string
+		lineageTag: a86cf8de-8d13-40df-9c98-8c459ac6a646
+		summarizeBy: none
+		sourceColumn: nombre
+
+		annotation SummarizationSetBy = Automatic
+
+	partition cat_niveles = m
+		mode: import
+		source =
+				let
+				    Origen = Odbc.DataSource("driver={SQLite3 ODBC Driver};database=H:\Mi unidad\Proyecto - CRM Inmobiliaria\dlab-data\data\dlab.db;notxn=1;dsn=SQLite3 Datasource", [HierarchicalNavigation=true, SqlCapabilities=[LimitClauseKind=LimitClauseKind.Limit]]),
+				    cat_niveles_Table = Origen{[Name="cat_niveles",Kind="Table"]}[Data]
+				in
+				    cat_niveles_Table
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

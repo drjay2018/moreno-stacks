@@ -1,0 +1,242 @@
+table proyectos
+	lineageTag: 4d42f140-df51-4828-a5c1-27f818ad79eb
+
+	column id
+		dataType: double
+		lineageTag: a03123b1-b4ca-4f5d-ba48-8a4b1c30220c
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column nombre
+		dataType: string
+		lineageTag: 2bd0a88b-645e-40a8-8de6-360ea4ac8ec2
+		summarizeBy: none
+		sourceColumn: nombre
+
+		annotation SummarizationSetBy = Automatic
+
+	column contraparte_id
+		dataType: double
+		lineageTag: 7ae68d8a-eda4-4abf-bd73-3413bccbd126
+		summarizeBy: sum
+		sourceColumn: contraparte_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column compania_ejecutora
+		dataType: string
+		lineageTag: f83bc01c-aca3-41a8-913c-07bb21acbcbd
+		summarizeBy: none
+		sourceColumn: compania_ejecutora
+
+		annotation SummarizationSetBy = Automatic
+
+	column etapa
+		dataType: string
+		lineageTag: 319e80c3-0666-4dbd-b43f-f40ffa667831
+		summarizeBy: none
+		sourceColumn: etapa
+
+		annotation SummarizationSetBy = Automatic
+
+	column etapa_desarrollo_id
+		dataType: double
+		lineageTag: 55031817-e8df-40cf-81ff-f7dc5ebf2c1e
+		summarizeBy: sum
+		sourceColumn: etapa_desarrollo_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column tipo_inmueble
+		dataType: string
+		lineageTag: cc09fe7d-e125-49e3-a23a-1668e37e0b0f
+		summarizeBy: none
+		sourceColumn: tipo_inmueble
+
+		annotation SummarizationSetBy = Automatic
+
+	column provincia
+		dataType: string
+		lineageTag: 52aa55ce-e9e3-4815-a234-bd4b841de940
+		summarizeBy: none
+		sourceColumn: provincia
+
+		annotation SummarizationSetBy = Automatic
+
+	column municipio
+		dataType: string
+		lineageTag: 70955c79-623e-43e5-b780-4051d15849b2
+		summarizeBy: none
+		sourceColumn: municipio
+
+		annotation SummarizationSetBy = Automatic
+
+	column sector
+		dataType: string
+		lineageTag: d503671d-2d0d-4435-9bcb-e3db94e0871d
+		summarizeBy: none
+		sourceColumn: sector
+
+		annotation SummarizationSetBy = Automatic
+
+	column direccion
+		dataType: string
+		lineageTag: 81535cb7-35a6-46b7-9ccd-961d13a9978b
+		summarizeBy: none
+		sourceColumn: direccion
+
+		annotation SummarizationSetBy = Automatic
+
+	column amenidades
+		dataType: string
+		lineageTag: 7da6542b-a147-409d-abff-193892111b4d
+		summarizeBy: none
+		sourceColumn: amenidades
+
+		annotation SummarizationSetBy = Automatic
+
+	column score_amenidades
+		dataType: double
+		lineageTag: 2f33e110-b4ec-497d-a46b-71adcad3b304
+		summarizeBy: sum
+		sourceColumn: score_amenidades
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fecha_entrega_estimada
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 2974ca5c-0f8c-4b13-a64d-aeb06134c47c
+		summarizeBy: none
+		sourceColumn: fecha_entrega_estimada
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column unidades_totales
+		dataType: double
+		lineageTag: cc08aebf-0b8e-424f-a60d-b7e2101b4b4f
+		summarizeBy: sum
+		sourceColumn: unidades_totales
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column precio_min
+		dataType: double
+		lineageTag: 91cecdbc-c75d-4efb-b410-8faa69d9bec7
+		summarizeBy: sum
+		sourceColumn: precio_min
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column precio_max
+		dataType: double
+		lineageTag: 92c8be27-2a4d-41e3-a014-bfe1817af6a9
+		summarizeBy: sum
+		sourceColumn: precio_max
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column activo
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 5b760f5f-6fa1-49f3-8be5-b70bb5b39f92
+		summarizeBy: none
+		sourceColumn: activo
+
+		annotation SummarizationSetBy = Automatic
+
+	column encargado_id
+		dataType: double
+		lineageTag: a918275c-4113-403e-8fba-5354b3c985e2
+		summarizeBy: sum
+		sourceColumn: encargado_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column financiamiento
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: ae3feb3f-5a4e-4e89-90c0-d2ec279ff446
+		summarizeBy: none
+		sourceColumn: financiamiento
+
+		annotation SummarizationSetBy = Automatic
+
+	column institucion_bancaria
+		dataType: string
+		lineageTag: cc941cbd-a6c2-424e-859d-6de18af6ecba
+		summarizeBy: none
+		sourceColumn: institucion_bancaria
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha_captacion
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: e199b034-d522-4c8e-97cf-33e22c247c02
+		summarizeBy: none
+		sourceColumn: fecha_captacion
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column captador_id
+		dataType: double
+		lineageTag: 8b48301b-c1ff-40d8-8163-e513b680b165
+		summarizeBy: sum
+		sourceColumn: captador_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column correos_ventas
+		dataType: string
+		lineageTag: af9da80d-b4a8-4482-a0f3-4f35b0436724
+		summarizeBy: none
+		sourceColumn: correos_ventas
+
+		annotation SummarizationSetBy = Automatic
+
+	column forma_registro
+		dataType: string
+		lineageTag: 0795d0a6-4321-4d94-be37-7efb944200a5
+		summarizeBy: none
+		sourceColumn: forma_registro
+
+		annotation SummarizationSetBy = Automatic
+
+	partition proyectos = m
+		mode: import
+		source =
+				let
+				    Origen = Odbc.DataSource("driver={SQLite3 ODBC Driver};database=H:\Mi unidad\Proyecto - CRM Inmobiliaria\dlab-data\data\dlab.db;notxn=1;dsn=SQLite3 Datasource", [HierarchicalNavigation=true, SqlCapabilities=[LimitClauseKind=LimitClauseKind.Limit]]),
+				    proyectos_Table = Origen{[Name="proyectos",Kind="Table"]}[Data]
+				in
+				    proyectos_Table
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

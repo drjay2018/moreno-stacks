@@ -1,0 +1,14 @@
+services:
+  social-agent:
+    build: ./agent
+    container_name: social-agent
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - /mnt/silo/social:/data
+    networks:
+      - social-net
+
+networks:
+  social-net:
+    driver: bridge

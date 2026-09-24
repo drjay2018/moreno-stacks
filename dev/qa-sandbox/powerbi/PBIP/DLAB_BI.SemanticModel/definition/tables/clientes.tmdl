@@ -1,0 +1,315 @@
+table clientes
+	lineageTag: 193de157-4ef0-4e63-a129-348d0f1ae554
+
+	column id
+		dataType: double
+		lineageTag: cd3f195b-492b-4a9d-9ad6-207a13d22a1b
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column nombre
+		dataType: string
+		lineageTag: 17d6cb7a-08c0-4b2e-acb2-2303b20812d0
+		summarizeBy: none
+		sourceColumn: nombre
+
+		annotation SummarizationSetBy = Automatic
+
+	column apellido
+		dataType: string
+		lineageTag: 3745c444-7379-46b7-9bd2-dd3537a84771
+		summarizeBy: none
+		sourceColumn: apellido
+
+		annotation SummarizationSetBy = Automatic
+
+	column genero
+		dataType: string
+		lineageTag: 6a390861-b836-4b7b-92bc-3bcfe020d3bf
+		summarizeBy: none
+		sourceColumn: genero
+
+		annotation SummarizationSetBy = Automatic
+
+	column genero_id
+		dataType: double
+		lineageTag: 1e0920f5-7ab3-4e14-bfa3-0b2af72c19ac
+		summarizeBy: sum
+		sourceColumn: genero_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fecha_nacimiento
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: c9c4a66b-3f1f-4ad9-8295-70bbe9ea51c1
+		summarizeBy: none
+		sourceColumn: fecha_nacimiento
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column nacionalidad
+		dataType: string
+		lineageTag: 4ebeb2fb-0b24-4e3f-b3bf-d699d3bc8351
+		summarizeBy: none
+		sourceColumn: nacionalidad
+
+		annotation SummarizationSetBy = Automatic
+
+	column estado_civil
+		dataType: string
+		lineageTag: 4d40ce35-5e46-4510-9e05-acc7fc1630eb
+		summarizeBy: none
+		sourceColumn: estado_civil
+
+		annotation SummarizationSetBy = Automatic
+
+	column estado_civil_id
+		dataType: double
+		lineageTag: 5adc699d-830a-4630-8d18-3569c7ec05a1
+		summarizeBy: sum
+		sourceColumn: estado_civil_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ocupacion_sector_id
+		dataType: double
+		lineageTag: 3badd490-4640-4edf-9d3d-0e1350de5524
+		summarizeBy: sum
+		sourceColumn: ocupacion_sector_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column rango_ingreso_mensual_usd
+		dataType: double
+		lineageTag: 765faf61-1602-4ca5-a2aa-c909dfa600a9
+		summarizeBy: sum
+		sourceColumn: rango_ingreso_mensual_usd
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column pais
+		dataType: string
+		lineageTag: c1c15257-fdd2-4b94-873d-6dbde0736eab
+		summarizeBy: none
+		sourceColumn: pais
+
+		annotation SummarizationSetBy = Automatic
+
+	column provincia
+		dataType: string
+		lineageTag: 3043609c-a2d1-4343-91e4-121e24b2726d
+		summarizeBy: none
+		sourceColumn: provincia
+
+		annotation SummarizationSetBy = Automatic
+
+	column municipio
+		dataType: string
+		lineageTag: eaaa131c-2026-4eef-ba2a-372f2c5cb5af
+		summarizeBy: none
+		sourceColumn: municipio
+
+		annotation SummarizationSetBy = Automatic
+
+	column direccion
+		dataType: string
+		lineageTag: 0b4352ec-7a0d-40af-ba47-cdfcc604a600
+		summarizeBy: none
+		sourceColumn: direccion
+
+		annotation SummarizationSetBy = Automatic
+
+	column motivo_compra_id
+		dataType: double
+		lineageTag: 184f71ec-d41f-4533-a5ff-0eed2e99dc44
+		summarizeBy: sum
+		sourceColumn: motivo_compra_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column presupuesto_max_usd
+		dataType: double
+		lineageTag: 33a351fa-ab8b-488a-908d-f6dcfbdc253e
+		summarizeBy: sum
+		sourceColumn: presupuesto_max_usd
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column metodo_pago_pref_id
+		dataType: double
+		lineageTag: 0e0ffbb7-9dae-4039-b7f6-6cf55b910e44
+		summarizeBy: sum
+		sourceColumn: metodo_pago_pref_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column habitaciones_min
+		dataType: double
+		lineageTag: 8ef0a049-5c86-4ec5-83f5-e2089bd0be86
+		summarizeBy: sum
+		sourceColumn: habitaciones_min
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column canal_captacion_id
+		dataType: double
+		lineageTag: fd95cf36-c42e-441a-8d95-8ad4360c5c59
+		summarizeBy: sum
+		sourceColumn: canal_captacion_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column via_referida
+		dataType: string
+		lineageTag: bf1268b4-516b-44e7-b034-8275d3ee5abc
+		summarizeBy: none
+		sourceColumn: via_referida
+
+		annotation SummarizationSetBy = Automatic
+
+	column campana_id
+		dataType: double
+		lineageTag: b1268659-d6c7-4524-be94-7f8ba673f31d
+		summarizeBy: sum
+		sourceColumn: campana_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column referido_por_cliente_id
+		dataType: double
+		lineageTag: faed055c-9680-45f3-8e98-9ff308ab7ec3
+		summarizeBy: sum
+		sourceColumn: referido_por_cliente_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column vendedor_captador_id
+		dataType: double
+		lineageTag: a41c71d1-96a5-49cc-aa2c-4f0b0518298b
+		summarizeBy: sum
+		sourceColumn: vendedor_captador_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fecha_captacion
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: c0d2c077-5373-4862-9165-fb95c290f271
+		summarizeBy: none
+		sourceColumn: fecha_captacion
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column etapa_embudo
+		dataType: string
+		lineageTag: b1353dd8-8b89-45a2-96fd-71d6b07b8010
+		summarizeBy: none
+		sourceColumn: etapa_embudo
+
+		annotation SummarizationSetBy = Automatic
+
+	column activo
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 03529dfb-a868-4d6c-b7a9-ee8225eb615f
+		summarizeBy: none
+		sourceColumn: activo
+
+		annotation SummarizationSetBy = Automatic
+
+	column proyecto_interes_id
+		dataType: double
+		lineageTag: ee90f971-98cc-4a12-95b2-b32880a5c849
+		summarizeBy: sum
+		sourceColumn: proyecto_interes_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column cedula
+		dataType: string
+		lineageTag: 83a1ab1c-f175-42b5-8a31-b7c91e22b3cd
+		summarizeBy: none
+		sourceColumn: cedula
+
+		annotation SummarizationSetBy = Automatic
+
+	column telefono
+		dataType: string
+		lineageTag: 23745716-8bc4-4bba-8b4f-c77c543ad03a
+		summarizeBy: none
+		sourceColumn: telefono
+
+		annotation SummarizationSetBy = Automatic
+
+	column telefono_residencial
+		dataType: string
+		lineageTag: 7332aebe-9283-4fbf-bd42-e309ac5f8403
+		summarizeBy: none
+		sourceColumn: telefono_residencial
+
+		annotation SummarizationSetBy = Automatic
+
+	column email
+		dataType: string
+		lineageTag: 0c2e1ac4-1a90-4930-83bf-b76ea801c58e
+		summarizeBy: none
+		sourceColumn: email
+
+		annotation SummarizationSetBy = Automatic
+
+	column presupuesto_rango
+		dataType: string
+		lineageTag: 61c55451-5487-4f73-97b6-50fdf4450495
+		summarizeBy: none
+		sourceColumn: presupuesto_rango
+
+		annotation SummarizationSetBy = Automatic
+
+	partition clientes = m
+		mode: import
+		source =
+				let
+				    Origen = Odbc.DataSource("driver={SQLite3 ODBC Driver};database=H:\Mi unidad\Proyecto - CRM Inmobiliaria\dlab-data\data\dlab.db;notxn=1;dsn=SQLite3 Datasource", [HierarchicalNavigation=true, SqlCapabilities=[LimitClauseKind=LimitClauseKind.Limit]]),
+				    clientes_Table = Origen{[Name="clientes",Kind="Table"]}[Data]
+				in
+				    clientes_Table
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

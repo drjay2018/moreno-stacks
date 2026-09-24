@@ -1,0 +1,24 @@
+services:
+  app:
+    build: .
+    container_name: qa-sandbox-app
+    ports:
+      - "5000:5000"
+    volumes:
+      # Persiste la DB y logs: con APPDATA=/opt/dlab, la app guarda en /opt/dlab/DLAB_CRM/data
+      - app-data:/opt/dlab/DLAB_CRM/data
+    env_file:
+      # IMPORTANTE: el .env debe definir SECRET_KEY y FIELD_ENCRYPTION_KEY.
+      # En produccion (FLASK_ENV=production) la app falla al arrancar si
+      # faltan (fail-fast intencional de ProductionConfig), asi que sin
+      # un .env valido el contenedor no levantara.
+      - path: .env
+        required: false
+    environment:
+      - FLASK_ENV=production
+      - HOST=0.0.0.0
+      - PORT=5000
+    restart: unless-stopped
+
+volumes:
+  app-data:

@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-end">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Registro de Compras y Pagos</h1>
+        <p class="text-sm text-slate-500 mt-1">Gestione adquisiciones y sus abonos</p>
+    </div>
+    <div class="flex gap-2">
+        <button onclick="abrirModal('modal-compra')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded font-medium shadow-sm transition-colors text-sm">
+            + Nueva Compra
+        </button>
+    </div>
+</div>
+
+<div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+    <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-4">
+        <h2 class="text-lg font-semibold text-slate-800">Cuentas por Pagar</h2>
+        <div class="relative">
+            <input type="text" id="searchInput" onkeyup="filtrarLocal()" placeholder="Buscar en lista..." class="field-input pl-9 max-w-xs text-sm">
+            <span class="absolute left-3 top-2.5 text-slate-400"><i class="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg' aria-hidden='true"></i></span>
+        </div>
+    </div>
+    
+    <div id="contador-modulo" class="text-sm font-semibold text-slate-600 mb-2">Total de registros: <span id="total-badge">0</span></div>
+    <div id="table-container" class="overflow-x-auto min-h-[300px]">
+        <p class="text-center text-slate-400 py-8">Cargando datos...</p>
+    </div>
+</div>
+
+<!-- Modal Nueva Compra -->
+<div id="modal-compra" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 animate-fade-in-up max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+            <h3 class="text-xl font-bold text-slate-800" id="titulo-modal">Registrar Compra</h3>
+            <button onclick="cerrarModal('modal-compra')" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
+        </div>
+        
+        <form onsubmit="guardarCompra(event)" class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Concepto</label>
+                <input type="text" id="fc-concepto" required class="field-input">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Proveedor</label>
+                <select id="fc-proveedor" required class="w-full border border-slate-300 rounded-lg p-2 text-sm select2-prov">
+                    <option value="">Seleccione proveedor...</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Enlace Formulario (F-03) - Dropbox</label>
+                <input type="url" id="fc-enlace" required class="field-input" placeholder="https://dropbox.com/...">
+                <p class="text-[10px] text-slate-400 mt-1">Obligatorio adjuntar F-03 almacenado en Dropbox.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Monto Total (USD)</label>
+                    <input type="number" step="0.01" id="fc-monto" required class="field-input" onchange="verificarMontoAprobacion(this.value)">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Fecha Vencimiento (Aprox)</label>
+                    <input type="date" id="fc-vencimiento" class="field-input">
+                </div>
+            </div>
+            
+            <div id="aviso-aprobacion" class="hidden p-3 bg-amber-50 border border-amber-200 rounded text-amber-800 text-xs font-semibold flex items-center gap-2">
+                <span><svg class="inline w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span> Monto supera los $50,000. Esta compra quedará en estado "Pendiente Aprobación CEO" y no podrá pagarse hasta ser aprobada por el CEO.
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex justify-end gap-2 mt-6">
+                <button type="button" onclick="cerrarModal('modal-compra')" class="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded transition-colors text-sm">Cancelar</button>
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded font-medium shadow-sm transition-colors text-sm">Guardar Compra</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Pago -->
+<div id="modal-pago" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 animate-fade-in-up border-t-4 border-emerald-500 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-4">
+            <h3 class="text-lg font-bold text-slate-800">Registrar Pago a Proveedor</h3>
+            <button onclick="cerrarModal('modal-pago')" class="text-slate-400 hover:text-slate-600 font-bold text-xl">&times;</button>
+        </div>
+        <form onsubmit="procesarPago(event)">
+            <input type="hidden" id="pago-compra-id">
+            <div class="mb-4 text-sm text-slate-600">
+                <p>Concepto: <strong id="pago-compra-con" class="text-slate-800"></strong></p>
+                <p>Pendiente: <strong id="pago-compra-balance" class="text-rose-600"></strong></p>
+            </div>
+            <div class="mb-4">
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Monto a Pagar</label>
+                <input type="number" step="0.01" id="pago-monto" required class="field-input font-mono text-lg text-emerald-700" placeholder="0.00">
+            </div>
+            <div class="mb-6">
+                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Referencia / Comprobante</label>
+                <input type="text" id="pago-ref" class="field-input" placeholder="Opcional">
+            </div>
+            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded font-bold shadow-sm transition-colors">Confirmar Pago</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in-up { animation: fadeInUp 0.3s ease-out forwards; }
+</style>
+
+<!-- DataTables + jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    let dtCompras = null;
+
+    $(document).ready(() => {
+        cargarCompras();
+        initSelect2Proveedores();
+    });
+
+    function initSelect2Proveedores() {
+        $('.select2-prov').select2({
+            dropdownParent: $('#modal-compra'),
+            ajax: {
+                url: '/api/maestros/proveedores',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return { buscar: params.term || '', per_page: 20 };
+                },
+                processResults: function (data) {
+                    let items = data.items || data || [];
+                    return {
+                        results: items.map(i => ({ id: i.id, text: i.razon_social + (i.ruc ? ' - ' + i.ruc : '') }))
+                    };
+                },
+                cache: true
+            },
+            placeholder: 'Seleccione un proveedor...',
+            minimumInputLength: 0,
+            allowClear: true
+        });
+    }
+
+    async function cargarCompras() {
+        const container = document.getElementById('table-container');
+        container.innerHTML = '<div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm mt-4"><table id="dt-compras" class="w-full text-left text-sm text-slate-600"><thead class="bg-slate-50 text-xs uppercase font-bold text-slate-500 border-b border-slate-200"><tr>' +
+            '<th class="px-4 py-3">Concepto</th><th class="px-4 py-3">Proveedor</th><th class="px-4 py-3">Total</th><th class="px-4 py-3">Pendiente</th><th class="px-4 py-3">SLA</th><th class="px-4 py-3">Estado</th><th class="px-4 py-3">F-03</th><th class="px-4 py-3">Acciones</th>' +
+            '</tr></thead><tbody class="divide-y divide-slate-100"></tbody></table></div>';
+
+        if (dtCompras) { try { dtCompras.destroy(); } catch(e){} dtCompras = null; }
+
+        dtCompras = $('#dt-compras').DataTable({
+            serverSide: true,
+            processing: true,
+            ajax: {
+                url: '/api/compras/compras',
+                type: 'GET'
+            },
+            columns: [
+                { data: 'concepto', render: function(d){ return '<span class="font-semibold text-slate-800">'+(d||'')+'</span>'; } },
+                { data: 'proveedor', render: function(d){ return '<span class="text-slate-600">'+(d||'')+'</span>'; } },
+                { data: 'monto_total', className: 'text-right font-medium', render: function(d){ return '$'+Number(d||0).toLocaleString(); } },
+                { data: 'balance_pendiente', className: 'text-right font-medium', render: function(d,t,r){
+                    var cls = (r.balance_pendiente > 0) ? 'text-rose-600 font-bold' : 'text-emerald-600 font-bold';
+                    return '<span class="'+cls+'">$'+Number(d||0).toLocaleString()+'</span>';
+                }},
+                { data: 'estado_sla', render: function(d){
+                    var badgeCls = 'badge-proceso';
+                    if(d === 'INCUMPLIDO') badgeCls = 'badge-rechazado';
+                    else if(d === 'EN TIEMPO') badgeCls = 'badge-proceso';
+                    else if(d === 'OK') badgeCls = 'badge-aprobado';
+                    return '<span class="badge-pill \'+badgeCls+\'">'+d+'</span>';
+                }},
+                { data: 'estado', render: function(d){
+                    if (d === 'pendiente_aprobacion') return '<span class="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">⏳ Pend. CEO</span>';
+                    var badgeCls = 'badge-proceso';
+                    if(d === 'aprobado') badgeCls = 'badge-aprobado';
+                    else if(d === 'pagado') badgeCls = 'badge-aprobado';
+                    else if(d === 'rechazado') badgeCls = 'badge-rechazado';
+                    return '<span class="badge-pill \'+badgeCls+\'">'+(d||'').replace('_',' ')+'</span>';
+                }},
+                { data: 'enlace_f03', orderable: false, render: function(d){
+                    if(d) return '<a href="'+d+'" target="_blank" class="text-sky-600 hover:underline">Ver Doc</a>';
+                    return '-';
+                }},
+                { data: null, orderable: false, className: 'text-right flex justify-end items-center space-x-1', render: function(d,t,r){
+                    let btns = '<a href="/compras/facturas?compra_id='+r.id+'" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded mr-2" title="Ver Facturas"><i class="bx bx-file"></i> Facturas</a>';
+                    // Aprobar / Rechazar (simulado)
+                    if (r.estado === 'pendiente_aprobacion') {
+                        btns += '<button onclick="aprobarCompra('+r.id+')" class="px-2 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 text-xs font-bold rounded mr-2">Aprobar</button>';
+                        btns += '<button onclick="rechazarCompra('+r.id+')" class="px-2 py-1 bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-bold rounded mr-2">Rechazar</button>';
+                    } else if (r.estado === 'aprobado' && r.balance_pendiente > 0) {
+                        btns += '<button onclick="abrirPago('+r.id+',\''+r.concepto+'\','+r.balance_pendiente+')" class="px-2 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold rounded mr-2">Pagar</button>';
+                    }
+                    btns += '<button onclick="editarCompra('+r.id+',\''+r.estado+'\','+r.monto_total+')" class="text-slate-400 hover:text-amber-600 text-xs mr-2" title="Editar"><i class="bx bx-edit"></i> Editar</button>';
+                    btns += '<button onclick="borrarCompra('+r.id+')" class="text-slate-400 hover:text-rose-600 text-xs" title="Borrar"><i class="bx bx-trash"></i> Borrar</button>';
+                    return btns;
+                }}
+            ],
+            pageLength: 20,
+            deferRender: true,
+            order: [[0,'desc']],
+            language: {
+                search: 'Buscar:', lengthMenu: 'Mostrar _MENU_',
+                info: '_START_-_END_ de _TOTAL_', zeroRecords: 'Sin resultados',
+                paginate: { first:'«', last:'»', next:'›', previous:'‹' },
+                processing: 'Cargando datos...'
+            },
+            dom: '<"flex items-center justify-between mb-4 flex-wrap gap-2"lf>rt<"flex items-center justify-between mt-4 flex-wrap gap-2"ip>',
+            drawCallback: function(settings) {
+                const badge = document.getElementById('total-badge');
+                if (badge) badge.innerText = settings.fnRecordsTotal();
+            }
+        });
+    }
+
+    function filtrarLocal() {
+        if (dtCompras) dtCompras.search(document.getElementById('searchInput').value).draw();
+    }
+
+
+
+    function verificarMontoAprobacion(val) {
+        if(parseFloat(val||0) > 50000) {
+            document.getElementById('aviso-aprobacion').classList.remove('hidden');
+        } else {
+            document.getElementById('aviso-aprobacion').classList.add('hidden');
+        }
+    }
+
+    async function guardarCompra(e) {
+        e.preventDefault();
+        
+        // Validate Dropbox URL
+        const enlaceVal = document.getElementById('fc-enlace').value;
+        const dropboxRegex = /^https?:\/\/(www\.)?dropbox\.com\/.*/;
+        if (enlaceVal && !dropboxRegex.test(enlaceVal.toLowerCase())) {
+            showToast('El enlace debe ser un enlace de Dropbox válido (https://www.dropbox.com/...)', 'error');
+            document.getElementById('fc-enlace').focus();
+            return;
+        }
+
+        const payload = {
+            concepto: document.getElementById('fc-concepto').value,
+            proveedor_id: document.getElementById('fc-proveedor').value,
+            enlace_f03: document.getElementById('fc-enlace').value,
+            monto_total: parseFloat(document.getElementById('fc-monto').value),
+            fecha_vencimiento: document.getElementById('fc-vencimiento').value || null
+        };
+        try {
+            const res = await fetch('/api/compras', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const d = await res.json();
+            if (d.success) {
+                let msg = 'OK: ' + d.message;
+                if (payload.monto_total > 50000) {
+                    msg += ' (Monto supera $50,000. Quedará pendiente de aprobación del CEO)';
+                }
+                showToast(msg, 'success');
+                cerrarModal('modal-compra');
+                cargarCompras();
+            } else { showToast(d.error, 'error'); }
+        } catch (err) { showToast('Error: ' + err.message, 'error'); }
+    }
+
+    async function aprobarCompra(id) {
+        if(!confirm('¿Confirmar aprobación de esta compra?')) return;
+        try {
+            const res = await fetch('/api/compras/' + id + '/aprobar', { method: 'POST' });
+            const d = await res.json();
+            if(d.success) { alert('Aprobada.'); cargarCompras(); }
+            else { showToast(d.error, 'error'); }
+        } catch(e) { alert('Error: ' + e.message); }
+    }
+
+    async function rechazarCompra(id) {
+        if(!confirm('¿Confirmar rechazo de esta compra?')) return;
+        try {
+            const res = await fetch('/api/compras/' + id + '/rechazar', { method: 'POST' });
+            const d = await res.json();
+            if(d.success) { alert('Rechazada.'); cargarCompras(); }
+            else { showToast(d.error, 'error'); }
+        } catch(e) { alert('Error: ' + e.message); }
+    }
+
+    function borrarCompra(id) {
+        confirmarAccion('¿Seguro que desea borrar este registro? Esta acción es irreversible.', async () => {
+            try {
+                const res = await fetch('/api/compras/' + id, { method: 'DELETE' });
+                const d = await res.json();
+                if(d.success) { 
+                    showToast('Compra eliminada.', 'success'); 
+                    cargarCompras(); 
+                } else { 
+                    showToast(d.error, 'error'); 
+                }
+            } catch(e) { alert('Error: ' + e.message); }
+        });
+    }
+
+    function editarCompra(id, estadoActual, montoActual) {
+        document.getElementById('edit-comp-id').value = id;
+        document.getElementById('edit-comp-estado').value = estadoActual;
+        document.getElementById('edit-comp-monto').value = montoActual;
+        document.getElementById('modal-editar-compra').classList.remove('hidden');
+    }
+    
+    async function guardarEdicionCompra(e) {
+        e.preventDefault();
+        const id = document.getElementById('edit-comp-id').value;
+        const payload = { 
+            estado: document.getElementById('edit-comp-estado').value, 
+            monto_total: parseFloat(document.getElementById('edit-comp-monto').value) 
+        };
+        try {
+            const res = await fetch('/api/compras/' + id, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const d = await res.json();
+            if (d.success) { 
+                showToast('Compra actualizada.', 'success'); 
+                document.getElementById('modal-editar-compra').classList.add('hidden');
+                cargarCompras(); 
+            } else { showToast(d.error, 'error'); }
+        } catch(e) { showToast('Error de conexion al actualizar.', 'error'); }
+    }
+
+
+    function abrirPago(id, concepto, pendiente) {
+        document.getElementById('pago-compra-id').value = id;
+        document.getElementById('pago-compra-con').innerText = concepto;
+        document.getElementById('pago-compra-balance').innerText = '$' + Number(pendiente).toLocaleString();
+        document.getElementById('pago-monto').value = pendiente;
+        document.getElementById('pago-ref').value = '';
+        abrirModal('modal-pago');
+    }
+
+    async function procesarPago(e) {
+        e.preventDefault();
+        const id = document.getElementById('pago-compra-id').value;
+        const payload = {
+            monto_pagado: parseFloat(document.getElementById('pago-monto').value),
+            referencia: document.getElementById('pago-ref').value
+        };
+        try {
+            const res = await fetch('/api/compras/' + id + '/pagar', {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const d = await res.json();
+            if (d.success) {
+                alert('Pago registrado. Nuevo balance: ' + d.nuevo_balance);
+                cerrarModal('modal-pago');
+                cargarCompras();
+            } else { showToast(d.error, 'error'); }
+        } catch (err) { alert('Error: ' + err.message); }
+    }
+</script>
+<!-- MODAL EDITAR COMPRA -->
+<div id="modal-editar-compra" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
+        <h3 class="text-lg font-bold text-slate-900">Editar Orden de Compra</h3>
+        <form id="form-editar-compra" onsubmit="guardarEdicionCompra(event)" class="space-y-4">
+            <input type="hidden" id="edit-comp-id" value="">
+            <div>
+                <label for="edit-comp-estado" class="block text-xs font-semibold text-slate-600 mb-1">Estado</label>
+                <select id="edit-comp-estado" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                    <option value="en_proceso">En Proceso</option>
+                    <option value="pendiente_aprobacion">Pendiente Aprobación</option>
+                    <option value="aprobado">Aprobado</option>
+                    <option value="rechazado">Rechazado</option>
+                </select>
+            </div>
+            <div>
+                <label for="edit-comp-monto" class="block text-xs font-semibold text-slate-600 mb-1">Monto de Compra</label>
+                <input type="number" step="0.01" id="edit-comp-monto" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+            </div>
+            <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+                <button type="button" onclick="document.getElementById('modal-editar-compra').classList.add('hidden')" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancelar</button>
+                <button type="submit" class="px-4 py-2 text-sm font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-lg shadow-sm transition-colors">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

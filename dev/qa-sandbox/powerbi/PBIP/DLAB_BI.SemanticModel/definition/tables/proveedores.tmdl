@@ -1,0 +1,93 @@
+table proveedores
+	lineageTag: 8081f609-e259-431d-b707-2fd26aaa59e1
+
+	column id
+		dataType: double
+		lineageTag: bd518c54-e268-4fbe-9ed5-ed9d65fc08d3
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column razon_social
+		dataType: string
+		lineageTag: 8d5e4732-1971-4475-abef-c0b802c73699
+		summarizeBy: none
+		sourceColumn: razon_social
+
+		annotation SummarizationSetBy = Automatic
+
+	column ruc
+		dataType: string
+		lineageTag: bd4f81b2-5aff-4803-bc2e-e2cddab47ecb
+		summarizeBy: none
+		sourceColumn: ruc
+
+		annotation SummarizationSetBy = Automatic
+
+	column email
+		dataType: string
+		lineageTag: febc229c-2b7a-4ad1-869d-73a0ae075ec5
+		summarizeBy: none
+		sourceColumn: email
+
+		annotation SummarizationSetBy = Automatic
+
+	column telefono
+		dataType: string
+		lineageTag: 3bbdf2c0-506e-47f3-abca-ba87e75432a0
+		summarizeBy: none
+		sourceColumn: telefono
+
+		annotation SummarizationSetBy = Automatic
+
+	column direccion
+		dataType: string
+		lineageTag: 232af96d-4dcd-423c-a66a-c237a0cb215c
+		summarizeBy: none
+		sourceColumn: direccion
+
+		annotation SummarizationSetBy = Automatic
+
+	column estado
+		dataType: string
+		lineageTag: c9be1594-383b-4c66-8323-ca587df415a2
+		summarizeBy: none
+		sourceColumn: estado
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha_registro
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: dac28236-833f-4e8d-8d5a-39922ecae942
+		summarizeBy: none
+		sourceColumn: fecha_registro
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column descripcion
+		dataType: string
+		lineageTag: 3326e561-25f5-403f-a42e-c1420a11f928
+		summarizeBy: none
+		sourceColumn: descripcion
+
+		annotation SummarizationSetBy = Automatic
+
+	partition proveedores = m
+		mode: import
+		source =
+				let
+				    Origen = Odbc.DataSource("driver={SQLite3 ODBC Driver};database=H:\Mi unidad\Proyecto - CRM Inmobiliaria\dlab-data\data\dlab.db;notxn=1;dsn=SQLite3 Datasource", [HierarchicalNavigation=true, SqlCapabilities=[LimitClauseKind=LimitClauseKind.Limit]]),
+				    proveedores_Table = Origen{[Name="proveedores",Kind="Table"]}[Data]
+				in
+				    proveedores_Table
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

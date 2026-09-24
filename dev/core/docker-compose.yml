@@ -1,0 +1,34 @@
+services:
+  db-dev:
+    image: postgres:16
+    container_name: db-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: devuser
+      POSTGRES_PASSWORD: devpass123
+      POSTGRES_DB: devdb
+    ports:
+      - "5433:5432"
+    volumes:
+      - db-dev-data:/var/lib/postgresql/data
+    networks:
+      - dev-net
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - dev-net
+
+volumes:
+  db-dev-data:
+  ollama-data:
+
+networks:
+  dev-net:
+    driver: bridge

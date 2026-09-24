@@ -1,0 +1,1517 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Configuración & Respaldos | DLAB CRM{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900">Configuración del Sistema & Respaldos</h1>
+        <p class="text-sm text-slate-500">Gestión de parámetros clave, respaldos semanales y restauración de base de datos.</p>
+    </div>
+
+    <!-- Pestañas -->
+    <div class="flex flex-wrap border-b border-slate-200 gap-1">
+        <button onclick="cambiarTabConfig('empresa')" id="tab-btn-empresa" class="tab-cfg-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-slate-800 text-slate-900 whitespace-nowrap transition-colors"><i class="bx bx-buildings"></i> Datos de Empresa</button>
+        <button onclick="cambiarTabConfig('usuarios')" id="tab-btn-usuarios" class="tab-cfg-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap transition-colors"><i class="bx bx-user"></i> Usuarios & Roles</button>
+        <button onclick="cambiarTabConfig('kpis')" id="tab-btn-kpis" class="tab-cfg-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap transition-colors"><i class="bx bx-bar-chart-alt-2"></i> KPIs (Metas y Umbrales)</button>
+        <button onclick="cambiarTabConfig('respaldos')" id="tab-btn-respaldos" class="tab-cfg-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap transition-colors"><svg class="inline w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Respaldos &amp; Restauración</button>
+        <button onclick="cambiarTabConfig('auditoria')" id="tab-btn-auditoria" class="tab-cfg-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap transition-colors"><svg class="inline w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg> Auditoría del Sistema</button>
+        <!-- Matriz button removed because Inmobiliaria uses hardcoded algorithmic engine -->
+                <button onclick="cambiarTabConfig('correo')" id="tab-btn-correo" class="tab-cfg-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap transition-colors"><i class="bx bx-envelope"></i> Servidor de Correo</button>
+        <button onclick="cambiarTabConfig('calendar')" id="tab-btn-calendar" class="tab-cfg-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap transition-colors"><svg class="inline w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Google Calendar</button>
+        <button onclick="cambiarTabConfig('alterestate')" id="tab-btn-alterestate" class="tab-cfg-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap transition-colors"><svg class="inline w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> API-AlterState</button>
+    </div>
+
+    
+        <!-- TAB: CORREO SMTP -->
+    <div id="section-correo" class="hidden space-y-6">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-5 text-white">
+                <div class="flex justify-between items-center"><h3 class="font-bold text-base"><i class="bx bx-envelope mr-1"></i> Configura el Servidor de Correos (SMTP)</h3><span id="smtp-status-badge" class="px-3 py-1 bg-white/20 text-white rounded-full text-xs font-bold flex items-center gap-1"><i class="bx bx-time"></i> Sin Configurar</span></div>
+            </div>
+            <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- LADO IZQUIERDO: INSTRUCCIONES -->
+                <div class="space-y-4">
+                    <h4 class="font-bold text-slate-800 text-sm border-b pb-2">Guía paso a paso para Gmail / Outlook</h4>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-start gap-3">
+                            <div class="bg-amber-100 text-amber-600 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs">1</div>
+                            <div class="text-xs text-slate-600">
+                                <p class="font-bold text-slate-800">Verificación en 2 pasos</p>
+                                <p>Ve a la <a href="https://myaccount.google.com/security" target="_blank" class="text-blue-600 hover:underline font-semibold">Configuración de Seguridad de Google</a> (o Outlook) y asegúrate de tener activa la "Verificación en 2 pasos".</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="bg-amber-100 text-amber-600 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs">2</div>
+                            <div class="text-xs text-slate-600">
+                                <p class="font-bold text-slate-800">Busca "Contraseñas de aplicación"</p>
+                                <p>En la misma pantalla de seguridad, busca <strong>Contraseñas de aplicación</strong> (o entra directo <a href="https://myaccount.google.com/apppasswords" target="_blank" class="text-blue-600 hover:underline font-semibold">aquí</a>).</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="bg-amber-100 text-amber-600 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs">3</div>
+                            <div class="text-xs text-slate-600">
+                                <p class="font-bold text-slate-800">Genera una nueva contraseña</p>
+                                <p>Ponle de nombre "CRM DLAB" (o el que gustes) y dale a Generar. Se mostrará una clave de 16 letras continuas.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-3">
+                            <div class="bg-amber-100 text-amber-600 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs">4</div>
+                            <div class="text-xs text-slate-600">
+                                <p class="font-bold text-slate-800">Copia los datos aquí</p>
+                                <p>Copia esa clave en el campo "Contraseña de Aplicación". Para Gmail el servidor es <code>smtp.gmail.com</code> y el puerto <code>587</code>.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LADO DERECHO: FORMULARIO -->
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                    <form onsubmit="guardarDatosCorreo(event)" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1" for="cfg-smtp-server">Servidor SMTP *</label>
+                                <input type="text" id="cfg-smtp-server" placeholder="ej. smtp.gmail.com" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs font-mono focus:ring-2 focus:ring-amber-500 outline-none bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1" for="cfg-smtp-port">Puerto *</label>
+                                <input type="number" id="cfg-smtp-port" placeholder="ej. 587" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs font-mono focus:ring-2 focus:ring-amber-500 outline-none bg-white">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1" for="cfg-smtp-user">Correo Emisor (Remitente) *</label>
+                            <input type="email" id="cfg-smtp-user" placeholder="alertas@miempresa.com" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-amber-500 outline-none bg-white">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1" for="cfg-smtp-password">Contraseña de Aplicación *</label>
+                            <input type="password" id="cfg-smtp-password" placeholder="Clave de 16 letras" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs font-mono focus:ring-2 focus:ring-amber-500 outline-none bg-white">
+                            <p class="text-[10px] text-slate-400 mt-1" id="smtp-pass-help">Deja en blanco para conservar la actual si ya fue guardada.</p>
+                        </div>
+                        
+                        <div class="border-t border-slate-200 my-2 pt-2"></div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1" for="cfg-smtp-receptor">Correo Receptor de Alertas *</label>
+                            <input type="email" id="cfg-smtp-receptor" placeholder="gerencia@miempresa.com" required class="w-full border border-slate-300 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-amber-500 outline-none bg-white">
+                        </div>
+
+                        <div class="pt-2 flex flex-col sm:flex-row gap-2">
+                            <button type="button" onclick="probarConexionCorreo()" class="flex-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-bold text-sm px-4 py-2.5 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
+                                <i class="bx bx-paper-plane"></i> Probar Conexión
+                            </button>
+                            <button type="submit" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm px-4 py-2.5 rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2">
+                                Guardar <i class="bx bx-check"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- TAB NUEVA: DATOS DE EMPRESA -->
+    <div id="section-empresa" class="space-y-6">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+            <h2 class="text-base font-bold text-slate-900">Configuración de White-label (Empresa)</h2>
+            <form onsubmit="guardarDatosEmpresa(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1" for="cfg-empresa-nombre">Nombre de la Empresa</label>
+                    <input type="text" id="cfg-empresa-nombre" value="{{ dlab_empresa }}" required class="w-full border border-slate-300 text-slate-900 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1" for="cfg-empresa-gerente">Gerente General</label>
+                    <input type="text" id="cfg-empresa-gerente" value="{{ dlab_gerente }}" class="w-full border border-slate-300 text-slate-900 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1" for="cfg-empresa-telefono">Teléfono</label>
+                    <input type="text" id="cfg-empresa-telefono" value="{{ dlab_telefono }}" class="w-full border border-slate-300 text-slate-900 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1" for="cfg-empresa-correo">Correo Electrónico</label>
+                    <input type="email" id="cfg-empresa-correo" value="{{ dlab_correo }}" class="w-full border border-slate-300 text-slate-900 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div class="sm:col-span-2 flex justify-end mt-2">
+                    <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-2.5 rounded-lg transition-colors shadow-sm">
+                        Guardar Configuración
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TAB 0: USUARIOS -->
+    <div id="section-usuarios" class="hidden space-y-6">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+            <div class="flex justify-between items-center">
+                <h2 class="text-base font-bold text-slate-900">Gestión de Usuarios</h2>
+                <button onclick="abrirModalUsuario()" class="px-4 py-2 bg-slate-900 text-white font-semibold rounded-lg text-sm hover:bg-slate-800 transition-colors">
+                    + Nuevo Usuario
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <div class="mb-4 relative max-w-md">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400" aria-hidden="true"><i class="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg" aria-hidden="true"></i></span>
+                    <label for="usuarios-search" class="sr-only">Buscar usuarios</label>
+                    <input type="search" id="usuarios-search" onkeyup="filtrarTabla('usuarios-search', 'tabla-usuarios-body')" placeholder="Buscar usuarios..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:border-amber-500 focus:ring-amber-500">
+                </div>
+                <table class="w-full text-left border-collapse text-sm text-slate-600">
+                    <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500 border-b border-slate-200 px-4 py-3\">
+                        <tr>
+                            <th class="py-3 px-4">ID</th>
+                            <th class="py-3 px-4">Usuario</th>
+                            <th class="py-3 px-4">Rol</th>
+                            <th class="py-3 px-4">Empleado Asoc.</th>
+                            <th class="py-3 px-4">Estado</th>
+                            <th class="py-3 px-4 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-usuarios-body" class="divide-y divide-slate-100" aria-live="polite">
+                        <tr><td colspan="6" class="py-6 text-center text-slate-400">Cargando usuarios...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Modal Usuario -->
+    <div id="modal-usuario" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" role="dialog">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-xl">
+            <h3 id="modal-usuario-title" class="text-lg font-bold text-slate-900">Usuario</h3>
+            <form id="form-usuario" onsubmit="guardarUsuario(event)" class="space-y-4">
+                <input type="hidden" id="usr-id">
+                <input type="hidden" id="usr-action">
+                
+                <div id="usr-group-username">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre de Usuario *</label>
+                    <input type="text" id="usr-username" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-amber-500">
+                </div>
+                
+                <div id="usr-group-password">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1" id="lbl-password">Contraseña *</label>
+                    <input type="password" id="usr-password" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-amber-500">
+                </div>
+                
+                <div id="usr-group-rol">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Rol *</label>
+                    <input type="text" id="usr-rol" list="roles-list" placeholder="Ej. Admin, Asesor..." class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-amber-500">
+                    <datalist id="roles-list">
+                        <option value="Asesor">
+                        <option value="Gerente">
+                        <option value="Admin">
+                    </datalist>
+                </div>
+                
+                <div id="usr-group-entidad">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">ID Empleado Asociado (Opcional)</label>
+                    <input type="number" id="usr-entidad" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-amber-500">
+                </div>
+                
+                <div id="usr-group-activo" class="hidden">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Estado</label>
+                    <select id="usr-activo" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-amber-500">
+                        <option value="1">Activo</option>
+                        <option value="0">Inactivo</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-4">
+                    <button type="button" onclick="document.getElementById('modal-usuario').classList.add('hidden')" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-lg hover:bg-slate-800">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TAB 1: METAS Y UMBRALES DE KPIS -->
+    <div id="section-kpis" class="hidden space-y-6">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+            <h2 class="text-base font-bold text-slate-900">Editar Parámetros de KPI</h2>
+            <form onsubmit="guardarKPIConfig(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+                <div class="sm:col-span-1">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1" for="select-kpi-editar">KPI a Editar</label>
+                    <select id="select-kpi-editar" onchange="seleccionarKPIParaEditar()" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1" for="edit-meta">Meta (Objetivo)</label>
+                    <input type="number" step="any" id="edit-meta" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500 font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1" for="edit-umbral-amarillo">Umbral Amarillo (Alerta)</label>
+                    <input type="number" step="any" id="edit-umbral-amarillo" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500 font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1" for="edit-umbral-rojo">Umbral Rojo (Crítico)</label>
+                    <input type="number" step="any" id="edit-umbral-rojo" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-amber-500 font-mono">
+                </div>
+                <div class="sm:col-span-4 flex justify-end">
+                    <button type="submit" class="bg-rose-600 hover:bg-rose-700 text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition-colors shadow-sm">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+            <h2 class="text-base font-bold text-slate-900">Todos los KPIs Configurados</h2>
+            <div class="overflow-x-auto">
+                <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm mt-4"><table id="dt-kpis" class="w-full text-left text-sm text-slate-600">
+                    <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500 border-b border-slate-200 px-4 py-3\">
+                        <tr>
+                            <th class="py-3 px-4">Categoría</th>
+                            <th class="py-3 px-4">KPI</th>
+                            <th class="py-3 px-4">Unidad</th>
+                            <th class="py-3 px-4">Meta</th>
+                            <th class="py-3 px-4">Umbral Amarillo</th>
+                            <th class="py-3 px-4">Umbral Rojo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-kpi-config-body" class="divide-y divide-slate-100" aria-live="polite">
+                        <tr><td colspan="6" class="py-6 text-center text-slate-400">Cargando metas...</td></tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: RESPALDOS Y RESTAURACIÓN -->
+    <div id="section-respaldos" class="hidden space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4 flex flex-col justify-between">
+                <div>
+                    <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-2xl font-bold mb-3"><svg class="inline w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></div>
+                    <h2 class="text-lg font-bold text-slate-900">Generar Respaldo Manual</h2>
+                    <p class="text-xs text-slate-500 mt-1">Descarga una copia de seguridad en caliente (`.db`) con la totalidad de los datos maestros, transacciones y configuraciones.</p>
+                </div>
+                <div class="pt-4 border-t border-slate-100">
+                    <button onclick="ejecutarRespaldoInmediatoGlobal()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold text-sm py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
+                        <span>â¬‡ Descargar Copia de Seguridad (.db)</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+                <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-2xl font-bold mb-3"><svg class="inline w-5 h-5 mr-1" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
+                <h2 class="text-lg font-bold text-slate-900">Restaurar Base de Datos</h2>
+                <p class="text-xs text-slate-500">Subir un archivo de respaldo (`.db` o `.sqlite`). Se generóará un respaldo preventivo de seguridad antes de restaurar.</p>
+
+                <div class="border-2 border-dashed border-slate-300 hover:border-emerald-500 rounded-xl p-6 text-center transition-colors">
+                    <input type="file" id="db-restore-input" accept=".db,.sqlite" class="hidden" onchange="restaurarBaseDatos(this.files[0])">
+                    <button onclick="document.getElementById('db-restore-input').click()" class="bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold px-4 py-2.5 rounded-lg transition-colors">
+                        Seleccionar Archivo .db
+                    </button>
+                    <p class="text-[11px] text-slate-400 mt-2">Formatos soportados: .db, .sqlite</p>
+                </div>
+                <div id="resultado-restauracion" class="hidden p-3 rounded-lg text-xs font-medium" aria-live="polite"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: AUDITORÍA -->
+    <div id="section-auditoria" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+        <h2 class="text-lg font-bold text-slate-900">Registro de Auditoría de Acciones</h2>
+        <div class="overflow-x-auto">
+            <div class="mb-4 relative max-w-md">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400" aria-hidden="true"><i class="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg" aria-hidden="true"></i></span>
+                <label for="auditoria-search" class="sr-only">Buscar auditoría</label>
+                <input type="search" id="auditoria-search" onkeyup="filtrarTabla('auditoria-search', 'tabla-auditoria-body')" placeholder="Buscar registros..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:border-amber-500 focus:ring-amber-500">
+            </div>
+            <table class="w-full text-left border-collapse text-sm text-slate-600">
+                <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500 border-b border-slate-200 px-4 py-3\">
+                    <tr>
+                        <th class="py-3 px-4">Fecha</th>
+                        <th class="py-3 px-4">Usuario</th>
+                        <th class="py-3 px-4">Acción</th>
+                        <th class="py-3 px-4">Módulo</th>
+                        <th class="py-3 px-4">Detalle</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-auditoria-body" class="divide-y divide-slate-100" aria-live="polite">
+                    <tr><td colspan="5" class="py-6 text-center text-slate-400">Cargando registros...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB 5: COMISIONES -->
+    <div id="section-comisiones" class="hidden space-y-6">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-base font-bold text-slate-900">Configuración de Matriz de Comisiones</h2>
+                    <p class="text-xs text-slate-500">Ajusta los porcentajes de distribución de comisiones según el cruce de categorías (debe sumar exactamente 100%).</p>
+                </div>
+                <button onclick="abrirModalRegla()" class="px-4 py-2 bg-slate-900 text-white font-semibold rounded-lg text-sm hover:bg-slate-800 transition-colors">
+                    + Nueva Regla
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm mt-4"><table id="dt-comisiones" class="w-full text-left text-sm text-slate-600">
+                    <thead class="bg-slate-50 text-xs uppercase font-semibold text-slate-500 border-b border-slate-200 px-4 py-3\">
+                        <tr>
+                            <th class="py-3 px-4">Cruce Categórico</th>
+                            <th class="py-3 px-4">Venta (A/N)</th>
+                            <th class="py-3 px-4">Asesores (1/2)</th>
+                            <th class="py-3 px-4">Enc. Proyecto</th>
+                            <th class="py-3 px-4">Admin/Compañía</th>
+                            <th class="py-3 px-4">Capt. Extra</th>
+                            <th class="py-3 px-4">Publicidad (GFM)</th>
+                            <th class="py-3 px-4 text-right">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-comisiones-body" class="divide-y divide-slate-100" aria-live="polite">
+                        <tr><td colspan="8" class="py-6 text-center text-slate-400">Cargando reglas...</td></tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 6: GOOGLE CALENDAR â€” Wizard de 3 Estados Progresivos -->
+    <div id="section-calendar" class="hidden space-y-5">
+        <style>
+            .gcal-step { background:#f8fafc; color:#94a3b8; border-color:#e2e8f0; }
+            .gcal-step.active { background:#eff6ff; color:#2563eb; border-color:#bfdbfe; }
+            .gcal-step.done   { background:#f0fdf4; color:#16a34a; border-color:#bbf7d0; }
+            .gcal-step-num { background:#e2e8f0; color:#64748b; }
+            .gcal-step.active .gcal-step-num { background:#2563eb; color:#fff; }
+            .gcal-step.done   .gcal-step-num { background:#16a34a; color:#fff; }
+        </style>
+
+        <div class="flex items-center" aria-label="Pasos de configuración" role="tablist">
+            <div class="gcal-step flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-l-xl border" id="step-indicator-1">
+                <span class="gcal-step-num w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold">1</span>
+                <span class="hidden sm:inline">Configurar App</span>
+            </div>
+            <div class="h-px w-6 bg-slate-200 flex-shrink-0"></div>
+            <div class="gcal-step flex items-center gap-2 text-xs font-semibold px-3 py-2 border-y border-r" id="step-indicator-2">
+                <span class="gcal-step-num w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold">2</span>
+                <span class="hidden sm:inline">Conectar Cuenta</span>
+            </div>
+            <div class="h-px w-6 bg-slate-200 flex-shrink-0"></div>
+            <div class="gcal-step flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-r-xl border-y border-r" id="step-indicator-3">
+                <span class="gcal-step-num w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold">3</span>
+                <span class="hidden sm:inline">Personalizar</span>
+            </div>
+        </div>
+
+        <div id="gcal-state-loading" class="flex items-center justify-center py-14 text-slate-400 text-sm gap-2" aria-live="polite">
+            <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+            </svg>
+            Verificando conexión...
+        </div>
+
+        <div id="gcal-state-setup" class="hidden" aria-live="polite">
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-5 text-white">
+                    <h3 class="font-bold text-base"><svg class="inline w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Activa Google Calendar en 3 minutos</h3>
+                </div>
+                <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- LADO IZQUIERDO: INSTRUCCIONES -->
+                    <div class="space-y-4">
+                        <h4 class="font-bold text-slate-800 text-sm border-b pb-2">Guía paso a paso para obtener tus credenciales</h4>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-3">
+                                <div class="bg-blue-100 text-blue-600 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs">1</div>
+                                <div class="text-xs text-slate-600">
+                                    <p class="font-bold text-slate-800">Crea un Proyecto en Google</p>
+                                    <p>Ve a la <a href="https://console.cloud.google.com/" target="_blank" class="text-blue-600 hover:underline">Consola de Google Cloud</a>, crea un proyecto nuevo y dale un nombre (ej. Mi CRM).</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="bg-blue-100 text-blue-600 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs">2</div>
+                                <div class="text-xs text-slate-600">
+                                    <p class="font-bold text-slate-800">Habilita la API de Calendar</p>
+                                    <p>En "APIs y Servicios > Biblioteca", busca <strong>Google Calendar API</strong> y haz clic en Habilitar.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="bg-blue-100 text-blue-600 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs">3</div>
+                                <div class="text-xs text-slate-600">
+                                    <p class="font-bold text-slate-800">Pantalla de Consentimiento</p>
+                                    <p>Ve a "Pantalla de consentimiento OAuth", elige <strong>Externo</strong>. Completa solo los campos obligatorios (nombre de la app y tu correo). Si te piden un "User type", en este momento está bien Externo en Testing.</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <div class="bg-blue-100 text-blue-600 font-bold rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-xs">4</div>
+                                <div class="text-xs text-slate-600">
+                                    <p class="font-bold text-slate-800">Crea las Credenciales</p>
+                                    <p>En "Credenciales", crea un <strong>ID de cliente de OAuth</strong> tipo <em>Aplicación Web</em>. En <strong>URI de redireccionamiento autorizados</strong>, pega exactamente esto:</p>
+                                    <div class="mt-2 flex items-center bg-slate-50 border border-slate-200 rounded p-1.5 gap-2">
+                                        <code id="redirect-uri-display" class="text-emerald-600 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[10px]">Cargando...</code>
+                                        <button type="button" onclick="copiarUri()" class="bg-white border shadow-sm px-2 py-1 rounded text-slate-600 hover:bg-slate-50 flex-shrink-0 transition-colors" title="Copiar al portapapeles">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                        </button>
+                                    </div>
+                                    <p class="mt-2">Guarda y pega el <strong>Client ID</strong> y <strong>Client Secret</strong> aquí a la derecha.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- LADO DERECHO: FORMULARIO -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-5">
+                        <form id="form-credenciales" onsubmit="guardarCredenciales(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1" for="input-client-id">1. Client ID <span class="text-red-500">*</span></label>
+                                <input type="text" id="input-client-id" required autocomplete="off" placeholder="ej. 123456-abc.apps.googleusercontent.com" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs font-mono focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1" for="input-client-secret">2. Client Secret <span class="text-red-500">*</span></label>
+                                <input type="password" id="input-client-secret" required autocomplete="off" placeholder="Pega tu Client Secret aquí" class="w-full border border-slate-300 rounded-lg p-2.5 text-xs font-mono focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            </div>
+                            
+                            <input type="hidden" id="input-redirect-uri" value="">
+
+                            <div class="pt-2">
+                                <button type="submit" id="btn-guardar-creds" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm px-5 py-3 rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2">
+                                    Guardar y conectar
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="gcal-state-connect" class="hidden" aria-live="polite">
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-10 flex flex-col items-center text-center gap-5">
+                <h3 class="text-base font-bold text-slate-900">Aplicación configurada</h3>
+                <a href="/api/google/oauth/autorizar" class="inline-flex items-center gap-3 bg-white border-2 border-slate-200 hover:border-blue-400 text-slate-800 font-bold text-base px-8 py-4 rounded-2xl transition-all">Conectar con Google Calendar</a>
+            </div>
+        </div>
+
+        <div id="gcal-state-connected" class="hidden space-y-5" aria-live="polite">
+            <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center justify-between gap-4">
+                <p id="gcal-email-display" class="text-xs text-emerald-600 font-mono"></p>
+                <button onclick="desconectarGoogle()" class="text-xs font-semibold text-rose-600 hover:text-rose-700 border border-rose-200 hover:bg-rose-50 px-3 py-2 rounded-lg">Desconectar</button>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
+                <form id="form-calendar-config" onsubmit="guardarConfigCalendario(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1" for="cfg-frecuencia">Frecuencia</label>
+                        <select id="cfg-frecuencia" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-amber-500 outline-none bg-white">
+                            <option value="mensual">Mensual</option>
+                            <option value="semestral">Semestral</option>
+                            <option value="anual" selected>Anual</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1" for="cfg-ant-postventa">Días de aviso previo</label>
+                        <input type="number" id="cfg-ant-postventa" min="1" max="90" value="7" class="w-full border border-slate-300 rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-amber-500 outline-none">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: API-AlterState -->
+    <div id="section-alterestate" class="hidden space-y-6">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="bg-gradient-to-r from-cyan-600 to-cyan-700 px-6 py-5 text-white">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-bold text-base"><i class="bx bx-link-alt mr-1"></i> Conexión con AlterEstate</h3>
+                    <span id="ae-estado-badge" class="px-3 py-1 bg-white/20 text-white rounded-full text-xs font-bold">Verificando...</span>
+                </div>
+            </div>
+            <div class="p-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- LADO IZQUIERDO: CONFIGURACIÓN -->
+                <div class="space-y-4">
+                    <h4 class="font-bold text-slate-800 text-sm border-b pb-2">Datos de Conexión</h4>
+                    <form id="form-config-ae" onsubmit="guardarConfigAE(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">URL Base de la API</label>
+                            <input type="url" id="ae-base-url" class="w-full border border-slate-300 rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-cyan-500 outline-none" value="https://secure.alterestate.com" placeholder="https://secure.alterestate.com">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">API Token</label>
+                            <input type="password" id="ae-api-token" class="w-full border border-slate-300 rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-cyan-500 outline-none" placeholder="Pegar token de AlterEstate">
+                            <p class="text-[10px] text-slate-400 mt-1">Settings → Public API Token en tu dashboard de AlterEstate</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <button type="submit" class="px-5 py-2 bg-cyan-600 text-white text-xs font-semibold rounded-lg hover:bg-cyan-700 transition-colors">
+                                <i class="bx bx-save mr-1"></i> Guardar
+                            </button>
+                            <button type="button" id="ae-btn-test" onclick="probarConexionAE()" class="px-5 py-2 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50 transition-colors">
+                                <i class="bx bx-transfer mr-1"></i> Probar Conexión
+                            </button>
+                        </div>
+                        <div id="ae-test-result" class="hidden text-xs mt-2 p-3 rounded-lg"></div>
+                    </form>
+                </div>
+
+                <!-- LADO DERECHO: ACCIONES -->
+                <div class="space-y-4">
+                    <h4 class="font-bold text-slate-800 text-sm border-b pb-2">Sincronización de Datos</h4>
+                    <p class="text-xs text-slate-500">Descarga propiedades, agentes, ciudades y sectores desde AlterEstate hacia el CRM.</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button onclick="syncAE('all')" class="px-4 py-3 bg-cyan-600 text-white text-xs font-semibold rounded-lg hover:bg-cyan-700 transition-colors flex items-center justify-center gap-2">
+                            <i class="bx bx-sync"></i> Sync Completo
+                        </button>
+                        <button onclick="syncAE('properties')" class="px-4 py-3 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                            <i class="bx bx-building-house"></i> Propiedades
+                        </button>
+                        <button onclick="syncAE('agents')" class="px-4 py-3 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                            <i class="bx bx-user"></i> Agentes
+                        </button>
+                        <button onclick="syncAE('countries')" class="px-4 py-3 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                            <i class="bx bx-globe"></i> Países
+                        </button>
+                        <button onclick="syncAE('cities')" class="px-4 py-3 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                            <i class="bx bx-map"></i> Ciudades
+                        </button>
+                        <button onclick="syncAE('sectors')" class="px-4 py-3 border border-slate-300 text-slate-700 text-xs font-semibold rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                            <i class="bx bx-map-pin"></i> Sectores
+                        </button>
+                    </div>
+                    <div id="ae-sync-status" class="text-xs text-slate-500 mt-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Modal Regla -->
+<div id="modal-regla" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" aria-modal="true">
+    <div class="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-xl">
+        <h3 id="modal-regla-title" class="text-lg font-bold text-slate-900">Añadir Nueva Regla a Matriz</h3>
+        <form onsubmit="guardarRegla(event)" class="space-y-4">
+            <input type="hidden" id="nr-id">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-b pb-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1" for="nr-nivel">Nivel Asesor *</label>
+                    <select id="nr-nivel" required class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-slate-50"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1" for="nr-captador">Nivel Captador *</label>
+                    <select id="nr-captador" required class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-slate-50"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1" for="nr-gastos-pub">Gastos Pub *</label>
+                    <select id="nr-gastos-pub" required class="w-full border border-slate-300 rounded-lg p-2 text-sm bg-slate-50"></select>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1" title="Venta (Corredor A)">pct_a (%)</label>
+                    <input type="number" step="0.01" min="0" max="100" id="nr-pct-a" value="0" class="pct-input w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1" title="Venta (Corredor N)">pct_n (%)</label>
+                    <input type="number" step="0.01" min="0" max="100" id="nr-pct-n" value="0" class="pct-input w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">pct_ase1 (%)</label>
+                    <input type="number" step="0.01" min="0" max="100" id="nr-pct-ase1" value="0" class="pct-input w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">pct_ase2 (%)</label>
+                    <input type="number" step="0.01" min="0" max="100" id="nr-pct-ase2" value="0" class="pct-input w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">pct_proyecto (%)</label>
+                    <input type="number" step="0.01" min="0" max="100" id="nr-pct-proyecto" value="0" class="pct-input w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">pct_admin (%)</label>
+                    <input type="number" step="0.01" min="0" max="100" id="nr-pct-admin" value="0" class="pct-input w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">pct_extra (%)</label>
+                    <input type="number" step="0.01" min="0" max="100" id="nr-pct-extra" value="0" class="pct-input w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">pct_pub_gfm (%)</label>
+                    <input type="number" step="0.01" min="0" max="100" id="nr-pct-pub-gfm" value="0" class="pct-input w-full border border-slate-300 rounded-lg p-2 text-sm focus:ring-amber-500">
+                </div>
+            </div>
+            
+            <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+                <div id="semaforo-suma" class="text-sm font-bold">Sumando...</div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="document.getElementById('modal-regla').classList.add('hidden')" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancelar</button>
+                    <button type="submit" id="btn-guardar-regla" disabled class="px-6 py-2 bg-slate-900 text-white text-xs font-semibold rounded-lg hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed">Guardar Regla</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let kpisCache = [];
+    let comisionesCache = [];
+
+    function cambiarTabConfig(tab) {
+        document.querySelectorAll('.tab-cfg-btn').forEach(btn => {
+            btn.classList.remove('border-slate-800', 'text-slate-900');
+            btn.classList.add('border-transparent', 'text-slate-500');
+        });
+
+        const activeBtn = document.getElementById(`tab-btn-${tab}`);
+        if (activeBtn) {
+            activeBtn.classList.remove('border-transparent', 'text-slate-500');
+            activeBtn.classList.add('border-slate-800', 'text-slate-900');
+        }
+
+        document.getElementById('section-empresa').classList.toggle('hidden', tab !== 'empresa');
+        document.getElementById('section-usuarios').classList.toggle('hidden', tab !== 'usuarios');
+        document.getElementById('section-kpis').classList.toggle('hidden', tab !== 'kpis');
+        document.getElementById('section-respaldos').classList.toggle('hidden', tab !== 'respaldos');
+        document.getElementById('section-auditoria').classList.toggle('hidden', tab !== 'auditoria');
+        document.getElementById('section-comisiones').classList.toggle('hidden', tab !== 'comisiones');
+        document.getElementById('section-calendar').classList.toggle('hidden', tab !== 'calendar');
+        const sc = document.getElementById('section-correo');
+        if (sc) sc.classList.toggle('hidden', tab !== 'correo');
+        const sa = document.getElementById('section-alterestate');
+        if (sa) sa.classList.toggle('hidden', tab !== 'alterestate');
+
+        if (tab === 'usuarios') cargarUsuarios().catch(console.error);
+        if (tab === 'kpis') cargarKpiConfig().catch(console.error);
+        if (tab === 'auditoria') cargarAuditoria().catch(console.error);
+        if (tab === 'comisiones') cargarComisiones().catch(console.error);
+        if (tab === 'calendar') cargarEstadoGoogle().catch(console.error);
+        if (tab === 'correo') cargarDatosCorreo().catch(console.error);
+        if (tab === 'alterestate') cargarConfigAE().catch(console.error);
+    }
+
+    async function cargarUsuarios() {
+        const tbody = document.getElementById('tabla-usuarios-body');
+        try {
+            const res = await fetch('/api/usuarios');
+            const data = await res.json();
+            if (data.success) {
+                tbody.innerHTML = data.items.map(u => `
+                    <tr class="hover:bg-slate-50">
+                        <td class="py-3 px-4 text-xs font-mono font-bold text-amber-600">${u.id}</td>
+                        <td class="py-3 px-4 font-semibold text-slate-900">${u.username}</td>
+                        <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-800">${u.rol}</span></td>
+                        <td class="py-3 px-4 text-xs">${u.empleado_nombre || 'N/A'}</td>
+                        <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-xs font-semibold ${u.activo ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}">${u.activo ? 'Activo' : 'Inactivo'}</span></td>
+                        <td class="py-3 px-4 text-right">
+                            <button onclick="editarUsuario(${u.id}, '${u.rol}', ${u.activo})" class="text-slate-400 hover:text-amber-600 mr-2" aria-label="Editar Rol o Estado"><i class="bx bx-edit"></i> Editar</button>
+                            <button onclick="cambiarClaveUsuario(${u.id})" class="text-slate-400 hover:text-blue-600 mr-2" aria-label="Cambiar Contraseña"><svg class="inline w-4 h-4" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></button>
+                            <button onclick="borrarUsuario(${u.id})" class="text-slate-400 hover:text-rose-600" aria-label="Borrar Usuario"><i class="bx bx-trash"></i> Borrar</button>
+                        </td>
+                    </tr>
+                `).join('');
+                
+                // Extraer roles únicos y actualizar datalist
+                const roles = [...new Set(data.items.map(u => u.rol))];
+                const defaultRoles = ['Asesor', 'Gerente', 'Admin'];
+                const allRoles = [...new Set([...defaultRoles, ...roles])];
+                const datalist = document.getElementById('roles-list');
+                if (datalist) {
+                    datalist.innerHTML = allRoles.map(r => `<option value="${r}">`).join('');
+                }
+            }
+        } catch(e) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-rose-500 py-4">Error cargando usuarios</td></tr>';
+        }
+    }
+
+    function abrirModalUsuario() {
+        document.getElementById('modal-usuario-title').innerText = 'Nuevo Usuario';
+        document.getElementById('form-usuario').reset();
+        document.getElementById('usr-action').value = 'create';
+        document.getElementById('usr-group-username').classList.remove('hidden');
+        document.getElementById('usr-group-password').classList.remove('hidden');
+        document.getElementById('usr-group-rol').classList.remove('hidden');
+        document.getElementById('usr-group-entidad').classList.remove('hidden');
+        document.getElementById('usr-group-activo').classList.add('hidden');
+        document.getElementById('usr-username').required = true;
+        document.getElementById('usr-password').required = true;
+        document.getElementById('lbl-password').innerText = 'Contraseña *';
+        document.getElementById('modal-usuario').classList.remove('hidden');
+    }
+
+    function editarUsuario(id, rolActual, activoActual) {
+        document.getElementById('modal-usuario-title').innerText = 'Editar Usuario';
+        document.getElementById('form-usuario').reset();
+        document.getElementById('usr-id').value = id;
+        document.getElementById('usr-action').value = 'edit';
+        
+        document.getElementById('usr-group-username').classList.add('hidden');
+        document.getElementById('usr-group-password').classList.add('hidden');
+        document.getElementById('usr-group-entidad').classList.add('hidden');
+        
+        document.getElementById('usr-group-rol').classList.remove('hidden');
+        document.getElementById('usr-group-activo').classList.remove('hidden');
+        
+        document.getElementById('usr-rol').value = rolActual;
+        document.getElementById('usr-activo').value = activoActual ? "1" : "0";
+        
+        document.getElementById('usr-username').required = false;
+        document.getElementById('usr-password').required = false;
+        
+        document.getElementById('modal-usuario').classList.remove('hidden');
+    }
+
+    function cambiarClaveUsuario(id) {
+        document.getElementById('modal-usuario-title').innerText = 'Cambiar Contraseña';
+        document.getElementById('form-usuario').reset();
+        document.getElementById('usr-id').value = id;
+        document.getElementById('usr-action').value = 'password';
+        
+        document.getElementById('usr-group-username').classList.add('hidden');
+        document.getElementById('usr-group-rol').classList.add('hidden');
+        document.getElementById('usr-group-entidad').classList.add('hidden');
+        document.getElementById('usr-group-activo').classList.add('hidden');
+        
+        document.getElementById('usr-group-password').classList.remove('hidden');
+        document.getElementById('usr-password').required = true;
+        document.getElementById('lbl-password').innerText = 'Nueva Contraseña *';
+        
+        document.getElementById('modal-usuario').classList.remove('hidden');
+    }
+
+    async function guardarUsuario(e) {
+        e.preventDefault();
+        const action = document.getElementById('usr-action').value;
+        const id = document.getElementById('usr-id').value;
+        
+        let url = '/api/usuarios';
+        let method = 'POST';
+        let payload = {};
+
+        if (action === 'create') {
+            payload = {
+                username: document.getElementById('usr-username').value.trim(),
+                password: document.getElementById('usr-password').value,
+                rol: document.getElementById('usr-rol').value,
+                entidad_id: document.getElementById('usr-entidad').value ? parseInt(document.getElementById('usr-entidad').value) : null
+            };
+        } else if (action === 'edit') {
+            url = `/api/usuarios/${id}`;
+            method = 'PUT';
+            payload = {
+                rol: document.getElementById('usr-rol').value,
+                activo: parseInt(document.getElementById('usr-activo').value)
+            };
+        } else if (action === 'password') {
+            url = `/api/usuarios/${id}`;
+            method = 'PUT';
+            payload = {
+                password: document.getElementById('usr-password').value
+            };
+        }
+
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const d = await res.json();
+            if (d.success) {
+                document.getElementById('modal-usuario').classList.add('hidden');
+                cargarUsuarios();
+            } else {
+                showToast("Error: " + d.error, 'error');
+            }
+        } catch(e) {
+            showToast("Error de conexión.", 'error');
+        }
+    }
+
+    async function borrarUsuario(id) {
+        if (!confirm("Â¿Borrar usuario permanentemente?")) return;
+        try {
+            const res = await fetch('/api/usuarios/' + id, { method: 'DELETE' });
+            const d = await res.json();
+            if (d.success) cargarUsuarios();
+            else showToast("Error: " + d.error, 'error');
+        } catch(e) { showToast("Error de conexión", 'error'); }
+    }
+
+    async function cargarKpiConfig() {
+        const tbody = document.getElementById('tabla-kpi-config-body');
+        const select = document.getElementById('select-kpi-editar');
+        try {
+            const res = await fetch('/api/configuracion/kpis');
+            const data = await res.json();
+            if (data.success && data.items.length > 0) {
+                kpisCache = data.items;
+                select.innerHTML = kpisCache.map(k => `<option value="${k.kpi_id}">${k.nombre} (${k.categoria})</option>`).join('');
+                seleccionarKPIParaEditar();
+                tbody.innerHTML = kpisCache.map(k => `
+                    <tr class="hover:bg-slate-50">
+                        <td class="py-3 px-4 text-xs font-semibold uppercase text-slate-400">${k.categoria}</td>
+                        <td class="py-3 px-4 font-semibold text-slate-900">${k.nombre}</td>
+                        <td class="py-3 px-4 font-mono text-xs">${k.unidad}</td>
+                        <td class="py-3 px-4 font-bold text-emerald-600">${k.meta}</td>
+                        <td class="py-3 px-4 font-semibold text-amber-600">${k.umbral_amarillo}</td>
+                        <td class="py-3 px-4 font-semibold text-rose-600">${k.umbral_rojo}</td>
+                    </tr>
+                `).join('');
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    function seleccionarKPIParaEditar() {
+        const selectedId = document.getElementById('select-kpi-editar').value;
+        const kpi = kpisCache.find(k => k.kpi_id === selectedId);
+        if (kpi) {
+            document.getElementById('edit-meta').value = kpi.meta;
+            document.getElementById('edit-umbral-amarillo').value = kpi.umbral_amarillo;
+            document.getElementById('edit-umbral-rojo').value = kpi.umbral_rojo;
+        }
+    }
+
+    async function guardarKPIConfig(e) {
+        e.preventDefault();
+        const payload = {
+            kpi_id: document.getElementById('select-kpi-editar').value,
+            meta: parseFloat(document.getElementById('edit-meta').value),
+            umbral_amarillo: parseFloat(document.getElementById('edit-umbral-amarillo').value),
+            umbral_rojo: parseFloat(document.getElementById('edit-umbral-rojo').value)
+        };
+        try {
+            const res = await fetch('/api/configuracion/kpis', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(data.message, 'success');
+                cargarKpiConfig();
+            } else {
+                showToast("Error: " + data.error, 'error');
+            }
+        } catch (err) {
+            showToast("Error de conexión al guardar KPI.", 'error');
+        }
+    }
+
+    async function restaurarBaseDatos(file) {
+        if (!file) return;
+        if (!confirm(`Â¿Estás seguro de que deseas restaurar la base de datos desde '${file.name}'? Se creará una copia de seguridad preventiva.`)) {
+            return;
+        }
+        const resDiv = document.getElementById('resultado-restauracion');
+        resDiv.innerText = "Restaurando base de datos...";
+        resDiv.className = "p-3 rounded-lg text-xs font-medium bg-slate-100 text-slate-700 block";
+        const formData = new FormData();
+        formData.append('file', file);
+        try {
+            const res = await fetch('/api/configuracion/backup/restaurar', { method: 'POST', body: formData });
+            const data = await res.json();
+            if (data.success) {
+                resDiv.className = "p-3 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 block";
+                resDiv.innerText = data.message;
+                setTimeout(() => window.location.reload(), 2000);
+            } else {
+                resDiv.className = "p-3 rounded-lg text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 block";
+                resDiv.innerText = "Error: " + data.error;
+            }
+        } catch (err) {
+            resDiv.className = "p-3 rounded-lg text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 block";
+            resDiv.innerText = "Error procesando el archivo de restauración.";
+        }
+    }
+
+    async function cargarAuditoria() {
+        const tbody = document.getElementById('tabla-auditoria-body');
+        try {
+            const res = await fetch('/api/configuracion/auditoria');
+            const data = await res.json();
+            if (data.success && data.items.length > 0) {
+                tbody.innerHTML = data.items.map(a => `
+                    <tr class="hover:bg-slate-50">
+                        <td class="py-3 px-4 font-mono text-xs">${a.fecha}</td>
+                        <td class="py-3 px-4 font-semibold text-slate-900">${a.username_snapshot || 'Sistema'}</td>
+                        <td class="py-3 px-4">${a.accion}</td>
+                        <td class="py-3 px-4 uppercase text-xs">${a.modulo}</td>
+                        <td class="py-3 px-4 text-slate-500">${a.detalle || 'â€”'}</td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">Sin registros de auditoría.</td></tr>`;
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async function cargarComisiones() {
+        const tbody = document.getElementById('tabla-comisiones-body');
+        try {
+            const res = await fetch('/api/configuracion/matriz_comisiones');
+            const data = await res.json();
+            if (data.success && data.items.length > 0) {
+                comisionesCache = data.items;
+                tbody.innerHTML = data.items.map(c => `
+                    <tr class="hover:bg-slate-50 text-xs">
+                        <td class="py-3 px-4 font-semibold text-slate-800 break-words whitespace-normal min-w-[200px]">
+                            ${c.nivel} <br>
+                            <span class="text-[10px] text-slate-500 font-normal">Cap:</span> ${c.captador} <br>
+                            <span class="text-[10px] text-slate-500 font-normal">G.Pub:</span> ${c.gastos_pub}
+                        </td>
+                        <td class="py-3 px-2 font-mono">A:${(c.pct_a*100).toFixed(1)}% N:${(c.pct_n*100).toFixed(1)}%</td>
+                        
+                        <td class="py-3 px-2 font-mono">${(c.pct_proyecto*100).toFixed(1)}%</td>
+                        <td class="py-3 px-2 font-mono">${(c.pct_admin*100).toFixed(1)}%</td>
+                        <td class="py-3 px-2 font-mono">${(c.pct_extra*100).toFixed(1)}%</td>
+                        <td class="py-3 px-2 font-mono">${(c.pct_pub_gfm*100).toFixed(1)}%</td>
+                        <td class="py-3 px-4 text-right">
+                            <button onclick="abrirModalRegla(${c.id})" class="text-slate-400 hover:text-amber-600 mr-2"><i class="bx bx-edit"></i> Editar</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tbody.innerHTML = `<tr><td colspan="8" class="py-6 text-center text-slate-400">No hay reglas de comisiones configuradas.</td></tr>`;
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    function initSemaforoComisiones() {
+        document.querySelectorAll('.pct-input').forEach(inp => {
+            inp.addEventListener('input', calcularSumaComisiones);
+        });
+    }
+
+    function calcularSumaComisiones() {
+        let suma = 0;
+        document.querySelectorAll('.pct-input').forEach(inp => {
+            suma += parseFloat(inp.value) || 0;
+        });
+        
+        const res = document.getElementById('semaforo-suma');
+        const btn = document.getElementById('btn-guardar-regla');
+        
+        if (Math.abs(suma - 100) < 0.01) {
+            res.innerHTML = '<span class="text-emerald-600">100% Correcto</span>';
+            btn.disabled = false;
+        } else if (suma < 100) {
+            res.innerHTML = `<span class="text-amber-500">Falta ${(100 - suma).toFixed(2)}%</span>`;
+            btn.disabled = true;
+        } else {
+            res.innerHTML = `<span class="text-rose-600">Sobra ${(suma - 100).toFixed(2)}%</span>`;
+            btn.disabled = true;
+        }
+    }
+
+    async function abrirModalRegla(id = null) {
+        try {
+            const resCat = await fetch('/api/maestros/catalogos-comisiones');
+            const dataCat = await resCat.json();
+            if (dataCat.success) {
+                const selNiv = document.getElementById('nr-nivel');
+                const selCap = document.getElementById('nr-captador');
+                const selGas = document.getElementById('nr-gastos-pub');
+                
+                selNiv.innerHTML = '<option value="">Seleccione Nivel</option>';
+                selCap.innerHTML = '<option value="">Seleccione Captador</option>';
+                selGas.innerHTML = '<option value="">Seleccione Gastos Pub</option>';
+
+                dataCat.niveles.forEach(i => selNiv.add(new Option(i.nombre, i.id)));
+                dataCat.captadores.forEach(i => selCap.add(new Option(i.nombre, i.id)));
+                dataCat.gastos_pub.forEach(i => selGas.add(new Option(i.nombre, i.id)));
+                
+                document.getElementById('nr-id').value = id || '';
+                
+                if (id) {
+                    document.getElementById('modal-regla-title').innerText = 'Editar Regla de Matriz';
+                    const regla = comisionesCache.find(c => c.id === id);
+                    if (regla) {
+                        Array.from(selNiv.options).forEach(opt => { if (opt.text === regla.nivel || opt.value == regla.nivel_id) opt.selected = true; });
+                        Array.from(selCap.options).forEach(opt => { if (opt.text === regla.captador || opt.value == regla.captador_id) opt.selected = true; });
+                        Array.from(selGas.options).forEach(opt => { if (opt.text === regla.gastos_pub || opt.value == regla.gastos_pub_id) opt.selected = true; });
+
+                        document.getElementById('nr-pct-a').value = (regla.pct_a * 100).toFixed(2);
+                        document.getElementById('nr-pct-n').value = (regla.pct_n * 100).toFixed(2);
+                        document.getElementById('nr-pct-proyecto').value = (regla.pct_proyecto * 100).toFixed(2);
+                        document.getElementById('nr-pct-admin').value = (regla.pct_admin * 100).toFixed(2);
+                        document.getElementById('nr-pct-extra').value = (regla.pct_extra * 100).toFixed(2);
+                        document.getElementById('nr-pct-pub-gfm').value = (regla.pct_pub_gfm * 100).toFixed(2);
+                    }
+                } else {
+                    document.getElementById('modal-regla-title').innerText = 'Añadir Nueva Regla a Matriz';
+                    document.querySelectorAll('.pct-input').forEach(inp => inp.value = '0');
+                }
+                
+                initSemaforoComisiones();
+                calcularSumaComisiones();
+                document.getElementById('modal-regla').classList.remove('hidden');
+            } else {
+                showToast("Error cargando catálogos: " + dataCat.error, 'error');
+            }
+        } catch (e) {
+            showToast("Error de conexión", 'error');
+        }
+    }
+
+    async function guardarRegla(e) {
+        e.preventDefault();
+        const id = document.getElementById('nr-id').value;
+        const payload = {
+            nivel_id: parseInt(document.getElementById('nr-nivel').value),
+            captador_id: parseInt(document.getElementById('nr-captador').value),
+            gastos_pub_id: parseInt(document.getElementById('nr-gastos-pub').value),
+            pct_a: parseFloat(document.getElementById('nr-pct-a').value) / 100 || 0,
+            pct_n: parseFloat(document.getElementById('nr-pct-n').value) / 100 || 0,
+            pct_proyecto: parseFloat(document.getElementById('nr-pct-proyecto').value) / 100 || 0,
+            pct_admin: parseFloat(document.getElementById('nr-pct-admin').value) / 100 || 0,
+            pct_extra: parseFloat(document.getElementById('nr-pct-extra').value) / 100 || 0,
+            pct_pub_gfm: parseFloat(document.getElementById('nr-pct-pub-gfm').value) / 100 || 0
+        };
+
+        const method = id ? 'PUT' : 'POST';
+        const url = id ? `/api/configuracion/matriz_comisiones/${id}` : '/api/configuracion/matriz_comisiones';
+
+        try {
+            const res = await fetch(url, {
+                method: method,
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(data.message || 'Regla guardada correctamente', 'success');
+                document.getElementById('modal-regla').classList.add('hidden');
+                cargarComisiones();
+            } else {
+                showToast("Error: " + data.error, 'error');
+            }
+        } catch (err) {
+            showToast("Error de conexión al guardar regla.", 'error');
+        }
+    }
+
+    function copiarUri() {
+        const uri = document.getElementById('redirect-uri-display').textContent;
+        navigator.clipboard.writeText(uri).then(() => {
+            showToast("Â¡URI copiada al portapapeles!", 'success');
+        }).catch(err => {
+            showToast("Error al copiar: " + err, 'error');
+        });
+    }
+
+    async function guardarCredenciales(e) {
+        e.preventDefault();
+        const client_id = document.getElementById('input-client-id').value;
+        const client_secret = document.getElementById('input-client-secret').value;
+        const redirect_uri = document.getElementById('input-redirect-uri').value;
+        const btn = document.getElementById('btn-guardar-creds');
+        btn.disabled = true; btn.textContent = "Guardando...";
+
+        try {
+            const r = await fetch('/api/google/config/credenciales', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({client_id, client_secret, redirect_uri})
+            });
+            const d = await r.json();
+            if(d.success) {
+                showToast(d.message, 'success');
+                verificarGoogleCalendar();
+            } else {
+                showToast(d.error, 'error');
+                btn.disabled = false; btn.textContent = "Guardar y conectar";
+            }
+        } catch(e) {
+            showToast("Error de conexión", 'error');
+            btn.disabled = false; btn.textContent = "Guardar y conectar";
+        }
+    }
+
+    function _gcalShowState(state) {
+        document.getElementById('gcal-state-loading').classList.add('hidden');
+        document.getElementById('gcal-state-setup').classList.add('hidden');
+        document.getElementById('gcal-state-connect').classList.add('hidden');
+        document.getElementById('gcal-state-connected').classList.add('hidden');
+
+        document.querySelectorAll('.gcal-step').forEach(el => el.classList.remove('active', 'done'));
+        const s1 = document.getElementById('step-indicator-1');
+        const s2 = document.getElementById('step-indicator-2');
+        const s3 = document.getElementById('step-indicator-3');
+
+        if (state === 'setup') {
+            document.getElementById('gcal-state-setup').classList.remove('hidden');
+            s1.classList.add('active');
+        } else if (state === 'connect') {
+            document.getElementById('gcal-state-connect').classList.remove('hidden');
+            s1.classList.add('done');
+            s2.classList.add('active');
+        } else if (state === 'connected') {
+            document.getElementById('gcal-state-connected').classList.remove('hidden');
+            s1.classList.add('done');
+            s2.classList.add('done');
+            s3.classList.add('active');
+        }
+    }
+
+    async function cargarEstadoGoogle() {
+        _gcalShowState('loading');
+        document.getElementById('gcal-state-loading').classList.remove('hidden');
+        
+        // Generar y mostrar URI de redireccionamiento
+        const base_url = window.location.origin;
+        const redirectUri = base_url + '/api/google/oauth/callback';
+        document.getElementById('input-redirect-uri').value = redirectUri;
+        document.getElementById('redirect-uri-display').textContent = redirectUri;
+
+        try {
+            const res = await fetch('/api/google/estado');
+            const data = await res.json();
+            if (data.conectado) {
+                document.getElementById('gcal-email-display').innerText = data.email || '';
+                const cfg = data.config || {};
+                if (cfg.frecuencia_postventa)       document.getElementById('cfg-frecuencia').value      = cfg.frecuencia_postventa;
+                if (cfg.antelacion_postventa_dias)  document.getElementById('cfg-ant-postventa').value   = cfg.antelacion_postventa_dias;
+                if (cfg.dias_contacto_lead)         document.getElementById('cfg-dias-lead').value       = cfg.dias_contacto_lead;
+                if (cfg.antelacion_cobro_dias)      document.getElementById('cfg-ant-cobro').value       = cfg.antelacion_cobro_dias;
+                if (cfg.calendar_id)                document.getElementById('cfg-calendar-id').value     = cfg.calendar_id;
+                if (cfg.timezone)                   document.getElementById('cfg-timezone').value        = cfg.timezone;
+                _gcalShowState('connected');
+            } else if (data.tiene_credenciales) {
+                _gcalShowState('connect');
+            } else {
+                _gcalShowState('setup');
+            }
+        } catch (e) {
+            console.error('Error cargando estado Google:', e);
+            _gcalShowState('setup');
+        }
+    }
+
+    async function guardarCredenciales(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btn-guardar-creds');
+        btn.innerText = 'Guardando...';
+        btn.disabled  = true;
+        const payload = {
+            client_id:     document.getElementById('input-client-id').value.trim(),
+            client_secret: document.getElementById('input-client-secret').value.trim(),
+        };
+        try {
+            const res  = await fetch('/api/google/config/credenciales', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) {
+                cargarEstadoGoogle();
+            } else {
+                showToast('Error al guardar: ' + data.error, 'error');
+            }
+        } catch (ex) {
+            showToast('Error de conexión.', 'error');
+        }
+        btn.innerText = 'Guardar y continuar â†’';
+        btn.disabled  = false;
+    }
+
+    async function resetCredenciales() {
+        if (!confirm('Â¿Deseas cambiar las credenciales? Esto desconectará la cuenta de Google actual.')) return;
+        await fetch('/api/google/config/credenciales/borrar', { method: 'POST' });
+        cargarEstadoGoogle();
+    }
+
+    function copiarURI() {
+        navigator.clipboard.writeText('http://127.0.0.1:5000/api/google/oauth/callback')
+            .then(() => showToast('URL copiada al portapapeles.', 'success'))
+            .catch(() => showToast('No se pudo copiar. Cópiala manualmente.', 'warning'));
+    }
+
+    async function guardarConfigCalendario(e) {
+        e.preventDefault();
+        const payload = {
+            frecuencia_postventa:      document.getElementById('cfg-frecuencia').value,
+            antelacion_postventa_dias: parseInt(document.getElementById('cfg-ant-postventa').value),
+            dias_contacto_lead:        parseInt(document.getElementById('cfg-dias-lead').value),
+            antelacion_cobro_dias:     parseInt(document.getElementById('cfg-ant-cobro').value),
+            calendar_id:               document.getElementById('cfg-calendar-id').value.trim(),
+            timezone:                  document.getElementById('cfg-timezone').value.trim(),
+        };
+        try {
+            const res  = await fetch('/api/google/config/guardar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('Configuración guardada correctamente.', 'success');
+            } else {
+                showToast('Error: ' + (data.error || 'No se pudo guardar.'), 'error');
+            }
+        } catch (err) {
+            showToast('Error de conexión al guardar configuración de calendario.', 'error');
+        }
+    }
+
+    async function desconectarGoogle() {
+        if (!confirm('Â¿Deseas desconectar la cuenta de Google Calendar? Los eventos ya creados no se eliminarán.')) return;
+        await fetch('/api/google/oauth/desconectar', { method: 'POST' });
+        cargarEstadoGoogle();
+    }
+
+    async function enviarEventoPrueba() {
+        const btn = document.getElementById('btn-test-evento');
+        btn.innerText = 'Enviando...';
+        btn.disabled = true;
+        try {
+            const res  = await fetch('/api/google/test-evento', { method: 'POST' });
+            const data = await res.json();
+            if(data.success) showToast(data.message, 'success'); else showToast('Error: ' + data.error, 'error');
+        } catch (e) { showToast('Error de conexión.', 'error'); }
+        btn.innerText = '<svg class="inline w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v8l4 7H5l4-7V3z"/><line x1="8" y1="3" x2="16" y2="3"/></svg> Probar Evento';
+        btn.disabled = false;
+    }
+
+    // Funciones globales y filtrado
+    function filtrarTabla(inputId, tbodyId) {
+        const query = document.getElementById(inputId).value.toLowerCase();
+        const rows = document.getElementById(tbodyId).getElementsByTagName('tr');
+        for (let i = 0; i < rows.length; i++) {
+            const text = rows[i].innerText.toLowerCase();
+            rows[i].style.display = text.includes(query) ? '' : 'none';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        cargarUsuarios();
+
+        // Abrir pestaña de Google Calendar si venimos del callback OAuth
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('tab') === 'calendar' || params.get('google_ok') || params.get('google_error')) {
+            cambiarTabConfig('calendar');
+        }
+        if (params.get('google_ok')) {
+            showToast('Cuenta de Google conectada exitosamente.', 'success');
+        }
+        if (params.get('google_error')) {
+            showToast('Error en la autenticación de Google: ' + decodeURIComponent(params.get('google_error')), 'error');
+        }
+    });
+
+    
+    async function cargarDatosCorreo() {
+        try {
+            const res = await fetch('/api/configuracion/smtp');
+            const data = await res.json();
+            if (data.success && data.config) {
+                document.getElementById('cfg-smtp-server').value = data.config.smtp_server || '';
+                document.getElementById('cfg-smtp-port').value = data.config.smtp_port || '';
+                document.getElementById('cfg-smtp-user').value = data.config.smtp_user || '';
+                document.getElementById('cfg-smtp-receptor').value = data.config.email_notificaciones_receptor || '';
+                if (data.config.smtp_user) {
+                    const badge = document.getElementById('smtp-status-badge');
+                    badge.innerHTML = '<i class="bx bx-check-circle"></i> Configurado y Activo';
+                    badge.className = 'px-3 py-1 bg-emerald-500/20 border border-emerald-400 text-white rounded-full text-xs font-bold flex items-center gap-1';
+                }
+            }
+        } catch (e) { console.error("Error cargando config correo:", e); }
+    }
+
+    async function probarConexionCorreo() {
+        const btn = document.querySelector('button[onclick="probarConexionCorreo()"]');
+        const oldText = btn.innerHTML;
+        btn.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Probando...';
+        btn.disabled = true;
+
+        const payload = {
+            smtp_server: document.getElementById('cfg-smtp-server').value,
+            smtp_port: parseInt(document.getElementById('cfg-smtp-port').value),
+            smtp_user: document.getElementById('cfg-smtp-user').value,
+            smtp_password: document.getElementById('cfg-smtp-password').value,
+            email_notificaciones_receptor: document.getElementById('cfg-smtp-receptor').value
+        };
+
+        try {
+            const res = await fetch('/api/configuracion/smtp/probar', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast("Conexión exitosa. Correo de prueba enviado.", 'success');
+            } else {
+                showToast("Error: " + data.error, 'error');
+            }
+        } catch (e) {
+            showToast("Error de conexión al probar SMTP.", 'error');
+        }
+        btn.innerHTML = oldText;
+        btn.disabled = false;
+    }
+
+    async function guardarDatosCorreo(e) {
+        e.preventDefault();
+        const payload = {
+            smtp_server: document.getElementById('cfg-smtp-server').value,
+            smtp_port: parseInt(document.getElementById('cfg-smtp-port').value),
+            smtp_user: document.getElementById('cfg-smtp-user').value,
+            smtp_password: document.getElementById('cfg-smtp-password').value,
+            email_notificaciones_receptor: document.getElementById('cfg-smtp-receptor').value
+        };
+
+        try {
+            const res = await fetch('/api/configuracion/smtp', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast("Configuración de correo guardada.", 'success');
+                document.getElementById('cfg-smtp-password').value = '';
+            } else {
+                showToast("Error: " + data.error, 'error');
+            }
+        } catch(e) {
+            showToast("Error de conexión.", 'error');
+        }
+    }
+
+    async function guardarDatosEmpresa(e) {
+        e.preventDefault();
+        const payload = {
+            empresa_nombre: document.getElementById('cfg-empresa-nombre').value,
+            empresa_gerente: document.getElementById('cfg-empresa-gerente').value,
+            empresa_telefono: document.getElementById('cfg-empresa-telefono').value,
+            empresa_correo: document.getElementById('cfg-empresa-correo').value
+        };
+        try {
+            const res = await fetch('/api/configuracion/empresa', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('Configuración guardada correctamente.', 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast('Error: ' + (data.error || 'Error desconocido'), 'error');
+            }
+        } catch (err) {
+            showToast('Error de conexión con el servidor', 'error');
+        }
+    }
+
+    // ─── API-AlterState ────────────────────────────────────────────────────────
+    async function cargarConfigAE() {
+        try {
+            const res = await fetch('/api/alterestate/config');
+            const data = await res.json();
+            if (data.config) {
+                document.getElementById('ae-base-url').value = data.config.base_url || 'https://secure.alterestate.com';
+                if (data.config.api_token && data.config.api_token.includes('****')) {
+                    document.getElementById('ae-api-token').placeholder = data.config.api_token;
+                }
+            }
+            const stRes = await fetch('/api/alterestate/status');
+            const stData = await stRes.json();
+            const badge = document.getElementById('ae-estado-badge');
+            if (stData.has_config) {
+                badge.className = 'px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold';
+                badge.textContent = 'Configurado';
+            } else {
+                badge.className = 'px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold';
+                badge.textContent = 'Sin configurar';
+            }
+        } catch(e) { console.error('Error cargando config AE:', e); }
+    }
+
+    async function guardarConfigAE(e) {
+        e.preventDefault();
+        const token = document.getElementById('ae-api-token').value;
+        const payload = {
+            base_url: document.getElementById('ae-base-url').value,
+        };
+        if (token) payload.api_token = token;
+        try {
+            const res = await fetch('/api/alterestate/config', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast('Configuración API-AlterState guardada.', 'success');
+                document.getElementById('ae-api-token').value = '';
+                cargarConfigAE();
+            } else {
+                showToast('Error: ' + data.error, 'error');
+            }
+        } catch(e) { showToast('Error de conexión.', 'error'); }
+    }
+
+    async function probarConexionAE() {
+        const btn = document.getElementById('ae-btn-test');
+        const oldText = btn.innerHTML;
+        btn.innerHTML = '<i class="bx bx-loader-alt animate-spin"></i> Probando...';
+        btn.disabled = true;
+        try {
+            const res = await fetch('/api/alterestate/test', { method: 'POST' });
+            const data = await res.json();
+            const result = document.getElementById('ae-test-result');
+            result.classList.remove('hidden');
+            const conn = data.connection || {};
+            const auth = data.authentication || {};
+            if (conn.connected && auth.authenticated) {
+                result.className = 'hidden md:col-span-2 text-xs mt-2 p-3 rounded-lg bg-green-50 text-green-700';
+                result.textContent = '✅ Conexión exitosa (' + conn.elapsed_ms + 'ms) — Autenticación válida';
+            } else {
+                result.className = 'hidden md:col-span-2 text-xs mt-2 p-3 rounded-lg bg-red-50 text-red-700';
+                result.textContent = '❌ ' + (conn.error || auth.error || 'Error de conexión');
+            }
+            result.classList.remove('hidden');
+        } catch(e) {
+            showToast('Error al probar conexión.', 'error');
+        }
+        btn.innerHTML = oldText;
+        btn.disabled = false;
+    }
+
+    async function syncAE(entity) {
+        const status = document.getElementById('ae-sync-status');
+        status.className = 'text-xs text-amber-600 mt-2';
+        status.textContent = 'Sincronizando ' + entity + '...';
+        try {
+            const endpoint = entity === 'all' ? '/api/alterestate/sync' : '/api/alterestate/sync/' + entity;
+            const body = entity === 'all' ? {} : {};
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+            if (data.error) {
+                status.className = 'text-xs text-red-600 mt-2';
+                status.textContent = '❌ ' + data.error;
+            } else {
+                status.className = 'text-xs text-green-600 mt-2';
+                const steps = data.steps || {};
+                let summary = Object.entries(steps).map(([k,v]) => {
+                    const ins = v.insertados || 0;
+                    const upd = v.actualizados || 0;
+                    return k + ': +' + ins + ' / ~' + upd;
+                }).join(' | ');
+                status.textContent = '✅ Completado (' + (data.elapsed_seconds || 0) + 's) — ' + summary;
+            }
+        } catch(e) {
+            status.className = 'text-xs text-red-600 mt-2';
+            status.textContent = '❌ Error de conexión';
+        }
+    }
+</script>
+{% endblock %}
+

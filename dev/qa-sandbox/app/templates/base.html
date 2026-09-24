@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/dlab_favicon.png') }}">
+    <title>{% block title %}{{ dlab_empresa }} | Data App{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Inter:wght@400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons (Lightweight & Modern) -->
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              dlab: {
+                primary: '#0B3D4E',
+                cta: '#B4E600',
+                dark: '#1E1E1E',
+                light: '#F5F5F0',
+                cyan: '#3FA9C9'
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              display: ['Space Grotesk', 'sans-serif'],
+              mono: ['Space Mono', 'monospace'],
+            }
+          }
+        }
+      }
+    </script>
+    <!-- jQuery y DataTables (local - sin dependencia de CDN) -->
+    <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery.dataTables.min.css') }}">
+    <script src="{{ url_for('static', filename='js/jquery.dataTables.min.js') }}"></script>
+    <!-- Select2 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .field-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            color: #1e293b;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .field-input:focus {
+            outline: none;
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245,158,11,0.15);
+        }
+        /* Select2 Tailwind Overrides */
+        .select2-container .select2-selection--single {
+            height: 38px;
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 36px;
+            font-size: 0.875rem;
+            color: #1e293b;
+            padding-left: 0.75rem;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+        }
+        .select2-dropdown {
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        /* DataTables overrides para integrar con Tailwind */
+        .dataTables_wrapper .dataTables_length, 
+        .dataTables_wrapper .dataTables_filter {
+            margin-bottom: 1rem;
+            padding: 0.5rem 1rem;
+        }
+        .dataTables_wrapper .dataTables_info, 
+        .dataTables_wrapper .dataTables_paginate {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+        }
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+            margin-left: 0.5rem;
+        }
+        .dataTables_wrapper .dataTables_length select {
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        table.dataTable thead th {
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        table.dataTable tbody td {
+            padding: 0.75rem 1rem;
+            vertical-align: middle;
+        }
+        table.dataTable tbody tr:hover { background: #f8fafc; }
+
+        /* -- EXECUTIVE TABLE UI MODERNIZATION -- */
+        table.dataTable tbody tr {
+            transition: background-color 0.2s ease;
+        }
+        table.dataTable tbody tr:hover { 
+            background-color: rgba(0, 0, 0, 0.02) !important; 
+        }
+        
+        /* Badges (Pill-shape) */
+        .badge-pill {
+            border-radius: 9999px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .badge-aprobado { background-color: #dcfce7; color: #166534; }
+        .badge-proceso { background-color: #fef3c7; color: #92400e; }
+        .badge-rechazado { background-color: #fee2e2; color: #991b1b; }
+        
+        /* Secondary Buttons / Outline */
+        .btn-auditoria-outline {
+            background-color: transparent;
+            border: 1px solid #e5e7eb;
+            color: #4b5563;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-auditoria-outline:hover {
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+        
+        /* Primary / Action Buttons Outline */
+        .btn-action-outline {
+            background-color: transparent;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            border-radius: 9999px;
+            padding: 8px 16px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        .btn-action-outline:hover {
+            background-color: #f9fafb;
+            color: #111827;
+            border-color: #9ca3af;
+        }
+        
+        /* Primary / Solid */
+        .btn-action-solid {
+            background-color: #0B3D4E;
+            color: #ffffff;
+            border: none;
+            border-radius: 9999px;
+            padding: 8px 16px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .btn-action-solid:hover {
+            background-color: #082d3a;
+            transform: translateY(-1px);
+        }
+
+        /* Action Icons inside Table */
+        .table-icon-btn {
+            color: #6b7280;
+            font-size: 1.125rem;
+            transition: color 0.2s ease;
+            padding: 4px;
+        }
+        .table-icon-btn.edit:hover { color: #0088aa; }
+        .table-icon-btn.delete:hover { color: #ef4444; }
+
+        /* Search Input Icon wrapper */
+        .dataTables_wrapper .dataTables_filter {
+            position: relative;
+        }
+        .dataTables_wrapper .dataTables_filter input {
+            /* padding removed */ /* Make room for icon */
+        }
+        .dataTables_filter::before {
+            /* content removed */ /* We'll use a hack if we can't use phosphor content directly, or we can just append icon via JS. Better via JS. */
+            /* Actually, let's just use JS to prepend the Phosphor icon in DataTables. */
+        }
+        .dataTables_processing {
+            background: rgba(255,255,255,0.9) !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 8px !important;
+            padding: 8px 16px !important;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1) !important;
+            font-size: 13px !important;
+            color: #475569 !important;
+        }
+        /* Form validation UX */
+        .field-required::after {
+            content: ' *';
+            color: #ef4444;
+            font-weight: 700;
+        }
+        .field-input:invalid:not(:placeholder-shown),
+        .field-input.is-invalid {
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+        }
+        .field-input:valid:not(:placeholder-shown) {
+            border-color: #22c55e;
+        }
+        .field-error {
+            color: #ef4444;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+        .field-input.is-invalid ~ .field-error { display: block; }
+        /* Toast notification improvements */
+        .toast-success { border-left: 4px solid #22c55e; }
+        .toast-error { border-left: 4px solid #ef4444; }
+        .toast-warning { border-left: 4px solid #f59e0b; }
+        .toast-info { border-left: 4px solid #3b82f6; }
+    </style>
+</head>
+<body class="bg-dlab-light text-dlab-dark font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Skip to content (accessibility) -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[10000] focus:bg-dlab-primary focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-lg">
+        Saltar al contenido principal
+    </a>
+
+    <!-- Global Page Loader -->
+    <div id="global-loader" class="hidden fixed inset-0 z-[9999] bg-white/70 backdrop-blur-sm flex items-center justify-center">
+        <div class="flex flex-col items-center gap-3">
+            <div class="w-10 h-10 border-4 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
+            <span class="text-sm text-slate-600 font-medium">Cargando...</span>
+        </div>
+    </div>
+
+    <!-- Banner Superior de Recordatorio Semanal de Respaldo -->
+    <div id="banner-backup-semando" class="hidden bg-amber-50 border-b border-amber-200 px-4 py-2 text-xs text-amber-900 flex items-center justify-between z-50">
+        <div class="flex items-center gap-2">
+            <span class="text-base"><i class="bx bx-error"></i></span>
+            <span><strong>Recordatorio de Seguridad:</strong> Todavía no se ha respaldado la base de datos esta semana. Se recomienda realizar un respaldo de seguridad.</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="ejecutarRespaldoInmediatoGlobal()" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-3 py-1 rounded transition-colors shadow-sm">
+                <svg class="inline w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Respaldar Ahora
+            </button>
+            <button onclick="desactivarBannerBackupTemporalmene()" class="text-amber-700 hover:text-amber-900 font-medium px-2 py-1">
+                Recordar después
+            </button>
+        </div>
+    </div>
+
+    <!-- Navegación Superior -->
+    <nav class="top-navbar">
+        <style>
+            .top-navbar {
+                background: rgba(255, 255, 255, 0.6);
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+                box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+            }
+            .nav-link {
+                display: flex;
+                align-items: center;
+                gap: 0.35rem;
+                padding: 0.5rem 0.65rem;
+                border-radius: 9999px;
+                font-size: 0.875rem;
+                font-weight: 500;
+                color: #475569;
+                transition: all 0.3s ease-in-out;
+                white-space: nowrap;
+            }
+            .nav-link:hover:not(.active) {
+                background-color: rgba(0, 0, 0, 0.05);
+                color: #1e293b;
+            }
+            .nav-link.active {
+                background-color: rgba(0, 200, 255, 0.1);
+                box-shadow: 0 0 10px rgba(0, 200, 255, 0.4), inset 0 0 5px rgba(0, 200, 255, 0.2);
+                color: #0088aa;
+            }
+            .nav-link i {
+                font-size: 1.5rem;
+            }
+            .user-avatar {
+                width: 36px;
+                height: 36px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #0088aa 0%, #0B3D4E 100%);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 14px;
+                letter-spacing: 1px;
+            }
+            .btn-outline-salir {
+                background: transparent;
+                border: 1px solid rgba(0, 0, 0, 0.2);
+                border-radius: 9999px;
+                padding: 4px 12px;
+                display: flex;
+                align-items: center;
+                gap: 0.35rem;
+                color: #334155;
+                font-size: 0.875rem;
+                font-weight: 500;
+                transition: all 0.3s ease-in-out;
+            }
+            .btn-outline-salir:hover {
+                background-color: rgba(0, 0, 0, 0.05);
+                color: #000;
+            }
+            .nav-container {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                height: 4rem; /* h-16 */
+            }
+            .nav-center-scroll {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                gap: 0.25rem;
+                overflow-x: auto;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                padding: 0 1rem;
+            }
+            .nav-center-scroll::-webkit-scrollbar {
+                display: none;
+            }
+            /* Mobile hamburger menu */
+            .hamburger-btn {
+                display: none;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                transition: background 0.2s;
+                gap: 5px;
+                flex-shrink: 0;
+            }
+            .hamburger-btn:hover { background: rgba(0,0,0,0.05); }
+            .hamburger-btn span {
+                display: block;
+                width: 20px;
+                height: 2px;
+                background: #334155;
+                border-radius: 2px;
+                transition: transform 0.3s, opacity 0.3s;
+            }
+            .hamburger-btn.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+            .hamburger-btn.active span:nth-child(2) { opacity: 0; }
+            .hamburger-btn.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+            @media (max-width: 1023px) {
+                .hamburger-btn { display: flex; }
+                .nav-center-scroll {
+                    display: none;
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    right: 0;
+                    background: rgba(255,255,255,0.97);
+                    backdrop-filter: blur(20px);
+                    -webkit-backdrop-filter: blur(20px);
+                    border-bottom: 1px solid rgba(0,0,0,0.08);
+                    box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+                    flex-direction: column;
+                    padding: 0.75rem;
+                    gap: 0.25rem;
+                    overflow-y: auto;
+                    max-height: 70vh;
+                    z-index: 999;
+                }
+                .nav-center-scroll.mobile-open { display: flex; }
+                .nav-center-scroll .h-6.w-px { display: none; }
+                .nav-center-scroll .nav-link {
+                    width: 100%;
+                    padding: 0.75rem 1rem;
+                    border-radius: 0.75rem;
+                    font-size: 0.95rem;
+                }
+            }
+        </style>
+        <div class="w-full px-4 sm:px-6 lg:px-8">
+            <div class="nav-container">
+                
+                <!-- Logo (Left) -->
+                <div class="flex-shrink-0 flex items-center pr-4 border-r border-slate-200/60">
+                    <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo DLAB" class="h-8 w-auto object-contain drop-shadow-sm hover:scale-105 transition-transform duration-300">
+                </div>
+
+                <!-- Hamburger Button (mobile) -->
+                <button class="hamburger-btn" id="hamburger-btn" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="nav-links" onclick="toggleMobileNav()">
+                    <span></span><span></span><span></span>
+                </button>
+                
+                {% if session.get('usuario') %}
+                    {% set rol = session['usuario']['rol']|upper %}
+                    {% set current_path = request.path %}
+                    
+                    <!-- Links (Center - Scrollable on mobile) -->
+                    <div class="nav-center-scroll" id="nav-links" role="navigation" aria-label="Navegación principal">
+                        <a href="{{ url_for('dashboard_views.dashboard') }}" class="nav-link {% if current_path == '/dashboard' %}active{% endif %}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Dashboard
+                        </a>
+                        
+                        <!-- Separador -->
+                        <div class="h-6 w-px bg-slate-300 mx-1 flex-shrink-0"></div>
+
+                        <a href="{{ url_for('maestros_views.index') }}" class="nav-link {% if current_path.startswith('/maestros') %}active{% endif %}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> Maestros
+                        </a>
+                        
+                        <a href="{{ url_for('cierres_views.index') }}" class="nav-link {% if current_path.startswith('/cierres') %}active{% endif %}">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/></svg> Cierres
+                        </a>
+                        
+                        {% if rol in ['ADMIN', 'GERENTE COMERCIAL', 'GERENTE FINANCIERA', 'ASISTENTE'] %}
+                            <a href="{{ url_for('cobros_views.index') }}" class="nav-link {% if current_path.startswith('/cobros') %}active{% endif %}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg> Cobros
+                            </a>
+                        {% endif %}
+
+                        {% if rol in ['ADMIN', 'GERENTE FINANCIERA', 'ASISTENTE'] %}
+                            <a href="{{ url_for('compras_views.index') }}" class="nav-link {% if current_path.startswith('/compras') %}active{% endif %}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> Compras
+                            </a>
+                            <a href="{{ url_for('comisiones_views.index') }}" class="nav-link {% if current_path.startswith('/comisiones') %}active{% endif %}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Comisiones
+                            </a>
+                            <a href="{{ url_for('incidentes_views.index') }}" class="nav-link {% if current_path.startswith('/incidentes') %}active{% endif %}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg> Incidentes
+                            </a>
+                        {% endif %}
+
+                        {% if rol in ['ADMIN', 'GERENTE COMERCIAL', 'ASISTENTE'] %}
+                            <a href="{{ url_for('marketing_views.index') }}" class="nav-link {% if current_path.startswith('/marketing') %}active{% endif %}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg> Marketing
+                            </a>
+                        {% endif %}
+                        
+                        {% if rol in ['ADMIN', 'GERENTE COMERCIAL', 'GERENTE FINANCIERA'] %}
+                            <!-- Separador -->
+                            <div class="h-6 w-px bg-slate-300 mx-1 flex-shrink-0"></div>
+
+                            <a href="{{ url_for('exportaciones_views.index') }}" class="nav-link {% if current_path.startswith('/exportaciones') %}active{% endif %}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg> Reportería
+                            </a>
+                            <button onclick="abrirPowerBI()" id="btn-powerbi" class="nav-link" title="Abrir Power BI Desktop">
+                                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><polyline points="7 10 10 13 14 9 17 11"/>
+                                </svg> Power BI
+                            </button>
+                        {% endif %}
+
+                        {% if rol == 'ADMIN' %}
+                            <!-- Separador -->
+                            <div class="h-6 w-px bg-slate-300 mx-1 flex-shrink-0"></div>
+
+                            <a href="{{ url_for('configuracion_views.index') }}" class="nav-link {% if current_path.startswith('/configuracion') %}active{% endif %}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> Configuración
+                            </a>
+                            <a href="{{ url_for('carga_archivos_views.index') }}" class="nav-link {% if current_path.startswith('/carga_archivos') %}active{% endif %}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg> Carga CSV
+                            </a>
+                            <a href="{{ url_for('alterestate_views.index') }}" class="nav-link {% if current_path.startswith('/api-alterestate') %}active{% endif %}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> API-AlterState
+                            </a>
+                            <a href="{{ url_for('clarodom_views.index') }}" class="nav-link {% if current_path.startswith('/clarodom') %}active{% endif %}">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 5.17-2.39c0-.51.21-1 .55-1.36.28-.33.63-.56 1.01-.66l.17-.06c.7-.2 1.43-.12 2.09.25h.01a.6.6 0 0 1 .28.74c-.07.17-.18.3-.31.4-.15.12-.33.21-.52.25l-.23.05c-.97.17-1.9.45-2.77.85"/><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0zm-8.4-1.6 3-1.9c.6-.3 1.3 0 1.6.6.3.6 0 1.3-.6 1.6l-3 1.9a.8.8 0 1 1-1-1.2zm4.4-.4v3.4a1 1 0 1 1-2 0V10a1 1 0 1 1 2 0z"/></svg> API-ClaroDom
+                            </a>
+                        {% endif %}
+                    </div>
+
+                    <!-- User Section (Right - Fixed) -->
+                    <div class="flex-shrink-0 pl-4 border-l border-slate-200/60 flex items-center gap-4 relative">
+                        
+                        <!-- Notificaciones Bell -->
+                        <div class="relative cursor-pointer hover:bg-slate-100 p-2 rounded-full transition-colors mr-2" id="btn-notif" onclick="document.getElementById('notif-dropdown').classList.toggle('hidden')" role="button" aria-label="Notificaciones" aria-haspopup="true">
+                            <svg class="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
+                            <span id="notif-badge" class="hidden absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white shadow-sm"></span>
+                            
+                            <!-- Notif Dropdown -->
+                            <div id="notif-dropdown" class="hidden absolute top-[120%] right-0 w-80 bg-white rounded-xl shadow-2xl border border-slate-200 z-[60] overflow-hidden cursor-default" onclick="event.stopPropagation()">
+                                <div class="px-4 py-3 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                                    <h3 class="text-sm font-bold text-slate-800">Cuotas y Compromisos</h3>
+                                    <span id="notif-count" class="text-[10px] font-bold bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full">0</span>
+                                </div>
+                                <div id="notif-list" class="max-h-80 overflow-y-auto divide-y divide-slate-100">
+                                    <div class="p-4 text-center text-sm text-slate-500">Cargando...</div>
+                                </div>
+                                <div class="p-2 border-t border-slate-100 bg-slate-50 text-center">
+                                    <a href="/dashboard" class="text-xs text-brand-600 hover:text-brand-800 font-semibold">Ir al Dashboard</a>
+                                </div>
+                            </div>
+                        </div>
+
+                          <div class="flex items-center gap-2.5 hidden sm:flex cursor-pointer hover:opacity-80 transition-opacity" onclick="document.getElementById('user-dropdown').classList.toggle('hidden')" role="button" aria-label="Menú de usuario" aria-haspopup="true">
+                            <div class="user-avatar">
+                                {{ session['usuario']['username'][:2]|upper }}
+                            </div>
+                            <div class="flex flex-col">
+                                <span class="text-sm font-semibold text-slate-800 leading-none mb-1">{{ session['usuario']['username'] }}</span>
+                                <span class="text-[11px] text-slate-500 font-light leading-none">{{ session['usuario']['rol'] }}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Dropdown Menu -->
+                        <div id="user-dropdown" class="hidden absolute top-[110%] right-0 w-60 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden">
+                            <div class="px-4 py-3 bg-slate-50 border-b border-slate-100">
+                                <p class="text-sm font-bold text-slate-800">{{ session['usuario']['username'] }}</p>
+                                <p class="text-xs font-medium text-amber-600 mt-0.5">{{ session['usuario']['rol'] }}</p>
+                                {% if session['usuario'].get('email') %}
+                                <p class="text-xs text-slate-500 mt-1">{{ session['usuario']['email'] }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="p-2">
+                                <button class="w-full text-left px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 rounded-lg transition-colors flex items-center gap-2">
+                                    <i class="bx bx-lock-alt text-lg"></i> Cambiar Contraseña
+                                </button>
+                            </div>
+                            <div class="p-2 border-t border-slate-100">
+                                <a href="{{ url_for('auth_views.logout') }}" class="w-full text-left px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 rounded-lg transition-colors flex items-center gap-2">
+                                    <i class="bx bx-log-out text-lg"></i> Cerrar Sesión
+                                </a>
+                            </div>
+                        </div>
+
+                        <a href="{{ url_for('auth_views.logout') }}" class="btn-outline-salir hidden lg:flex">
+                            <i class="bx bx-log-out" style="font-size: 1.25rem;"></i> Salir
+                        </a>
+                    </div>
+                {% endif %}
+                
+            </div>
+        </div>
+    </nav>
+
+    <!-- Banner de Actualizacion Disponible -->
+    <div id="banner-update" class="hidden bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-200 px-4 py-2 text-xs text-emerald-900 flex items-center justify-between z-50">
+        <div class="flex items-center gap-2">
+            <span class="text-base"><i class="bx bx-cloud-download"></i></span>
+            <span><strong>Nueva version disponible:</strong> <span id="update-version-label">-</span>. Actualiza para obtener las ultimas mejoras.</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <button id="btn-apply-update" onclick="aplicarActualizacion()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1 rounded transition-colors shadow-sm">
+                <i class="bx bx-cloud-download mr-1"></i> Actualizar ahora
+            </button>
+            <button onclick="document.getElementById('banner-update').classList.add('hidden')" class="text-emerald-700 hover:text-emerald-900 font-medium px-2 py-1">
+                Cerrar
+            </button>
+        </div>
+    </div>
+
+    <!-- Banner de Actualizacion no comprobable (repo privado / sin conexion) -->
+    <div id="banner-update-error" class="hidden bg-slate-50 border-b border-slate-200 px-4 py-1.5 text-xs text-slate-500 flex items-center justify-between z-50">
+        <div class="flex items-center gap-2">
+            <span class="text-base"><i class="bx bx-cloud"></i></span>
+            <span id="update-error-label">No se pudieron comprobar las actualizaciones.</span>
+        </div>
+        <button onclick="document.getElementById('banner-update-error').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 font-medium px-2 py-1">
+            Cerrar
+        </button>
+    </div>
+
+    <!-- Contenido Principal -->
+    <main id="main-content" class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 px-6">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
+            <div>
+                DLab Data App &copy; 2026 &mdash; Plataforma CRM &amp; Analitica Inmobiliaria
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="abrirModalReporte()" class="hover:text-slate-600 transition-colors flex items-center gap-1" title="Reportar un problema">
+                    <i class="bx bx-bug text-sm"></i> Reportar Problema
+                </button>
+                <span class="text-slate-300">|</span>
+                <span class="font-mono text-slate-500">v{{ app_version.version }} ({{ app_version.build }})</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal Reportar Problema -->
+    <div id="modal-reporte" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 animate-fade-in-up">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="bx bx-bug text-rose-500"></i> Reportar Problema
+                </h3>
+                <button onclick="cerrarModal('modal-reporte')" class="text-slate-400 hover:text-slate-600">
+                    <i class="bx bx-x text-xl"></i>
+                </button>
+            </div>
+            <p class="text-sm text-slate-600 mb-4">
+                Describe el problema que encontraste. Se generara un reporte diagnostico con la informacion de tu sistema.
+            </p>
+            <textarea id="reporte-descripcion" rows="4" placeholder="Ej: No puedo registrar un pago, me sale error 500 al abrir cobros..."
+                class="field-input w-full mb-3"></textarea>
+            <div class="flex items-center gap-4 mb-4 text-sm text-slate-600">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="reporte-incluir-logs" checked class="rounded">
+                    Incluir logs recientes
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="reporte-incluir-db" checked class="rounded">
+                    Incluir info de la DB
+                </label>
+            </div>
+            <div class="flex justify-end gap-3">
+                <button onclick="cerrarModal('modal-reporte')" class="px-4 py-2 text-slate-600 font-medium bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors text-sm">
+                    Cancelar
+                </button>
+                <button onclick="generarReporte()" id="btn-generar-reporte" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-lg shadow-sm transition-colors text-sm flex items-center gap-2">
+                    <i class="bx bx-copy"></i> Generar y Copiar
+                </button>
+            </div>
+            <div id="reporte-preview" class="hidden mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs font-mono text-slate-700 max-h-48 overflow-y-auto whitespace-pre-wrap"></div>
+        </div>
+    </div>
+
+    <!-- Global Confirm Modal -->
+    <div id="modal-confirmacion-global" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-center animate-fade-in-up">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-rose-100 mb-4">
+                <i class="bx bx-error text-2xl text-rose-600"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 mb-2" id="mc-titulo">Confirmación</h3>
+            <p class="text-sm text-slate-600 mb-6" id="mc-mensaje">¿Está seguro de esta acción?</p>
+            <div class="flex justify-center gap-3">
+                <button onclick="cerrarConfirmacionGlobal()" class="px-4 py-2 text-slate-600 font-medium bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors text-sm">Cancelar</button>
+                <button id="mc-btn-confirmar" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-medium rounded-lg shadow-sm transition-colors text-sm">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global Confirmation Modal Logic
+        let globalConfirmCallback = null;
+        function confirmarAccion(mensaje, callback) {
+            document.getElementById('mc-mensaje').innerText = mensaje;
+            globalConfirmCallback = callback;
+            document.getElementById('modal-confirmacion-global').classList.remove('hidden');
+        }
+        function cerrarConfirmacionGlobal() {
+            document.getElementById('modal-confirmacion-global').classList.add('hidden');
+            globalConfirmCallback = null;
+        }
+        document.getElementById('mc-btn-confirmar').addEventListener('click', () => {
+            if (globalConfirmCallback) globalConfirmCallback();
+            cerrarConfirmacionGlobal();
+        });
+
+        // Mobile hamburger menu
+        function toggleMobileNav() {
+            const nav = document.getElementById('nav-links');
+            const btn = document.getElementById('hamburger-btn');
+            const isOpen = nav.classList.toggle('mobile-open');
+            btn.classList.toggle('active', isOpen);
+            btn.setAttribute('aria-expanded', isOpen);
+        }
+        // Close mobile nav when clicking a link
+        document.querySelectorAll('#nav-links .nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth < 1024) toggleMobileNav();
+            });
+        });
+        // Close mobile nav on resize to desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                const nav = document.getElementById('nav-links');
+                const btn = document.getElementById('hamburger-btn');
+                nav.classList.remove('mobile-open');
+                btn.classList.remove('active');
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // Verificar si se requiere un respaldo semanal
+        function verificarRecordatorioBackup() {
+            const ultimoBackup = localStorage.getItem('last_backup_timestamp');
+            const postergadoHasta = localStorage.getItem('postergado_backup_hasta');
+
+            const ahora = Date.now();
+            const sieteDiasMs = 7 * 24 * 60 * 60 * 1000;
+
+            if (postergadoHasta && ahora < parseInt(postergadoHasta)) {
+                return; // Ocultar si el usuario hizo clic en "Recordar después" recientemente
+            }
+
+            if (!ultimoBackup || (ahora - parseInt(ultimoBackup)) > sieteDiasMs) {
+                document.getElementById('banner-backup-semando').classList.remove('hidden');
+            }
+        }
+
+        function ejecutarRespaldoInmediatoGlobal() {
+            window.location.href = '/api/configuracion/backup/descargar';
+            localStorage.setItem('last_backup_timestamp', Date.now().toString());
+            document.getElementById('banner-backup-semando').classList.add('hidden');
+        }
+
+        function desactivarBannerBackupTemporalmene() {
+            // Postergar recordatorio por 24 horas
+            const manana = Date.now() + (24 * 60 * 60 * 1000);
+            localStorage.setItem('postergado_backup_hasta', manana.toString());
+            document.getElementById('banner-backup-semando').classList.add('hidden');
+        }
+
+        document.addEventListener('DOMContentLoaded', verificarRecordatorioBackup);
+
+        // Función global para filtrar tablas
+        function filtrarTabla(inputId, tbodyId) {
+            const filter = document.getElementById(inputId).value.toLowerCase();
+            const rows = document.getElementById(tbodyId).getElementsByTagName('tr');
+            for (let i = 0; i < rows.length; i++) {
+                const text = rows[i].textContent || rows[i].innerText;
+                if (text.toLowerCase().indexOf(filter) > -1) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+        }
+    </script>
+
+    <script>
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
+        function showToast(message, type = 'success') {
+            // Mapping type to SweetAlert2 icon types (success, error, warning, info, question)
+            let icon = type;
+            if (!['success', 'error', 'warning', 'info', 'question'].includes(type)) {
+                icon = 'info';
+            }
+            Toast.fire({
+                icon: icon,
+                title: message
+            });
+        }
+
+        function applySelect2() {
+            $('select').each(function() {
+                if (!$(this).hasClass('select2-hidden-accessible') && $(this).children('option').length > 10) {
+                    let parentModal = $(this).closest('.fixed.inset-0, [role="dialog"]');
+                    let config = { width: '100%' };
+                    if (parentModal.length) {
+                        config.dropdownParent = parentModal;
+                    }
+                    $(this).select2(config);
+                }
+            });
+        }
+        $(document).ready(function() {
+            applySelect2();
+            const observer = new MutationObserver(function(mutations) {
+                let shouldApply = false;
+                mutations.forEach(m => {
+                    if (m.type === 'childList' && m.addedNodes.length > 0) {
+                        shouldApply = true;
+                    }
+                });
+                if (shouldApply) applySelect2();
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        });
+    </script>
+    <script>
+        // ── Power BI ─────────────────────────────────────────────────────────
+        function abrirPowerBI() {
+            const btn = document.getElementById('btn-powerbi');
+            if (btn) {
+                btn.disabled = true;
+                btn.style.opacity = '0.6';
+                btn.style.cursor = 'wait';
+            }
+            fetch('/api/exportaciones/abrir-powerbi', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin'
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.modo === 'readme') {
+                        showToast('Se abrió la guía de configuración de Power BI.', 'info');
+                    } else if (data.modo === 'abierto') {
+                        showToast(data.message, 'info');
+                    } else {
+                        showToast('Power BI Desktop iniciando...', 'success');
+                    }
+                } else {
+                    showToast(data.message || 'No se pudo abrir Power BI.', 'error');
+                }
+            })
+            .catch(() => showToast('Error de conexión al intentar abrir Power BI.', 'error'))
+
+            .finally(() => {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.style.opacity = '';
+                    btn.style.cursor = '';
+                }
+            });
+        }
+
+        // ── Modales Globales (scroll-lock) ────────────────────────────────────
+        function abrirModal(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        function cerrarModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+            // Re-enable scroll only if no other modal is visible
+            const anyOpen = Array.from(document.querySelectorAll('[id^="modal-"]'))
+                .some(m => !m.classList.contains('hidden'));
+            if (!anyOpen) document.body.style.overflow = '';
+        }
+        // Close modal on backdrop click
+        document.addEventListener('click', function(e) {
+            if (e.target && e.target.matches('[id^="modal-"]')) {
+                cerrarModal(e.target.id);
+            }
+        });
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const openModal = Array.from(document.querySelectorAll('[id^="modal-"]'))
+                    .find(m => !m.classList.contains('hidden'));
+                if (openModal) cerrarModal(openModal.id);
+            }
+        });
+
+        // ── fetchWithLoader (wrapper fetch con spinner) ───────────────────────
+        async function fetchWithLoader(url, options = {}) {
+            const loader = document.getElementById('global-loader');
+            if (loader) loader.classList.remove('hidden');
+            try {
+                return await fetch(url, options);
+            } finally {
+                if (loader) loader.classList.add('hidden');
+            }
+        }
+    </script>
+    {% block scripts %}{% endblock %}
+
+    <script>
+        
+        // Logica Notificaciones Dinamicas
+        async function cargarNotificacionesNav() {
+            try {
+                const res = await fetch('/api/alertas/dashboard');
+                if (!res.ok) return;
+                const data = await res.json();
+                
+                let count = 0;
+                let html = '';
+                
+                // Critico: Cuotas vencidas
+                if(data.critico.cuotas_vencidas && data.critico.cuotas_vencidas.length > 0) {
+                    data.critico.cuotas_vencidas.forEach(c => {
+                        count++;
+                        html += `
+                        <div class="p-3 hover:bg-slate-50 transition-colors border-l-4 border-rose-500 flex flex-col gap-1">
+                            <div class="flex justify-between items-start">
+                                <span class="text-xs font-bold text-rose-700">Cuota Vencida</span>
+                                <span class="text-[10px] font-medium bg-rose-100 text-rose-600 px-1.5 rounded">${c.dias_atraso}d atrás</span>
+                            </div>
+                            <p class="text-sm font-medium text-slate-800 line-clamp-1">${c.cliente}</p>
+                            <p class="text-xs text-slate-500">Monto: $${Number(c.monto_total).toLocaleString()} - ${c.concepto}</p>
+                        </div>`;
+                    });
+                }
+                
+                // Advertencia: Cuotas proximas
+                if(data.advertencia.cuotas_proximas && data.advertencia.cuotas_proximas.length > 0) {
+                    data.advertencia.cuotas_proximas.forEach(c => {
+                        count++;
+                        html += `
+                        <div class="p-3 hover:bg-slate-50 transition-colors border-l-4 border-amber-400 flex flex-col gap-1">
+                            <div class="flex justify-between items-start">
+                                <span class="text-xs font-bold text-amber-700">Próxima a vencer</span>
+                                <span class="text-[10px] font-medium bg-amber-100 text-amber-700 px-1.5 rounded">En ${c.dias_para_vencer}d</span>
+                            </div>
+                            <p class="text-sm font-medium text-slate-800 line-clamp-1">${c.cliente}</p>
+                            <p class="text-xs text-slate-500">Monto: $${Number(c.monto_total).toLocaleString()} - ${c.concepto}</p>
+                        </div>`;
+                    });
+                }
+                
+                // Critico: Comisiones vencidas (CXP)
+                if(data.critico.comisiones_vencidas && data.critico.comisiones_vencidas.length > 0) {
+                    data.critico.comisiones_vencidas.forEach(c => {
+                        count++;
+                        html += `
+                        <div class="p-3 hover:bg-slate-50 transition-colors border-l-4 border-rose-500 flex flex-col gap-1">
+                            <span class="text-xs font-bold text-rose-700">CXP Vencida</span>
+                            <p class="text-sm font-medium text-slate-800">Pago a Asesor pendiente</p>
+                            <p class="text-xs text-slate-500">Monto: $${Number(c.monto).toLocaleString()} (Límite: ${c.fecha_maxima_pago})</p>
+                        </div>`;
+                    });
+                }
+                
+                if (count > 0) {
+                    document.getElementById('notif-badge').classList.remove('hidden');
+                    document.getElementById('notif-count').innerText = count;
+                    document.getElementById('notif-list').innerHTML = html;
+                } else {
+                    document.getElementById('notif-badge').classList.add('hidden');
+                    document.getElementById('notif-count').innerText = "0";
+                    document.getElementById('notif-list').innerHTML = '<div class="p-6 text-center text-sm text-slate-400"><i class="bx bx-check-circle text-3xl mb-2 text-emerald-400"></i><br>Todo al día. No hay alertas pendientes.</div>';
+                }
+            } catch(e) {
+                console.error("Error cargando notificaciones", e);
+            }
+        }
+        
+        // Load on start
+        window.addEventListener('load', cargarNotificacionesNav);
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const btn = document.getElementById('btn-notif');
+            const drop = document.getElementById('notif-dropdown');
+            if(btn && !btn.contains(e.target)) {
+                drop.classList.add('hidden');
+            }
+            
+            const btnUser = document.querySelector('.user-avatar')?.parentElement;
+            const dropUser = document.getElementById('user-dropdown');
+            if(btnUser && dropUser && !btnUser.contains(e.target) && !dropUser.contains(e.target)) {
+                dropUser.classList.add('hidden');
+            }
+        });
+        
+    
+
+        // Show loader on navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('a[href]:not([href^="#"]):not([href^="javascript"]):not([target])').forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    if (href && !href.startsWith('/api/') && !href.startsWith('mailto:')) {
+                        document.getElementById('global-loader').classList.remove('hidden');
+                    }
+                });
+            });
+            // Hide on load
+            window.addEventListener('load', function() {
+                document.getElementById('global-loader').classList.add('hidden');
+            });
+        });
+
+        // ── Reporte de Problema ────────────────────────────────────────────
+        function abrirModalReporte() {
+            document.getElementById('reporte-descripcion').value = '';
+            document.getElementById('reporte-preview').classList.add('hidden');
+            abrirModal('modal-reporte');
+        }
+
+        async function generarReporte() {
+            const desc = document.getElementById('reporte-descripcion').value.trim();
+            if (!desc) {
+                showToast('Describe el problema primero.', 'warning');
+                return;
+            }
+
+            const btn = document.getElementById('btn-generar-reporte');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bx bx-loader-alt animate-spin"></i> Generando...';
+
+            try {
+                const res = await fetch('/api/configuracion/diagnostics/report', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'same-origin',
+                    body: JSON.stringify({
+                        description: desc,
+                        include_logs: document.getElementById('reporte-incluir-logs').checked,
+                        include_db_info: document.getElementById('reporte-incluir-db').checked,
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success && data.report) {
+                    // Copiar al portapapeles
+                    await navigator.clipboard.writeText(data.report);
+                    showToast('Reporte copiado al portapapeles. Pegalo en WhatsApp/Telegram.', 'success');
+
+                    // Mostrar preview
+                    const preview = document.getElementById('reporte-preview');
+                    preview.textContent = data.report.substring(0, 800) + (data.report.length > 800 ? '\n...' : '');
+                    preview.classList.remove('hidden');
+                } else {
+                    showToast('Error generando el reporte.', 'error');
+                }
+            } catch(e) {
+                showToast('Error de conexion.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bx bx-copy"></i> Generar y Copiar';
+            }
+        }
+
+        // ── Verificar Actualizaciones al cargar ────────────────────────────
+        async function verificarActualizaciones() {
+            try {
+                const res = await fetch('/api/configuracion/update/check');
+                const data = await res.json();
+
+                if (data.error || data.success === false) {
+                    // Check fallo (repo privado, sin conexion, etc.): banner gris discreto con la razon
+                    const razon = data.mensaje || 'No se pudieron comprobar las actualizaciones.';
+                    document.getElementById('update-error-label').textContent = razon;
+                    document.getElementById('banner-update-error').classList.remove('hidden');
+                    return;
+                }
+
+                if (data.available) {
+                    document.getElementById('update-version-label').textContent = 'v' + data.latest_version;
+                    document.getElementById('banner-update').classList.remove('hidden');
+                }
+            } catch(e) {
+                // Silenciar errores de red en background
+            }
+        }
+        window.addEventListener('load', verificarActualizaciones);
+
+        // ── Aplicar actualizacion en la propia app (sin reinstalar) ─────────
+        async function aplicarActualizacion() {
+            const btn = document.getElementById('btn-apply-update');
+            if (!btn) return;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bx bx-loader-circle bx-spin mr-1"></i> Actualizando...';
+            try {
+                const res = await fetch('/api/configuracion/update/apply', { method: 'POST' });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bx bx-cloud-download mr-1"></i> Actualizar ahora';
+                    showToast((data.mensaje || data.error || 'No se pudo iniciar la actualizacion.'), 'error');
+                    return;
+                }
+                showToast('Descargando actualizacion... La app se reiniciara sola.', 'success');
+                setTimeout(() => { window.location.reload(); }, 15000);
+            } catch (e) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bx bx-cloud-download mr-1"></i> Actualizar ahora';
+                showToast('Error de conexion al actualizar.', 'error');
+            }
+        }
+
+        async function fetchWithLoader(url, options={}) {
+            const loader = document.getElementById('global-loader');
+            if (loader) loader.classList.remove('hidden');
+            try {
+                const res = await fetch(url, options);
+                
+                // Si la peticion modifica datos (POST, PUT, DELETE), recargar notificaciones
+                if (options.method && ['POST', 'PUT', 'DELETE'].includes(options.method.toUpperCase())) {
+                    if(typeof cargarNotificacionesNav === 'function') {
+                        cargarNotificacionesNav();
+                    }
+                }
+                return res;
+            } finally {
+                if (loader) loader.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+table pagos
+	lineageTag: 1ba4155a-07e4-4f42-b36b-873fe25b5f5f
+
+	column id
+		dataType: double
+		lineageTag: 000770f4-be8a-4c85-8b42-cc10319cc489
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column cobro_id
+		dataType: double
+		lineageTag: 57bcd782-d423-47a6-8b40-c809de8b4009
+		summarizeBy: sum
+		sourceColumn: cobro_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column monto
+		dataType: double
+		lineageTag: d22d23b4-689c-4b83-9951-89d2cb23476e
+		summarizeBy: sum
+		sourceColumn: monto
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fecha_pago
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 501692fe-f0da-4489-a26a-6ccb5ab681ba
+		summarizeBy: none
+		sourceColumn: fecha_pago
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column metodo
+		dataType: string
+		lineageTag: 0c0e98ec-a4c9-4582-ab9a-c5591c663073
+		summarizeBy: none
+		sourceColumn: metodo
+
+		annotation SummarizationSetBy = Automatic
+
+	column referencia
+		dataType: string
+		lineageTag: 87046992-506f-42bb-9317-ed0643008da8
+		summarizeBy: none
+		sourceColumn: referencia
+
+		annotation SummarizationSetBy = Automatic
+
+	column registrado_en
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: cb917613-9562-48d0-a654-e1996219f58e
+		summarizeBy: none
+		sourceColumn: registrado_en
+
+		annotation SummarizationSetBy = Automatic
+
+	column enlace_dropbox
+		dataType: string
+		lineageTag: 08eb17a2-ab4d-415e-a9f4-209c47ddb9fa
+		summarizeBy: none
+		sourceColumn: enlace_dropbox
+
+		annotation SummarizationSetBy = Automatic
+
+	partition pagos = m
+		mode: import
+		source =
+				let
+				    Origen = Odbc.DataSource("driver={SQLite3 ODBC Driver};database=H:\Mi unidad\Proyecto - CRM Inmobiliaria\dlab-data\data\dlab.db;notxn=1;dsn=SQLite3 Datasource", [HierarchicalNavigation=true, SqlCapabilities=[LimitClauseKind=LimitClauseKind.Limit]]),
+				    pagos_Table = Origen{[Name="pagos",Kind="Table"]}[Data]
+				in
+				    pagos_Table
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

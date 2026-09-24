@@ -1,0 +1,142 @@
+table cobros
+	lineageTag: 07e1da03-2a0e-436f-8615-ec7d40ba3d95
+
+	column id
+		dataType: double
+		lineageTag: 4d5e7bdc-0bdb-4283-9822-a03fdcc4e24c
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column transaccion_id
+		dataType: double
+		lineageTag: 4708e85d-5240-4955-ab31-eebdd2318d6e
+		summarizeBy: none
+		sourceColumn: transaccion_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column tipo
+		dataType: string
+		lineageTag: 9a934bdb-fab9-4cd9-9608-3db8a2e85dd2
+		summarizeBy: none
+		sourceColumn: tipo
+
+		annotation SummarizationSetBy = Automatic
+
+	column numero_cuota
+		dataType: double
+		lineageTag: 56862d37-5481-42d4-976e-4308fcebd8b3
+		summarizeBy: sum
+		sourceColumn: numero_cuota
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column tramo_comision
+		dataType: double
+		lineageTag: c0441ab9-60e4-43e2-b9dc-50efe7dd5312
+		summarizeBy: sum
+		sourceColumn: tramo_comision
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column concepto
+		dataType: string
+		lineageTag: b3f6bf5c-3e8f-411d-a39a-751484282e10
+		summarizeBy: none
+		sourceColumn: concepto
+
+		annotation SummarizationSetBy = Automatic
+
+	column origen
+		dataType: string
+		lineageTag: d4b32627-c3ed-4e17-a09a-d4b2ed81514e
+		summarizeBy: none
+		sourceColumn: origen
+
+		annotation SummarizationSetBy = Automatic
+
+	column monto_total
+		dataType: double
+		lineageTag: cfd0355f-b8dc-4923-81cd-ce0bef4ebd11
+		summarizeBy: sum
+		sourceColumn: monto_total
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fecha_generado
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: a9965586-0174-46a6-a2ed-f85489aa5232
+		summarizeBy: none
+		sourceColumn: fecha_generado
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column fecha_vencimiento
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 9d37105e-7418-4691-b0cb-735af630231a
+		summarizeBy: none
+		sourceColumn: fecha_vencimiento
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column dias_mora_calculados
+		dataType: double
+		lineageTag: 6b7b1545-5ac2-46ff-bb44-4cb49c0aa3fd
+		summarizeBy: sum
+		sourceColumn: dias_mora_calculados
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column estado_aging_id
+		dataType: double
+		lineageTag: db6c544d-43ce-48a5-965e-3e1f72e439ce
+		summarizeBy: sum
+		sourceColumn: estado_aging_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column metodo_pago_ultimo_id
+		dataType: double
+		lineageTag: bf7d52e8-db45-4f7d-b26d-393ac30c853b
+		summarizeBy: sum
+		sourceColumn: metodo_pago_ultimo_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition cobros = m
+		mode: import
+		source =
+				let
+				    Origen = Odbc.DataSource("driver={SQLite3 ODBC Driver};database=H:\Mi unidad\Proyecto - CRM Inmobiliaria\dlab-data\data\dlab.db;notxn=1;dsn=SQLite3 Datasource", [HierarchicalNavigation=true, SqlCapabilities=[LimitClauseKind=LimitClauseKind.Limit]]),
+				    cobros_Table = Origen{[Name="cobros",Kind="Table"]}[Data]
+				in
+				    cobros_Table
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

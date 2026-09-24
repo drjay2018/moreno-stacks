@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% block title %}Carga & Descarga Masiva CSV | DLAB CRM{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900">Centro de Ingesta (CSV / PDF)</h1>
+        <p class="text-sm text-slate-500">Descarga de plantillas estandarizadas e ingesta masiva con validación previa de tipos de datos y lectura automatizada de facturas (AI).</p>
+    </div>
+
+    <!-- Botones de Descarga de Plantillas -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
+        <h2 class="text-base font-semibold text-slate-800">Descargar Plantillas CSV Oficiales (Optimizadas para ML)</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3">
+            <a href="/api/carga-archivos/plantilla/clientes" class="p-3 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 border border-slate-200 rounded-lg text-center transition-colors block">
+                <div class="text-xl"><svg class="inline w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+                <div class="text-xs font-bold text-slate-800 mt-1">Clientes</div>
+                <div class="text-[10px] text-slate-400">Perfil &amp; Look-alike</div>
+            </a>
+            <a href="/api/carga-archivos/plantilla/empleados" class="p-3 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 border border-slate-200 rounded-lg text-center transition-colors block">
+                <div class="text-xl"><svg class="inline w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+                <div class="text-xs font-bold text-slate-800 mt-1">Empleados</div>
+                <div class="text-[10px] text-slate-400">Productividad</div>
+            </a>
+            <a href="/api/carga-archivos/plantilla/constructoras" class="p-3 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 border border-slate-200 rounded-lg text-center transition-colors block">
+                <div class="text-xl"><svg class="inline w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+                <div class="text-xs font-bold text-slate-800 mt-1">Constructoras</div>
+                <div class="text-[10px] text-slate-400">Contrapartes</div>
+            </a>
+            <a href="/api/carga-archivos/plantilla/proveedores" class="p-3 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 border border-slate-200 rounded-lg text-center transition-colors block">
+                <div class="text-xl"><svg class="inline w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+                <div class="text-xs font-bold text-slate-800 mt-1">Proveedores</div>
+                <div class="text-[10px] text-slate-400">Gestión de Compras</div>
+            </a>
+            <a href="/api/carga-archivos/plantilla/proyectos" class="p-3 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 border border-slate-200 rounded-lg text-center transition-colors block">
+                <div class="text-xl"><svg class="inline w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg></div>
+                <div class="text-xs font-bold text-slate-800 mt-1">Proyectos</div>
+                <div class="text-[10px] text-slate-400">Características</div>
+            </a>
+            <a href="/api/carga-archivos/plantilla/cobros" class="p-3 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 border border-slate-200 rounded-lg text-center transition-colors block">
+                <div class="text-xl"><svg class="inline w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="3"/><polyline points="2 7 12 3 22 7"/><line x1="4" y1="7" x2="4" y2="17"/><line x1="8" y1="7" x2="8" y2="17"/><line x1="12" y1="7" x2="12" y2="17"/><line x1="16" y1="7" x2="16" y2="17"/><line x1="20" y1="7" x2="20" y2="17"/><line x1="2" y1="17" x2="22" y2="17"/><line x1="2" y1="20" x2="22" y2="20"/></svg></div>
+                <div class="text-xs font-bold text-slate-800 mt-1">Cobros</div>
+                <div class="text-[10px] text-slate-400">Aging &amp; Riesgo</div>
+            </a>
+            <a href="/api/carga-archivos/plantilla/cierres" class="p-3 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 border border-slate-200 rounded-lg text-center transition-colors block">
+                <div class="text-xl"><svg class="inline w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div class="text-xs font-bold text-slate-800 mt-1">Cierres</div>
+                <div class="text-[10px] text-slate-400">Velocidad SLA</div>
+            </a>
+            <a href="/api/carga-archivos/plantilla/marketing" class="p-3 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 border border-slate-200 rounded-lg text-center transition-colors block">
+                <div class="text-xl"><svg class="inline w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+                <div class="text-xs font-bold text-slate-800 mt-1">Marketing</div>
+                <div class="text-[10px] text-slate-400">Campañas &amp; Leads</div>
+            </a>
+            <a href="/api/carga-archivos/plantilla/compras" class="p-3 bg-slate-50 hover:bg-amber-50 hover:border-amber-400 border border-slate-200 rounded-lg text-center transition-colors block">
+                <div class="text-xl"><svg class="inline w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></div>
+                <div class="text-xs font-bold text-slate-800 mt-1">Compras</div>
+                <div class="text-[10px] text-slate-400">Gastos &amp; Órdenes</div>
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Zona Drag & Drop CSV -->
+        <div id="dropzone" class="bg-white rounded-2xl shadow-sm border-2 border-dashed border-slate-300 p-8 text-center space-y-4 hover:border-amber-500 transition-colors">
+            <div class="w-16 h-16 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold"><svg class="inline w-8 h-8" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+            <div>
+                <p class="text-sm font-semibold text-slate-700">Arrastra tu archivo CSV para procesarlo</p>
+                <p class="text-xs text-slate-400 mt-1">Soporta codificación UTF-8 y coincidencia automática de columnas BI/IA</p>
+            </div>
+            <input type="file" id="csv-file-input" accept=".csv" class="hidden" onchange="procesarArchivoCSV(this.files[0])">
+            <button onclick="document.getElementById('csv-file-input').click()" class="bg-slate-900 hover:bg-slate-800 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+                Examinar Archivo CSV
+            </button>
+        </div>
+
+        <!-- Zona Drag & Drop PDF -->
+        <div id="dropzone-pdf" class="bg-white rounded-2xl shadow-sm border-2 border-dashed border-slate-300 p-8 text-center space-y-4 hover:border-rose-500 transition-colors">
+            <div class="w-16 h-16 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#e11d48" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <line x1="10" y1="9" x2="8" y2="9"/>
+                </svg>
+            </div>
+            <div>
+                <p class="text-sm font-semibold text-slate-700">Arrastra tu Factura PDF para lectura automatizada</p>
+                <p class="text-xs text-slate-400 mt-1">Extrae NCF, RNC, Totales e Impuestos usando PDF Plumber y Regex</p>
+            </div>
+            <input type="file" id="pdf-file-input" accept=".pdf" class="hidden" onchange="procesarArchivoPDF(this.files[0])">
+            <button onclick="document.getElementById('pdf-file-input').click()" class="bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+                Examinar Archivo PDF
+            </button>
+        </div>
+    </div>
+
+    <div id="resultado-carga" class="hidden bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-2"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Drag & Drop event listeners
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('csv-file-input');
+
+    dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('border-amber-500', 'bg-amber-50/30');
+    });
+
+    dropzone.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('border-amber-500', 'bg-amber-50/30');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('border-amber-500', 'bg-amber-50/30');
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            fileInput.files = e.dataTransfer.files;
+            procesarArchivoCSV(e.dataTransfer.files[0]);
+        }
+    });
+
+    // Drag & Drop event listeners (PDF)
+    const dropzonePdf = document.getElementById('dropzone-pdf');
+    const fileInputPdf = document.getElementById('pdf-file-input');
+
+    dropzonePdf.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzonePdf.classList.add('border-rose-500', 'bg-rose-50/30');
+    });
+
+    dropzonePdf.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        dropzonePdf.classList.remove('border-rose-500', 'bg-rose-50/30');
+    });
+
+    dropzonePdf.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzonePdf.classList.remove('border-rose-500', 'bg-rose-50/30');
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            fileInputPdf.files = e.dataTransfer.files;
+            procesarArchivoPDF(e.dataTransfer.files[0]);
+        }
+    });
+
+    // Módulos oficiales y sus nombres de archivo esperados
+    const PLANTILLAS_VALIDAS = {
+        "clientes":  "plantilla_clientes_bi_ia.csv",
+        "empleados": "plantilla_empleados_bi_ia.csv",
+        "constructoras": "plantilla_constructoras_bi_ia.csv",
+        "proveedores": "plantilla_proveedores_bi_ia.csv",
+        "proyectos": "plantilla_proyectos_bi_ia.csv",
+        "cobros":    "plantilla_cobros_bi_ia.csv",
+        "cierres":   "plantilla_cierres_bi_ia.csv",
+        "marketing": "plantilla_marketing_bi_ia.csv",
+        "compras":   "plantilla_compras_bi_ia.csv"
+    };
+    const NOMBRES_VALIDOS = Object.values(PLANTILLAS_VALIDAS);
+
+    async function procesarArchivoCSV(file) {
+        if (!file) return;
+
+        const resDiv = document.getElementById('resultado-carga');
+        resDiv.classList.remove('hidden');
+
+        // ── Validación 1: extensión
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+            resDiv.innerHTML = `<div class="bg-rose-50 border border-rose-200 p-4 rounded-lg">
+                <p class="text-sm font-bold text-rose-700"><i class="bx bx-x-circle"></i> Tipo de archivo no permitido</p>
+                <p class="text-xs text-rose-600 mt-1">Solo se aceptan archivos <strong>.csv</strong></p>
+            </div>`;
+            return;
+        }
+
+        // ── Validación 2: tamaño (5 MB)
+        if (file.size > 5 * 1024 * 1024) {
+            resDiv.innerHTML = `<div class="bg-rose-50 border border-rose-200 p-4 rounded-lg">
+                <p class="text-sm font-bold text-rose-700"><i class="bx bx-x-circle"></i> Archivo demasiado grande</p>
+                <p class="text-xs text-rose-600 mt-1">El tamaño máximo permitido es <strong>5 MB</strong></p>
+            </div>`;
+            return;
+        }
+
+        // ── Validación 3: nombre de archivo oficial
+        if (!NOMBRES_VALIDOS.includes(file.name)) {
+            const lista = NOMBRES_VALIDOS.map(n => `<li class="font-mono text-xs">${n}</li>`).join('');
+            resDiv.innerHTML = `<div class="bg-amber-50 border border-amber-300 p-4 rounded-lg space-y-2">
+                <p class="text-sm font-bold text-amber-800"><i class="bx bx-error"></i> Nombre de archivo no reconocido: <span class="font-mono">${file.name}</span></p>
+                <p class="text-xs text-amber-700">Solo se aceptan plantillas oficiales descargadas desde este sistema. Descarga la plantilla del módulo correspondiente y no cambies el nombre del archivo.</p>
+                <p class="text-xs font-semibold text-amber-800 mt-2">Nombres válidos:</p>
+                <ul class="list-disc list-inside text-amber-700 space-y-0.5">${lista}</ul>
+            </div>`;
+            return;
+        }
+
+        // ── Procesando...
+        resDiv.innerHTML = `<p class="text-sm text-slate-500 font-medium animate-pulse"><i class="bx bx-time"></i> Validando columnas e ingiriendo <strong>${file.name}</strong>...</p>`;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const res = await fetch('/api/carga-archivos/procesar', { method: 'POST', body: formData });
+            const data = await res.json();
+
+            if (data.success) {
+                let detallesHtml = '';
+                if (data.rechazados > 0 && data.detalles_rechazos) {
+                    detallesHtml = `<div class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                        <p class="text-xs font-bold text-amber-800 mb-2">Motivos de filas rechazadas:</p>
+                        <ul class="text-xs text-amber-700 list-disc list-inside space-y-1 mb-3">
+                            ${Object.entries(data.detalles_rechazos).map(([motivo, count]) =>
+                                `<li>${count} fila(s) — ${motivo}</li>`
+                            ).join('')}
+                        </ul>
+                        ${data.log_raw ? `
+                        <p class="text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider">Bitácora de Errores:</p>
+                        <textarea class="w-full h-24 p-2 text-[10px] font-mono text-slate-600 bg-white border border-slate-300 rounded focus:outline-none focus:border-amber-400" readonly onclick="this.select()">${data.log_raw}</textarea>
+                        ` : ''}
+                    </div>`;
+                }
+
+                resDiv.innerHTML = `
+                    <div class="flex items-center gap-2 text-emerald-600 font-bold text-base">${data.message}</div>
+                    <div class="text-xs text-slate-600 space-y-1 mt-2 bg-slate-50 rounded-lg p-3">
+                        <p><strong>Archivo:</strong> <span class="font-mono">${data.filename}</span></p>
+                        <p><strong>Módulo:</strong> ${data.modulo} → tabla <span class="font-mono">${data.tabla_destino}</span></p>
+                        <p><strong>Columnas validadas:</strong> ${data.columnas_validadas}</p>
+                        <p><strong>Filas insertadas:</strong> <span class="text-emerald-700 font-bold">${data.insertados}</span></p>
+                        <p><strong>Filas rechazadas:</strong> <span class="${data.rechazados > 0 ? 'text-amber-600 font-bold' : 'text-slate-500'}">${data.rechazados}</span></p>
+                    </div>
+                    ${detallesHtml}
+                `;
+            } else {
+                resDiv.innerHTML = `<div class="bg-rose-50 border border-rose-200 p-4 rounded-lg">
+                    <p class="text-sm font-bold text-rose-700"><i class="bx bx-x-circle"></i> ${data.error}</p>
+                </div>`;
+            }
+        } catch (e) {
+            resDiv.innerHTML = `<p class="text-rose-500 font-semibold">Error de conexión: ${e.message}</p>`;
+        }
+    }
+
+
+    async function procesarArchivoPDF(file) {
+        if (!file) return;
+
+        const resDiv = document.getElementById('resultado-carga');
+        resDiv.innerHTML = `<p class="text-sm text-slate-500 font-medium animate-pulse">Analizando factura ${file.name}...</p>`;
+        resDiv.classList.remove('hidden');
+
+        if (!file.name.toLowerCase().endsWith('.pdf')) {
+            resDiv.innerHTML = `<div class="bg-rose-50 border border-rose-200 p-4 rounded-lg text-rose-700">
+                <span class="font-semibold">Error:</span> Solo se aceptan archivos con extensión .pdf
+            </div>`;
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const res = await fetch('/api/carga-archivos/procesar-pdf', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await res.json();
+            
+            if (data.success) {
+                let jsonHtml = `<pre class="text-xs bg-slate-900 text-slate-300 p-4 rounded-lg overflow-x-auto"><code>${JSON.stringify(data.datos, null, 2)}</code></pre>`;
+                
+                resDiv.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-bold text-slate-800">Factura procesada con éxito</h3>
+                        <span class="px-3 py-1 bg-emerald-100 text-emerald-800 font-bold rounded-full text-xs">JSON Estructurado</span>
+                    </div>
+                    <div class="mt-4">
+                        ${jsonHtml}
+                    </div>
+                `;
+            } else {
+                resDiv.innerHTML = `
+                    <div class="bg-rose-50 border border-rose-200 p-4 rounded-lg text-rose-700">
+                        <span class="font-semibold">Fallo en la Ingesta:</span><br>
+                        ${data.error}
+                    </div>
+                `;
+            }
+        } catch (err) {
+            console.error(err);
+            resDiv.innerHTML = `<p class="text-rose-500 font-semibold">Error de conexión: ${err.message}</p>`;
+        }
+    }
+</script>
+{% endblock %}

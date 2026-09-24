@@ -1,0 +1,94 @@
+table compromisos
+	lineageTag: 9b913391-8c89-4a15-b22b-17d27d14296b
+
+	column id
+		dataType: double
+		lineageTag: 021442ec-8893-43d3-b77f-87a0a932e300
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column contraparte_id
+		dataType: double
+		lineageTag: 63d71c60-0b9d-496d-98dd-82310e622524
+		summarizeBy: sum
+		sourceColumn: contraparte_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column proyecto_id
+		dataType: double
+		lineageTag: 6121dff8-e42a-4bc1-b2cd-0278041929ea
+		summarizeBy: sum
+		sourceColumn: proyecto_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column categoria
+		dataType: string
+		lineageTag: 198876db-3b9e-4fb0-a937-be79cd44aedd
+		summarizeBy: none
+		sourceColumn: categoria
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha_inicio
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: fbf2e037-c403-4054-9765-a4977b4f8183
+		summarizeBy: none
+		sourceColumn: fecha_inicio
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column fecha_vencimiento
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 87bc12b6-1f2e-4571-9d87-367d12c7a060
+		summarizeBy: none
+		sourceColumn: fecha_vencimiento
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column valor_pactado_pct
+		dataType: double
+		lineageTag: 6dd2bd7a-b09d-4c35-940d-90654bcd61d6
+		summarizeBy: sum
+		sourceColumn: valor_pactado_pct
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column atributos_extra
+		dataType: string
+		lineageTag: b0ae562a-8cd9-4079-9d89-1df76ab4d68d
+		summarizeBy: none
+		sourceColumn: atributos_extra
+
+		annotation SummarizationSetBy = Automatic
+
+	partition compromisos = m
+		mode: import
+		source =
+				let
+				    Origen = Odbc.DataSource("driver={SQLite3 ODBC Driver};database=H:\Mi unidad\Proyecto - CRM Inmobiliaria\dlab-data\data\dlab.db;notxn=1;dsn=SQLite3 Datasource", [HierarchicalNavigation=true, SqlCapabilities=[LimitClauseKind=LimitClauseKind.Limit]]),
+				    compromisos_Table = Origen{[Name="compromisos",Kind="Table"]}[Data]
+				in
+				    compromisos_Table
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

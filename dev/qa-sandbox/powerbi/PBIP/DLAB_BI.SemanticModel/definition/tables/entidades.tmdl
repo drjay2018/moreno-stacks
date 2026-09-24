@@ -1,0 +1,247 @@
+table entidades
+	lineageTag: b6d161f6-87f3-4b1b-b1ad-edd2059c421e
+
+	column id
+		dataType: double
+		lineageTag: c7b59d30-763f-4d79-86f6-82fd975e5052
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column codigo
+		dataType: string
+		lineageTag: e0aa98b3-fd8b-40bf-bd2c-f6623d7874dd
+		summarizeBy: none
+		sourceColumn: codigo
+
+		annotation SummarizationSetBy = Automatic
+
+	column nombre
+		dataType: string
+		lineageTag: d182ed63-a59c-473e-9259-8e0680ebf014
+		summarizeBy: none
+		sourceColumn: nombre
+
+		annotation SummarizationSetBy = Automatic
+
+	column apellido
+		dataType: string
+		lineageTag: c614bad7-afe5-4ca6-aba8-da9a53c20d3b
+		summarizeBy: none
+		sourceColumn: apellido
+
+		annotation SummarizationSetBy = Automatic
+
+	column cedula
+		dataType: string
+		lineageTag: ffefe3b7-cbd3-4f85-b3f2-c56becba7ed1
+		summarizeBy: none
+		sourceColumn: cedula
+
+		annotation SummarizationSetBy = Automatic
+
+	column telefono
+		dataType: string
+		lineageTag: 48fdec1c-4e0f-4761-8aa9-6b3976cddb89
+		summarizeBy: none
+		sourceColumn: telefono
+
+		annotation SummarizationSetBy = Automatic
+
+	column email
+		dataType: string
+		lineageTag: f6358581-3dd3-4fbb-af86-e64dc8bc9b59
+		summarizeBy: none
+		sourceColumn: email
+
+		annotation SummarizationSetBy = Automatic
+
+	column posicion
+		dataType: string
+		lineageTag: bb0fbd25-6623-4776-84f0-4697215810b8
+		summarizeBy: none
+		sourceColumn: posicion
+
+		annotation SummarizationSetBy = Automatic
+
+	column posicion_id
+		dataType: double
+		lineageTag: 985495d1-535a-4545-92b2-b3fe791106a0
+		summarizeBy: sum
+		sourceColumn: posicion_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column nivel_certificacion_id
+		dataType: double
+		lineageTag: b295294e-eb16-447c-80d9-24c4a60e9e27
+		summarizeBy: sum
+		sourceColumn: nivel_certificacion_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column especialidad_zona_id
+		dataType: double
+		lineageTag: d81b98f1-5c77-415e-8119-9b7217591b28
+		summarizeBy: sum
+		sourceColumn: especialidad_zona_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column nivel
+		dataType: string
+		lineageTag: 1988d437-f52c-4712-9df2-3245ec480682
+		summarizeBy: none
+		sourceColumn: nivel
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha_nacimiento
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 3f87a7e6-0eac-4b0e-af56-5f1f17f34ff4
+		summarizeBy: none
+		sourceColumn: fecha_nacimiento
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column fecha_ingreso
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: b6a25c67-0157-4689-b517-d7f8f2928752
+		summarizeBy: none
+		sourceColumn: fecha_ingreso
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column supervisor_id
+		dataType: double
+		lineageTag: c8756506-f203-4bd5-8e6e-d69001d16848
+		summarizeBy: sum
+		sourceColumn: supervisor_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column meta_mensual_ventas
+		dataType: double
+		lineageTag: 364a3f0f-5958-4beb-8da6-107f5201960c
+		summarizeBy: sum
+		sourceColumn: meta_mensual_ventas
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column activo
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 0f0bd730-83d7-43ab-9ad5-2b6df1574c52
+		summarizeBy: none
+		sourceColumn: activo
+
+		annotation SummarizationSetBy = Automatic
+
+	column atributos_extra
+		dataType: string
+		lineageTag: f4607395-5196-48d7-8499-f2d706ac78d1
+		summarizeBy: none
+		sourceColumn: atributos_extra
+
+		annotation SummarizationSetBy = Automatic
+
+	column genero
+		dataType: string
+		lineageTag: 406bcee8-0262-4446-b4ce-248559068018
+		summarizeBy: none
+		sourceColumn: genero
+
+		annotation SummarizationSetBy = Automatic
+
+	column direccion
+		dataType: string
+		lineageTag: 93892c8e-302d-429e-a198-6ee6d575516f
+		summarizeBy: none
+		sourceColumn: direccion
+
+		annotation SummarizationSetBy = Automatic
+
+	column tipo
+		dataType: string
+		lineageTag: ce3a3d14-b0aa-4e74-836d-6450160dd946
+		summarizeBy: none
+		sourceColumn: tipo
+
+		annotation SummarizationSetBy = Automatic
+
+	column posee_vehiculo
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: b74f2893-4ff7-43e9-8d54-7b46a81fce10
+		summarizeBy: none
+		sourceColumn: posee_vehiculo
+
+		annotation SummarizationSetBy = Automatic
+
+	column tipo_vehiculo
+		dataType: string
+		lineageTag: 50d10c38-060a-43a1-b71b-f2fa275d0899
+		summarizeBy: none
+		sourceColumn: tipo_vehiculo
+
+		annotation SummarizationSetBy = Automatic
+
+	column vehiculo_datos
+		dataType: string
+		lineageTag: a0d6af50-fdb6-4b2a-8798-f4af01ba8ced
+		summarizeBy: none
+		sourceColumn: vehiculo_datos
+
+		annotation SummarizationSetBy = Automatic
+
+	column fecha_vencimiento_aei
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: e203a9b1-be19-4f61-807a-29a1a45c67fe
+		summarizeBy: none
+		sourceColumn: fecha_vencimiento_aei
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column empresa
+		dataType: string
+		lineageTag: b4176f1a-dfdf-4397-a290-fffc0a5f1cb9
+		summarizeBy: none
+		sourceColumn: empresa
+
+		annotation SummarizationSetBy = Automatic
+
+	partition entidades = m
+		mode: import
+		source =
+				let
+				    Origen = Odbc.DataSource("driver={SQLite3 ODBC Driver};database=H:\Mi unidad\Proyecto - CRM Inmobiliaria\dlab-data\data\dlab.db;notxn=1;dsn=SQLite3 Datasource", [HierarchicalNavigation=true, SqlCapabilities=[LimitClauseKind=LimitClauseKind.Limit]]),
+				    entidades_Table = Origen{[Name="entidades",Kind="Table"]}[Data]
+				in
+				    entidades_Table
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

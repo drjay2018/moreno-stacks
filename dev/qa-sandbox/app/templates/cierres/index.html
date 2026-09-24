@@ -1,0 +1,577 @@
+{% extends "base.html" %}
+
+{% block title %}Cierres & Transacciones Financieras | DLAB CRM{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Módulo de Cierres & Estructuración Financiera</h1>
+            <p class="text-sm text-slate-500">Gestión comercial de ventas, plan de pago diferido, comisiones y financiamiento bancario.</p>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="/carga-archivos" class="btn-action-outline">
+                <i class="bx bx-upload text-lg"></i> Carga Masiva
+            </a>
+            <button onclick="abrirModalCierre()" class="btn-action-solid">
+                <i class="bx bx-plus-circle text-lg"></i> Registrar Nuevo Cierre
+            </button>
+        </div>
+    </div>
+
+    <!-- Tabla de Cierres -->
+    <div id="contador-modulo" class="text-sm font-semibold text-slate-600 mb-2">Total de registros: <span id="total-badge">0</span></div>
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200">
+        <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-100 flex-wrap">
+            <div class="relative flex-1 min-w-[180px] max-w-sm">
+                <i class="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg" aria-hidden="true"></i>
+                <label for="searchInput" class="sr-only">Buscar cierre, cliente, proyecto...</label>
+                <input type="search" id="searchInput" oninput="filtrarLocal()" placeholder="Buscar cierre, cliente, proyecto..."
+                    class="w-full pl-8 pr-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-400 bg-slate-50 focus:bg-white transition">
+            </div>
+            <label for="filtroEstado" class="sr-only">Filtrar por estado</label>
+            <select id="filtroEstado" onchange="filtrarLocal()"
+                class="px-3 py-1.5 text-sm border border-slate-200 rounded-lg bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 transition">
+                <option value="">Todos los estados</option>
+                <option value="completado">Completado</option>
+                <option value="en_proceso">En Proceso</option>
+                <option value="cancelado">Cancelado</option>
+            </select>
+            <span id="rowCount" class="text-xs text-slate-400 ml-auto" aria-live="polite"></span>
+        </div>
+
+        <div id="tabla-container" class="overflow-x-auto min-h-[200px]" aria-live="polite">
+            <div id="cierres-table-container" class="overflow-x-auto">
+                <p class="text-center text-slate-400 py-8">Cargando cierres...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL REGISTRO DE CIERRE -->
+<div id="modal-cierre" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden max-h-[90vh] overflow-y-auto">
+        <div class="bg-slate-900 px-6 py-4 flex items-center justify-between sticky top-0">
+            <h2 class="text-white font-bold text-base"><svg class="inline w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg> Registrar Nuevo Cierre</h2>
+            <button onclick="cerrarModal('modal-cierre')" aria-label="Cerrar modal" class="text-white/60 hover:text-white text-xl font-bold leading-none focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-slate-900 rounded"><span aria-hidden="true">✕</span></button>
+        </div>
+        <form id="form-cierre" onsubmit="submitCierre(event)" class="p-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                    <label for="f-proyecto" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Proyecto *</label>
+                    <select id="f-proyecto" name="proyecto" required class="field-input"><option value="">-- Seleccionar --</option></select>
+                </div>
+                <div class="space-y-1">
+                    <label for="f-cliente" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Cliente *</label>
+                    <select id="f-cliente" name="cliente" required class="field-input"><option value="">-- Buscar / Seleccionar --</option></select>
+                </div>
+                <div class="space-y-1">
+                    <label for="f-asesor" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Asesor *</label>
+                    <select id="f-asesor" name="asesor" required class="field-input"><option value="">-- Buscar / Seleccionar --</option></select>
+                </div>
+                <div class="space-y-1">
+                    <label for="f-monto" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Monto de Venta (USD) *</label>
+                    <input type="number" id="f-monto" name="monto" min="1" step="0.01" placeholder="150000.00" required class="field-input">
+                </div>
+                <div class="space-y-1">
+                    <label for="cie-fecha-cierre" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Fecha de Cierre</label>
+                    <input type="date" id="cie-fecha-cierre" name="fecha_cierre" class="field-input">
+                </div>
+                <div class="space-y-1">
+                    <label for="f-separacion" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Separación (auto 5%)</label>
+                    <input type="number" id="f-separacion" name="separacion" min="0" step="0.01" placeholder="Opcional" class="field-input">
+                </div>
+                <div class="space-y-1">
+                    <label for="f-inicial" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Inicial (auto 20%)</label>
+                    <input type="number" id="f-inicial" name="inicial" min="0" step="0.01" placeholder="Opcional" class="field-input">
+                </div>
+                <div class="space-y-1">
+                    <label for="f-cuotas" class="text-xs font-bold text-slate-500 uppercase tracking-wide">N° Cuotas</label>
+                    <input type="number" id="f-cuotas" name="cuotas" min="1" max="360" value="10" class="field-input">
+                </div>
+                <div class="space-y-1">
+                    <label for="f-comision" class="text-xs font-bold text-slate-500 uppercase tracking-wide">% Comisión</label>
+                    <input type="number" id="f-comision" name="comision" min="0" max="100" step="0.01" value="5" class="field-input">
+                </div>
+                <div class="space-y-1">
+                    <label for="f-origen-prospecto" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Origen del Prospecto *</label>
+                    <select id="f-origen-prospecto" name="origen_prospecto" required class="field-input">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="propio">Propio (Generado por Asesor)</option>
+                        <option value="empresa">Generado por la Empresa</option>
+                    </select>
+                </div>
+                <div class="space-y-1 sm:col-span-2">
+                    <label for="f-gastos" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Gastos Publicidad *</label>
+                    <select id="f-gastos" name="gastos" required class="field-input">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="1">SÍ</option>
+                        <option value="2">NO</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label for="f-estado" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Estado</label>
+                    <select id="f-estado" name="estado" class="field-input">
+                        <option value="en_proceso">En Proceso</option>
+                        <option value="aprobado">Aprobado</option>
+                        <option value="rechazado">Rechazado</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label for="f-nombre-propiedad" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Nombre Propiedad</label>
+                    <input type="text" id="f-nombre-propiedad" name="nombre_propiedad" placeholder="Ej: Torre Cristal, Villa Sunset..." class="field-input">
+                </div>
+                <div class="space-y-1">
+                    <label for="f-numero-inmueble" class="text-xs font-bold text-slate-500 uppercase tracking-wide">No. Inmueble</label>
+                    <input type="text" id="f-numero-inmueble" name="numero_inmueble" placeholder="Apto, Villa, Local..." class="field-input">
+                </div>
+                <div class="space-y-1">
+                    <label for="f-moneda" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Moneda</label>
+                    <select id="f-moneda" name="moneda" class="field-input">
+                        <option value="USD">USD</option>
+                        <option value="RD$">RD$</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label for="f-promocion" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Promocion</label>
+                    <input type="text" id="f-promocion" name="promocion" placeholder="Ej: Todos los Aires..." class="field-input">
+                </div>
+                <div class="space-y-1">
+                    <label for="f-plan-pago" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Plan de Pago</label>
+                    <input type="text" id="f-plan-pago" name="plan_pago_tipo" placeholder="Ej: 20-80, 10-20-70..." class="field-input">
+                </div>
+                <div class="space-y-1">
+                    <label for="f-descuento" class="text-xs font-bold text-slate-500 uppercase tracking-wide">% Descuento</label>
+                    <input type="number" id="f-descuento" name="descuento_pct" min="0" max="100" step="0.01" value="0" class="field-input">
+                </div>
+                <div class="space-y-1 sm:col-span-2">
+                    <label for="f-adicionales" class="text-xs font-bold text-slate-500 uppercase tracking-wide">Adicionales / Notas</label>
+                    <textarea id="f-adicionales" name="adicionales" rows="2" placeholder="Extras, notas, observaciones..." class="field-input"></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-6">
+                <button type="button" onclick="cerrarModal('modal-cierre')" class="px-4 py-2 text-xs font-semibold text-slate-600">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-lg">Guardar Cierre</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL DESGLOSE FINANCIERO AUDITABLE -->
+<div id="modal-desglose" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full overflow-hidden max-h-[90vh] overflow-y-auto">
+        <div class="bg-slate-900 px-6 py-4 flex items-center justify-between sticky top-0">
+            <h2 class="text-white font-bold text-base"><i class="bx bx-bar-chart-alt-2"></i> Desglose Financiero</h2>
+            <button onclick="cerrarModal('modal-desglose')" aria-label="Cerrar modal" class="text-white/60 hover:text-white text-xl font-bold leading-none focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-slate-900 rounded"><span aria-hidden="true">✕</span></button>
+        </div>
+        <div id="desglose-content" class="p-6 space-y-4" aria-live="polite">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <p id="desglose-codigo" class="text-xs text-amber-600 font-mono font-semibold"></p>
+                <span id="badge-cuadre" class="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">✓ Cuadre Perfecto 100%</span>
+            </div>
+
+            <!-- 1. Estructuración -->
+            <div class="space-y-2">
+                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">1. Estructuración del Contrato</h4>
+                <div class="bg-slate-50 p-3 rounded-xl grid grid-cols-2 gap-3 text-xs">
+                    <div><span class="text-slate-400 block">Valor Venta:</span><strong id="d-monto" class="text-sm font-mono text-slate-900"></strong></div>
+                    <div><span class="text-slate-400 block">Separación:</span><strong id="d-separacion" class="font-mono text-slate-700"></strong></div>
+                    <div><span class="text-slate-400 block">Monto a Diferir:</span><strong id="d-diferido" class="font-mono text-amber-600"></strong></div>
+                    <div><span class="text-slate-400 block">Valor Cuota Mensual:</span><strong id="d-cuota" class="font-mono text-emerald-600"></strong></div>
+                    <div class="col-span-2 pt-1 border-t border-slate-200 flex justify-between items-center">
+                        <span class="text-slate-500 font-medium">Saldo Final a Financiar (Banco):</span>
+                        <strong id="d-financiar" class="text-sm font-mono text-slate-900"></strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Matriz de Comisiones -->
+            <div class="space-y-2">
+                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">2. Matriz de Comisiones (Reparto al 100%)</h4>
+                <div class="bg-slate-50 p-3 rounded-xl space-y-2 text-xs">
+                    <div class="flex justify-between items-center pb-1 border-b border-slate-200">
+                        <span class="text-slate-500">Bolsa Total de Comisión:</span>
+                        <strong id="d-bolsa-total" class="font-mono text-slate-900"></strong>
+                    </div>
+                    <div class="flex justify-between items-center text-slate-700"><span>Venta:</span><strong id="d-com-a" class="font-mono"></strong></div>
+                    <div class="flex justify-between items-center text-slate-700"><span>Captación:</span><strong id="d-com-n" class="font-mono"></strong></div>
+                    <div class="border-t border-slate-200 my-1 pt-1"></div>
+                    <div class="flex justify-between items-center text-slate-700 font-semibold"><span>Comisión Bruta Vendedor:</span><strong id="d-com-bruta-vendedor" class="font-mono"></strong></div>
+                    <div class="flex justify-between items-center text-rose-600"><span>Retención ISR:</span><strong id="d-com-isr-ret" class="font-mono"></strong></div>
+                    <div class="flex justify-between items-center text-rose-600"><span>Retención ITBIS:</span><strong id="d-com-itbis-ret" class="font-mono"></strong></div>
+                    <div class="flex justify-between items-center text-emerald-600 font-bold"><span>Neto a Pagar:</span><strong id="d-com-neto-pagar" class="font-mono"></strong></div>
+                    <div class="flex justify-between items-center text-slate-700"><span>Enc. Proyecto:</span><strong id="d-com-proy" class="font-mono"></strong></div>
+                    <div class="flex justify-between items-center text-slate-700"><span>Compañía:</span><strong id="d-com-admin" class="font-mono"></strong></div>
+                    <div class="flex justify-between items-center text-slate-700"><span>Capt. Inmobiliaria:</span><strong id="d-com-extra" class="font-mono"></strong></div>
+                    <div class="flex justify-between items-center text-slate-700"><span>Publicidad:</span><strong id="d-com-pub" class="font-mono"></strong></div>
+                    <div class="border-t border-slate-200 my-1 pt-1"></div>
+                    <div class="flex justify-between items-center text-indigo-700 font-bold"><span>Ingreso Bruto Empresa:</span><strong id="d-bruto-emp" class="font-mono"></strong></div>
+                    <div class="flex justify-between items-center text-emerald-700 font-bold"><span>Retención Neta:</span><strong id="d-neto-emp" class="font-mono"></strong></div>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-2">
+                <button onclick="cerrarModal('modal-desglose')" class="px-5 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-lg transition-colors">
+                    Cerrar Auditoría
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+
+    let dtCierres = null;
+    let todosLosCierres = [];
+
+    async function cargarCierres() {
+        const container = document.getElementById('cierres-table-container');
+        
+        container.innerHTML = '<div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm mt-4"><table id="dt-cierres" class="w-full text-left text-sm text-slate-600"><thead class="bg-slate-50 text-xs uppercase font-bold text-slate-500 border-b border-slate-200"><tr>' +
+            '<th class="px-4 py-3">Codigo</th><th class="px-4 py-3">Inmueble</th><th class="px-4 py-3">Cliente</th><th class="px-4 py-3">Monto</th><th class="px-4 py-3">Moneda</th><th class="px-4 py-3">Plan</th><th class="px-4 py-3">Bolsa</th><th class="px-4 py-3">Gerencia</th><th class="px-4 py-3">Estado</th><th class="px-4 py-3">Auditoria</th><th class="px-4 py-3">Acciones</th>' +
+            '</tr></thead><tbody class="divide-y divide-slate-100"></tbody></table></div>';
+
+        if (dtCierres) { try { dtCierres.destroy(); } catch(e) {} dtCierres = null; }
+
+        dtCierres = $('#dt-cierres').DataTable({
+            serverSide: true,
+            processing: true,
+            ajax: {
+                url: '/api/cierres/cierres',
+                type: 'GET'
+            },
+            columns: [
+                { data: 'codigo', render: function(d){ return '<span class="font-mono font-medium text-dlab-cyan">'+(d||'')+'</span>'; } },
+                { data: null, render: function(d,t,r){ 
+                    let nom = r.nombre_propiedad || ''; 
+                    let num = r.numero_inmueble || ''; 
+                    return '<span class="font-medium text-slate-900">' + (nom || '-') + '</span>' + (num ? ' <span class="text-slate-500">#' + num + '</span>' : ''); 
+                }},
+                { data: 'cliente', render: function(d){ return '<span class="text-slate-900">'+(d||'')+'</span>'; } },
+                { data: 'monto', className: 'text-right font-medium', render: function(d){ return '<span class="text-slate-900">$'+Number(d||0).toLocaleString()+'</span>'; } },
+                { data: 'moneda', render: function(d){ return '<span class="text-xs font-semibold text-slate-600">'+(d||'USD')+'</span>'; } },
+                { data: 'plan_pago_tipo', render: function(d){ return '<span class="text-slate-700">'+(d||'-')+'</span>'; } },
+                { data: 'bolsa_comision_total', className: 'text-right font-medium', render: function(d){ return '<span class="text-slate-900">$'+Number(d||0).toLocaleString()+'</span>'; } },
+                { data: 'comision_gerencia_saldo', className: 'text-right font-medium', render: function(d){ 
+                    let v = Number(d||0); 
+                    return '<span class="'+(v>0?'text-amber-600':'text-emerald-600')+'">$'+v.toLocaleString()+'</span>'; 
+                }},
+                { data: 'estado', render: function(d){ 
+                    let st = (d||'').toLowerCase();
+                    let badgeClass = 'badge-proceso';
+                    if(st.includes('aprobado')) badgeClass = 'badge-aprobado';
+                    else if(st.includes('rechazado') || st.includes('cancelado')) badgeClass = 'badge-rechazado';
+                    return '<span class="badge-pill ' + badgeClass + '">' + (d||'') + '</span>'; 
+                }},
+                { data: null, orderable: false, render: function(d,t,r){ return '<button onclick="verDesgloseFinanciero('+r.id+')" class="btn-auditoria-outline"><i class="bx bx-search"></i> Ver</button>'; } },
+                { data: null, orderable: false, className: 'text-right whitespace-nowrap', render: function(d,t,r){
+                    return '<button onclick="editarCierre('+r.id+',\''+r.estado+'\','+r.pct_comision+','+r.monto+')" class="table-icon-btn edit mr-2" title="Editar"><i class="bx bx-edit-alt"></i></button>'
+                          +'<button onclick="borrarCierre('+r.id+')" class="table-icon-btn delete" title="Eliminar"><i class="bx bx-trash"></i></button>';
+                }}
+            ],
+            pageLength: 20,
+            deferRender: true,
+            order: [[0,'desc']],
+            language: {
+                search: 'Buscar:', lengthMenu: 'Mostrar _MENU_',
+                info: '_START_-_END_ de _TOTAL_', zeroRecords: 'Sin resultados',
+                paginate: { first:'«', last:'»', next:'›', previous:'‹' },
+                processing: 'Cargando datos...'
+            },
+            dom: '<"flex items-center justify-between mb-4 flex-wrap gap-2"l>rt<"flex items-center justify-between mt-4 flex-wrap gap-2"ip>',
+            drawCallback: function(settings) {
+                document.getElementById('rowCount').innerText = settings.fnRecordsTotal() + ' registros';
+                const badge = document.getElementById('total-badge');
+                if (badge) badge.innerText = settings.fnRecordsTotal();
+            }
+        });
+    }
+
+    // Override buscar local para delegar a DataTables
+    function filtrarLocal() {
+        if (dtCierres) {
+            const txt = document.getElementById('searchInput').value;
+            const estado = document.getElementById('filtroEstado').value;
+            // The search query will filter globally, column(5) filters by state.
+            dtCierres.column(5).search(estado).search(txt).draw();
+        }
+    }
+
+    async function verDesgloseFinanciero(cierreId) {
+        try {
+            const res = await fetch('/api/cierres/' + cierreId + '/desglose-financiero');
+            const data = await res.json();
+
+            if (data.success) {
+                const t = data.transaccion;
+                const est = data.estructuracion_venta;
+                const com = data.comisiones;
+
+                document.getElementById('desglose-codigo').innerText = 'Transaccion: ' + t.codigo;
+                document.getElementById('d-monto').innerText = '$' + (Number(est.monto_total) || 0).toLocaleString() + ' USD';
+                document.getElementById('d-separacion').innerText = '$' + (Number(est.monto_separacion) || 0).toLocaleString() + ' USD';
+                document.getElementById('d-diferido').innerText = '$' + (Number(est.monto_diferido) || 0).toLocaleString() + ' USD (' + est.num_cuotas + ' cuotas)';
+                document.getElementById('d-cuota').innerText = '$' + (Number(est.valor_cuota_mensual) || 0).toLocaleString() + ' USD / mes';
+                document.getElementById('d-financiar').innerText = '$' + (Number(est.monto_a_financiar) || 0).toLocaleString() + ' USD';
+
+                document.getElementById('d-bolsa-total').innerText = '$' + (Number(com.bolsa_total) || 0).toLocaleString() + ' USD';
+                document.getElementById('d-com-a').innerText = '$' + (Number(com.comision_a) || 0).toLocaleString() + ' USD (' + ((com.pct_a || 0) * 100).toFixed(2) + '%)';
+                document.getElementById('d-com-n').innerText = '$' + (Number(com.comision_n) || 0).toLocaleString() + ' USD (' + ((com.pct_n || 0) * 100).toFixed(2) + '%)';
+                if (com.fiscales) {
+                    const f = com.fiscales;
+                    const brutaVendedor = f.comision_bruta_vendedor || f.comision_vendedor_bruta || com.comision_a || 0;
+                    document.getElementById('d-com-bruta-vendedor').innerText = '$' + (Number(brutaVendedor) || 0).toLocaleString('es-DO', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' USD';
+                    document.getElementById('d-com-isr-ret').innerText = '-$' + (Number(f.retencion_isr) || 0).toLocaleString() + ' USD (' + ((f.pct_isr || 0) * 100).toFixed(2) + '%)';
+                    document.getElementById('d-com-itbis-ret').innerText = '-$' + (Number(f.retencion_itbis) || 0).toLocaleString() + ' USD (' + ((f.pct_itbis_retenido ?? f.pct_itbis ?? 0) * 100).toFixed(2) + '%)';
+                    document.getElementById('d-com-neto-pagar').innerText = '$' + (Number(f.neto_pagado_vendedor ?? f.neto_a_pagar ?? 0) || 0).toLocaleString() + ' USD';
+                }
+                document.getElementById('d-com-proy').innerText = '$' + (Number(com.comision_proyecto) || 0).toLocaleString() + ' USD (' + ((com.pct_proyecto || 0) * 100).toFixed(2) + '%)';
+                document.getElementById('d-com-admin').innerText = '$' + (Number(com.comision_admin) || 0).toLocaleString() + ' USD (' + ((com.pct_admin || 0) * 100).toFixed(2) + '%)';
+                document.getElementById('d-com-extra').innerText = '$' + (Number(com.comision_extra) || 0).toLocaleString() + ' USD (' + ((com.pct_extra || 0) * 100).toFixed(2) + '%)';
+                document.getElementById('d-com-pub').innerText = '$' + (Number(com.comision_pub_gfm) || 0).toLocaleString() + ' USD (' + ((com.pct_pub_gfm || 0) * 100).toFixed(2) + '%)';
+                
+                document.getElementById('d-bruto-emp').innerText = '$' + (Number(com.ingreso_bruto_empresa) || 0).toLocaleString() + ' USD';
+                document.getElementById('d-neto-emp').innerText = '$' + (Number(com.retencion_neta_empresa) || 0).toLocaleString() + ' USD';
+
+                const badge = document.getElementById('badge-cuadre');
+                if (badge) {
+                    if (com.cuadre_perfecto) {
+                        badge.className = 'px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full border border-emerald-200';
+                        badge.innerHTML = '<svg class="inline w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Cuadre Perfecto 100%';
+                    } else {
+                        badge.className = 'px-3 py-1 bg-rose-100 text-rose-800 text-xs font-bold rounded-full border border-rose-200';
+                        badge.innerHTML = '<svg class="inline w-4 h-4 mr-1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Descuadre de Matriz';
+                    }
+                }
+                abrirModal('modal-desglose');
+            } else {
+                showToast(data.error, 'error');
+            }
+        } catch (err) {
+            showToast('Error al obtener auditoria financiera: ' + err.message, 'error');
+        }
+    }
+
+    async function submitCierre(e) {
+        e.preventDefault();
+        const payload = {
+            cliente_id: parseInt(document.getElementById('f-cliente').value),
+            proyecto_id: parseInt(document.getElementById('f-proyecto').value),
+            entidad_id: parseInt(document.getElementById('f-asesor').value),
+            monto: parseFloat(document.getElementById('f-monto').value),
+            monto_separacion: parseFloat(document.getElementById('f-separacion').value) || 0,
+            monto_inicial: parseFloat(document.getElementById('f-inicial').value) || 0,
+            num_cuotas: parseInt(document.getElementById('f-cuotas').value) || 10,
+            pct_comision: parseFloat(document.getElementById('f-comision').value) || 5.0,
+            estado: document.getElementById('f-estado').value,
+            gastos_pub_id: parseInt(document.getElementById('f-gastos').value) || null,
+            fecha_cierre: document.getElementById('cie-fecha-cierre').value || null,
+            origen_prospecto: document.getElementById('f-origen-prospecto').value,
+            nombre_propiedad: document.getElementById('f-nombre-propiedad').value,
+            numero_inmueble: document.getElementById('f-numero-inmueble').value,
+            moneda: document.getElementById('f-moneda').value,
+            promocion: document.getElementById('f-promocion').value,
+            plan_pago_tipo: document.getElementById('f-plan-pago').value,
+            descuento_pct: parseFloat(document.getElementById('f-descuento').value) || 0,
+            adicionales: document.getElementById('f-adicionales').value
+        };
+        const btn = e.target.querySelector('[type=submit]');
+        btn.disabled = true; btn.textContent = 'Guardando...';
+        try {
+            const res = await fetch('/api/cierres', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const d = await res.json();
+            if (d.success) { 
+                showToast('OK: ' + d.message, 'success'); 
+                cerrarModal('modal-cierre'); 
+                cargarCierres(); 
+                btn.disabled = false; btn.textContent = 'Guardar Cierre';
+            }
+            else { 
+                showToast(d.error, 'error');
+                btn.disabled = false; btn.textContent = 'Guardar Cierre';
+            }
+        } catch(err) {
+            btn.disabled = false; btn.textContent = 'Guardar Cierre';
+            showToast('Error: ' + err.message, 'error');
+        }
+    }
+
+    function cargarListas() {
+        // Usar Select2 AJAX en lugar de cargar todos los datos de una vez
+        if (!$.fn.select2) return;
+
+        $('#f-proyecto').select2({
+            width: '100%', dropdownParent: $('#modal-cierre'),
+            ajax: {
+                url: '/api/maestros/proyectos', dataType: 'json', delay: 200,
+                data: p => ({ buscar: p.term, per_page: 20, page: p.page || 1 }),
+                processResults: (data, p) => ({
+                    results: (data.items || []).map(i => ({ id: i.id, text: i.nombre })),
+                    pagination: { more: (p.page || 1) * 20 < (data.total || 0) }
+                }), cache: true
+            }, minimumInputLength: 0, language: { noResults: () => 'Sin resultados' }
+        });
+
+        $('#f-cliente').select2({
+            width: '100%', dropdownParent: $('#modal-cierre'),
+            ajax: {
+                url: '/api/maestros/clientes', dataType: 'json', delay: 200,
+                data: p => ({ buscar: p.term, per_page: 20, page: p.page || 1 }),
+                processResults: (data, p) => ({
+                    results: (data.items || []).map(i => ({ id: i.id, text: i.nombre + ' ' + i.apellido + ' (' + (i.cedula||'') + ')', captador_id: i.captador_id })),
+                    pagination: { more: (p.page || 1) * 20 < (data.total || 0) }
+                }), cache: true
+            }, minimumInputLength: 0, language: { noResults: () => 'Sin resultados' }
+        });
+
+        $('#f-asesor').select2({
+            width: '100%', dropdownParent: $('#modal-cierre'),
+            ajax: {
+                url: '/api/maestros/empleados', dataType: 'json', delay: 200,
+                data: p => ({ buscar: p.term, per_page: 20, page: p.page || 1 }),
+                processResults: (data, p) => ({
+                    results: (data.items || []).map(i => ({ id: i.id, text: i.nombre + ' ' + i.apellido })),
+                    pagination: { more: (p.page || 1) * 20 < (data.total || 0) }
+                }), cache: true
+            }, minimumInputLength: 0, language: { noResults: () => 'Sin resultados' }
+        });
+
+        $('#f-cliente').on('select2:select', async function (e) {
+            const data = e.params.data;
+            if (data.captador_id) {
+                try {
+                    const res = await fetch('/api/maestros/empleados/' + data.captador_id);
+                    const d = await res.json();
+                    if (d.success && d.item) {
+                        const as = $('#f-asesor');
+                        if (as.find("option[value='" + d.item.id + "']").length) {
+                            as.val(d.item.id).trigger('change');
+                        } else {
+                            const newOption = new Option(d.item.nombre + ' ' + d.item.apellido, d.item.id, true, true);
+                            as.append(newOption).trigger('change');
+                        }
+                        showToast('Asesor seleccionado automáticamente basado en el cliente.', 'success');
+                    }
+                } catch(err) { console.error(err); }
+            }
+        });
+    }
+
+    async function borrarCierre(id) {
+        if (!confirm('Desea borrar este cierre?')) return;
+        try {
+            const res = await fetch('/api/cierres/' + id, { method: 'DELETE' });
+            const d = await res.json();
+            if (d.success) { cargarCierres(); }
+            else { showToast(d.error, 'warning'); }
+        } catch(e) { showToast('Error de conexion al intentar borrar.', 'error'); }
+    }
+
+    function editarCierre(id, estadoActual, pctActual, montoActual) {
+        document.getElementById('edit-cie-id').value = id;
+        document.getElementById('edit-cie-estado').value = estadoActual;
+        document.getElementById('edit-cie-pct').value = pctActual;
+        document.getElementById('edit-cie-monto').value = montoActual;
+        document.getElementById('modal-editar-cierre').classList.remove('hidden');
+    }
+    
+    async function guardarEdicionCierre(e) {
+        e.preventDefault();
+        const id = document.getElementById('edit-cie-id').value;
+        const payload = { 
+            estado: document.getElementById('edit-cie-estado').value, 
+            pct_comision: parseFloat(document.getElementById('edit-cie-pct').value), 
+            monto: parseFloat(document.getElementById('edit-cie-monto').value) 
+        };
+        try {
+            const res = await fetch('/api/cierres/' + id, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const d = await res.json();
+            if (d.success) { 
+                showToast('Cierre actualizado.', 'success'); 
+                document.getElementById('modal-editar-cierre').classList.add('hidden');
+                cargarCierres(); 
+            } else { showToast(d.error, 'error'); }
+        } catch(e) { showToast('Error de conexion al actualizar.', 'error'); }
+    }
+
+    let listasYaCargadas = false;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarCierres();
+        // NO cargar listas hasta que se abra el modal
+    });
+</script>
+
+<script>
+    function inicializarSelects() {
+        console.log("Inicializando Select2...");
+        if (typeof $ === 'undefined' || !$.fn.select2) {
+            console.error("Select2 no está cargado.");
+            return;
+        }
+        
+        // Sólo inicializamos los que NO usan AJAX aquí, para no sobreescribir la conf de AJAX
+        const selectors = ['#f-gastos', '#f-estado', '#f-origen-prospecto'];
+        
+        selectors.forEach(selector => {
+            const $el = $(selector);
+            if ($el.length) {
+                if ($el.data('select2')) {
+                    $el.select2('destroy');
+                }
+                $el.select2({
+                    width: '100%',
+                    dropdownParent: $('#modal-cierre'),
+                    language: {
+                        noResults: function() { return "No se encontraron resultados"; }
+                    }
+                });
+            }
+        });
+        console.log("Select2 inicializado correctamente.");
+    }
+
+    function abrirModalCierre() {
+        abrirModal('modal-cierre');
+        // Cargar listas solo la primera vez que se abre el modal
+        if (!listasYaCargadas) {
+            listasYaCargadas = true;
+            cargarListas();
+        }
+        setTimeout(inicializarSelects, 100);
+    }
+</script>
+<!-- MODAL EDITAR CIERRE -->
+<div id="modal-editar-cierre" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
+        <h3 class="text-lg font-bold text-slate-900">Editar Cierre</h3>
+        <form id="form-editar-cierre" onsubmit="guardarEdicionCierre(event)" class="space-y-4">
+            <input type="hidden" id="edit-cie-id" value="">
+            <div>
+                <label for="edit-cie-estado" class="block text-xs font-semibold text-slate-600 mb-1">Estado</label>
+                <select id="edit-cie-estado" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                    <option value="en_proceso">En Proceso</option>
+                    <option value="aprobado">Aprobado</option>
+                    <option value="rechazado">Rechazado</option>
+                </select>
+            </div>
+            <div>
+                <label for="edit-cie-pct" class="block text-xs font-semibold text-slate-600 mb-1">Porcentaje Comisión</label>
+                <input type="number" step="0.01" id="edit-cie-pct" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+            </div>
+            <div>
+                <label for="edit-cie-monto" class="block text-xs font-semibold text-slate-600 mb-1">Monto de Venta</label>
+                <input type="number" step="0.01" id="edit-cie-monto" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+            </div>
+            <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+                <button type="button" onclick="document.getElementById('modal-editar-cierre').classList.add('hidden')" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancelar</button>
+                <button type="submit" class="px-4 py-2 text-sm font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-lg shadow-sm transition-colors">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

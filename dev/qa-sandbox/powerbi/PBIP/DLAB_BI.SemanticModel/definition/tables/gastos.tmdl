@@ -1,0 +1,71 @@
+table gastos
+	lineageTag: 15509d7c-e51c-47ae-a6b9-d63dfcd9074e
+
+	column id
+		dataType: double
+		lineageTag: c45c51ba-d1c8-4f5a-845b-13c30b2fb28b
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column concepto
+		dataType: string
+		lineageTag: 5ec551f9-8a9c-4180-9c50-783ec9fbb79b
+		summarizeBy: none
+		sourceColumn: concepto
+
+		annotation SummarizationSetBy = Automatic
+
+	column proveedor
+		dataType: string
+		lineageTag: 98ed9da9-d081-4c8e-9dbc-88f03ef3e4b3
+		summarizeBy: none
+		sourceColumn: proveedor
+
+		annotation SummarizationSetBy = Automatic
+
+	column monto
+		dataType: double
+		lineageTag: 70121a6f-53ec-464f-b0e2-b2a4ae9555b7
+		summarizeBy: sum
+		sourceColumn: monto
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fecha
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: de5fede6-f92f-4f60-93ec-5ebd76f8699a
+		summarizeBy: none
+		sourceColumn: fecha
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column estado
+		dataType: string
+		lineageTag: 6a90b434-1917-4f9d-bf48-74ccb7a5ed18
+		summarizeBy: none
+		sourceColumn: estado
+
+		annotation SummarizationSetBy = Automatic
+
+	partition gastos = m
+		mode: import
+		source =
+				let
+				    Origen = Odbc.DataSource("driver={SQLite3 ODBC Driver};database=H:\Mi unidad\Proyecto - CRM Inmobiliaria\dlab-data\data\dlab.db;notxn=1;dsn=SQLite3 Datasource", [HierarchicalNavigation=true, SqlCapabilities=[LimitClauseKind=LimitClauseKind.Limit]]),
+				    gastos_Table = Origen{[Name="gastos",Kind="Table"]}[Data]
+				in
+				    gastos_Table
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

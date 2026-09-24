@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+    <!-- Fondo -->
+    <rect width="1280" height="720" fill="#171A1F"/>
+
+    <!-- Título General -->
+    <text x="24" y="56" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="28" font-weight="bold" fill="#F0F2F5">Dashboard de RRHH y Comercial</text>
+    <text x="24" y="78" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="14" fill="#8B949E">Indicadores clave de AEI y Retención de Asesores</text>
+
+    <!-- Tarjeta 1: % de AEI Vigentes -->
+    <rect x="24" y="104" width="380" height="284" rx="12" fill="#21252D" stroke="#2E353D" stroke-width="2"/>
+    <text x="48" y="144" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" font-weight="600" fill="#E1E4E8">% de AEI Vigentes</text>
+    <!-- Placeholder hint for PowerBI -->
+    <text x="48" y="166" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#8B949E">Semáforo de cumplimiento</text>
+
+    <!-- Tarjeta 2: AEI por Vencer en 30 días -->
+    <rect x="24" y="412" width="380" height="284" rx="12" fill="#21252D" stroke="#2E353D" stroke-width="2"/>
+    <text x="48" y="452" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" font-weight="600" fill="#E1E4E8">AEI por Vencer (30 días)</text>
+    <text x="48" y="474" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#8B949E">Próximos vencimientos</text>
+
+    <!-- Tarjeta 3: Ranking de Retención (R) por Asesor -->
+    <rect x="428" y="104" width="828" height="592" rx="12" fill="#21252D" stroke="#2E353D" stroke-width="2"/>
+    <text x="452" y="144" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" font-weight="600" fill="#E1E4E8">Ranking de Retención (R) por Asesor</text>
+    <text x="452" y="166" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13" fill="#8B949E">Tabla o gráfico de barras</text>
+</svg>

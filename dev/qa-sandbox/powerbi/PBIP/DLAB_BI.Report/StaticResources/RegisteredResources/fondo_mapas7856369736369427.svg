@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+    <!-- Background -->
+    <rect width="1280" height="720" fill="#171A1F"/>
+
+    <!-- Header / Title / Filters Area -->
+    <rect x="24" y="24" width="1232" height="64" fill="#21252D" stroke="#2E353D" stroke-width="2" rx="12"/>
+    
+    <!-- 1. Mapa de Ventas o Leads (Large central area) -->
+    <rect x="24" y="112" width="800" height="584" fill="#21252D" stroke="#2E353D" stroke-width="2" rx="12"/>
+    
+    <!-- 2. Incidentes Críticos (N3/N4) Abiertos (Top right) -->
+    <rect x="848" y="112" width="408" height="280" fill="#21252D" stroke="#2E353D" stroke-width="2" rx="12"/>
+    
+    <!-- 3. Costo por Lead y Tasa de Conversión (Bottom right) -->
+    <rect x="848" y="416" width="408" height="280" fill="#21252D" stroke="#2E353D" stroke-width="2" rx="12"/>
+
+    <!-- Optional: Placeholder Text for reference (can be hidden or removed in Power BI) -->
+    <text x="48" y="62" font-family="Segoe UI, Helvetica, sans-serif" font-size="18" fill="#8B949E" font-weight="bold">Panel de Operaciones / Filtros</text>
+    <text x="48" y="150" font-family="Segoe UI, Helvetica, sans-serif" font-size="20" fill="#8B949E" font-weight="bold">1. Mapa de Ventas / Leads</text>
+    <text x="872" y="150" font-family="Segoe UI, Helvetica, sans-serif" font-size="20" fill="#8B949E" font-weight="bold">2. Incidentes Críticos (N3/N4)</text>
+    <text x="872" y="454" font-family="Segoe UI, Helvetica, sans-serif" font-size="20" fill="#8B949E" font-weight="bold">3. Costo por Lead / Conversión</text>
+</svg>

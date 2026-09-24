@@ -1,0 +1,715 @@
+{% extends "base.html" %}
+
+{% block title %}API-AlterState | {{ dlab_empresa }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900">API-AlterState</h1>
+        <p class="text-sm text-slate-500">Integración con AlterEstate — Descarga de propiedades, agentes y catálogos.</p>
+    </div>
+
+    <!-- Pestañas -->
+    <div class="flex flex-wrap border-b border-slate-200 gap-1">
+        <button onclick="cambiarTab('dashboard')" id="tab-btn-dashboard" class="tab-ae-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-slate-800 text-slate-900 whitespace-nowrap transition-colors">
+            <i class="bx bx-dashboard"></i> Dashboard
+        </button>
+        <button onclick="cambiarTab('propiedades')" id="tab-btn-propiedades" class="tab-ae-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap transition-colors">
+            <i class="bx bx-building-house"></i> Propiedades
+        </button>
+        <button onclick="cambiarTab('agentes')" id="tab-btn-agentes" class="tab-ae-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap transition-colors">
+            <i class="bx bx-user"></i> Agentes
+        </button>
+        <button onclick="cambiarTab('leads')" id="tab-btn-leads" class="tab-ae-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap transition-colors">
+            <i class="bx bx-message-detail"></i> Leads
+        </button>
+        <button onclick="cambiarTab('catalogos')" id="tab-btn-catalogos" class="tab-ae-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap transition-colors">
+            <i class="bx bx-list-ul"></i> Catálogos
+        </button>
+        <button onclick="cambiarTab('datos')" id="tab-btn-datos" class="tab-ae-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap transition-colors">
+            <i class="bx bx-data"></i> Datos Importados
+        </button>
+        <button onclick="cambiarTab('config')" id="tab-btn-config" class="tab-ae-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap transition-colors">
+            <i class="bx bx-cog"></i> Configuración
+        </button>
+        <button onclick="cambiarTab('log')" id="tab-btn-log" class="tab-ae-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap transition-colors">
+            <i class="bx bx-history"></i> Log
+        </button>
+    </div>
+
+    <!-- TAB: DASHBOARD -->
+    <div id="section-dashboard" class="space-y-6">
+        <!-- Banner de estado general -->
+        <div id="ae-status-banner" class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div id="ae-status-dot" class="w-3 h-3 rounded-full bg-slate-300"></div>
+                    <div>
+                        <div id="kpi-estado" class="text-sm font-bold text-slate-900">Verificando...</div>
+                        <div id="ae-last-sync-text" class="text-xs text-slate-500 mt-0.5">—</div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div id="ae-total-records" class="text-xs text-slate-500">—</div>
+                    <div id="ae-freshness-global" class="text-xs font-semibold mt-0.5">—</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards detalladas -->
+        <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+                <div class="text-xs text-slate-500 font-semibold uppercase">Propiedades</div>
+                <div id="kpi-propiedades" class="text-2xl font-bold text-blue-600 mt-1">0</div>
+                <div id="kpi-propiedades-sync" class="text-[10px] text-slate-400 mt-0.5">—</div>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+                <div class="text-xs text-slate-500 font-semibold uppercase">Agentes</div>
+                <div id="kpi-agentes" class="text-2xl font-bold text-green-600 mt-1">0</div>
+                <div id="kpi-agentes-sync" class="text-[10px] text-slate-400 mt-0.5">—</div>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+                <div class="text-xs text-slate-500 font-semibold uppercase">Paises</div>
+                <div id="kpi-paises" class="text-2xl font-bold text-amber-600 mt-1">0</div>
+                <div id="kpi-paises-sync" class="text-[10px] text-slate-400 mt-0.5">—</div>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+                <div class="text-xs text-slate-500 font-semibold uppercase">Ciudades</div>
+                <div id="kpi-ciudades" class="text-2xl font-bold text-indigo-600 mt-1">0</div>
+                <div id="kpi-ciudades-sync" class="text-[10px] text-slate-400 mt-0.5">—</div>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+                <div class="text-xs text-slate-500 font-semibold uppercase">Sectores</div>
+                <div id="kpi-sectores" class="text-2xl font-bold text-rose-600 mt-1">0</div>
+                <div id="kpi-sectores-sync" class="text-[10px] text-slate-400 mt-0.5">—</div>
+            </div>
+        </div>
+
+        <!-- Tabla resumen de sync por entidad -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200">
+                <h3 class="font-bold text-slate-800 text-sm"><i class="bx bx-table mr-1"></i> Estado de Sincronización por Entidad</h3>
+            </div>
+            <div class="p-4">
+                <table class="w-full text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-100">
+                            <th class="text-left py-2 font-semibold text-slate-600">Entidad</th>
+                            <th class="text-center py-2 font-semibold text-slate-600">Registros en DB</th>
+                            <th class="text-center py-2 font-semibold text-slate-600">Mappings AE</th>
+                            <th class="text-center py-2 font-semibold text-slate-600">Ultimo Sync</th>
+                            <th class="text-center py-2 font-semibold text-slate-600">Frescura</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ae-sync-table-body">
+                        <tr><td colspan="5" class="text-center py-4 text-slate-400">Cargando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Acciones de Sync -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <h3 class="font-bold text-slate-800 mb-4"><i class="bx bx-sync mr-1"></i> Sincronización Manual</h3>
+            <div class="flex flex-wrap gap-3">
+                <button onclick="ejecutarSync('all')" class="btn-action-solid bg-dlab-primary text-white hover:bg-dlab-primary/90">
+                    <i class="bx bx-sync"></i> Sync Completo
+                </button>
+                <button onclick="ejecutarSync('countries')" class="btn-action-outline">
+                    <i class="bx bx-globe"></i> Países
+                </button>
+                <button onclick="ejecutarSync('cities')" class="btn-action-outline">
+                    <i class="bx bx-map"></i> Ciudades
+                </button>
+                <button onclick="ejecutarSync('sectors')" class="btn-action-outline">
+                    <i class="bx bx-map-pin"></i> Sectores
+                </button>
+                <button onclick="ejecutarSync('properties')" class="btn-action-outline">
+                    <i class="bx bx-building-house"></i> Propiedades
+                </button>
+                <button onclick="ejecutarSync('agents')" class="btn-action-outline">
+                    <i class="bx bx-user"></i> Agentes
+                </button>
+            </div>
+            <div id="sync-progress" class="hidden mt-4">
+                <div class="w-full bg-slate-200 rounded-full h-2">
+                    <div id="sync-bar" class="bg-dlab-cta h-2 rounded-full transition-all" style="width: 0%"></div>
+                </div>
+                <p id="sync-status" class="text-xs text-slate-500 mt-2"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: PROPIEDADES -->
+    <div id="section-propiedades" class="hidden space-y-4">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="font-bold text-slate-800"><i class="bx bx-building-house mr-1"></i> Propiedades AlterEstate</h3>
+                <button onclick="cargarPropiedades()" class="btn-action-outline text-xs"><i class="bx bx-refresh"></i> Recargar</button>
+            </div>
+            <div class="p-4">
+                <table id="tabla-propiedades" class="w-full text-sm" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Ciudad</th>
+                            <th>Sector</th>
+                            <th>Precio Min</th>
+                            <th>Precio Max</th>
+                            <th>Estado</th>
+                            <th>Creado en AE</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: AGENTES -->
+    <div id="section-agentes" class="hidden space-y-4">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="font-bold text-slate-800"><i class="bx bx-user mr-1"></i> Agentes AlterEstate</h3>
+                <button onclick="cargarAgentes()" class="btn-action-outline text-xs"><i class="bx bx-refresh"></i> Recargar</button>
+            </div>
+            <div class="p-4">
+                <table id="tabla-agentes" class="w-full text-sm" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Teléfono</th>
+                            <th>Posición</th>
+                            <th>Empresa</th>
+                            <th>Registro AE</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: LEADS -->
+    <div id="section-leads" class="hidden space-y-4">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <h3 class="font-bold text-slate-800 mb-4"><i class="bx bx-message-detail mr-1"></i> Enviar Lead a AlterEstate</h3>
+            <form id="form-lead" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre *</label>
+                    <input type="text" id="lead-nombre" class="field-input" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Apellido *</label>
+                    <input type="text" id="lead-apellido" class="field-input" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Email *</label>
+                    <input type="email" id="lead-email" class="field-input" required>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Teléfono *</label>
+                    <input type="text" id="lead-telefono" class="field-input" required>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Mensaje</label>
+                    <textarea id="lead-mensaje" class="field-input" rows="3"></textarea>
+                </div>
+                <div class="md:col-span-2">
+                    <button type="submit" class="btn-action-solid bg-dlab-primary text-white">
+                        <i class="bx bx-send"></i> Enviar Lead
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TAB: CATÁLOGOS -->
+    <div id="section-catalogos" class="hidden space-y-4">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200">
+                <h3 class="font-bold text-slate-800"><i class="bx bx-list-ul mr-1"></i> Catálogos del Sistema</h3>
+            </div>
+            <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="border rounded-lg p-4">
+                    <h4 class="font-bold text-sm text-slate-700 mb-2">Países</h4>
+                    <div id="lista-paises" class="text-xs text-slate-600 max-h-40 overflow-y-auto">Cargando...</div>
+                </div>
+                <div class="border rounded-lg p-4">
+                    <h4 class="font-bold text-sm text-slate-700 mb-2">Tipos de Inmueble</h4>
+                    <div id="lista-tipos" class="text-xs text-slate-600 max-h-40 overflow-y-auto">Cargando...</div>
+                </div>
+                <div class="border rounded-lg p-4">
+                    <h4 class="font-bold text-sm text-slate-700 mb-2">Monedas</h4>
+                    <div id="lista-monedas" class="text-xs text-slate-600 max-h-40 overflow-y-auto">Cargando...</div>
+                </div>
+                <div class="border rounded-lg p-4">
+                    <h4 class="font-bold text-sm text-slate-700 mb-2">Estados de Unidad</h4>
+                    <div id="lista-estados" class="text-xs text-slate-600 max-h-40 overflow-y-auto">Cargando...</div>
+                </div>
+                <div class="border rounded-lg p-4">
+                    <h4 class="font-bold text-sm text-slate-700 mb-2">Amenidades</h4>
+                    <div id="lista-amenidades" class="text-xs text-slate-600 max-h-40 overflow-y-auto">Cargando...</div>
+                </div>
+                <div class="border rounded-lg p-4">
+                    <h4 class="font-bold text-sm text-slate-700 mb-2">Tipos de Listado</h4>
+                    <div id="lista-listados" class="text-xs text-slate-600 max-h-40 overflow-y-auto">Cargando...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: DATOS IMPORTADOS -->
+    <div id="section-datos" class="hidden space-y-4">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                <h3 class="font-bold text-slate-800"><i class="bx bx-data mr-1"></i> Datos Importados desde AlterEstate</h3>
+                <button onclick="cargarDatosImportados()" class="btn-action-outline text-xs"><i class="bx bx-refresh"></i> Recargar</button>
+            </div>
+            <div class="p-4 space-y-6">
+                <!-- Paises -->
+                <div>
+                    <h4 class="font-bold text-sm text-slate-700 mb-2"><i class="bx bx-globe mr-1 text-amber-500"></i> Países <span id="datos-paises-count" class="text-xs text-slate-400 font-normal"></span></h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead id="datos-paises-head"></thead>
+                            <tbody id="datos-paises-body" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Ciudades -->
+                <div>
+                    <h4 class="font-bold text-sm text-slate-700 mb-2"><i class="bx bx-map mr-1 text-indigo-500"></i> Ciudades (ultimas 10) <span id="datos-ciudades-count" class="text-xs text-slate-400 font-normal"></span></h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead id="datos-ciudades-head"></thead>
+                            <tbody id="datos-ciudades-body" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- Sectores -->
+                <div>
+                    <h4 class="font-bold text-sm text-slate-700 mb-2"><i class="bx bx-map-pin mr-1 text-rose-500"></i> Sectores (ultimos 10) <span id="datos-sectores-count" class="text-xs text-slate-400 font-normal"></span></h4>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead id="datos-sectores-head"></thead>
+                            <tbody id="datos-sectores-body" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: CONFIGURACIÓN -->
+    <div id="section-config" class="hidden space-y-4">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <h3 class="font-bold text-slate-800 mb-4"><i class="bx bx-cog mr-1"></i> Configuración de la Conexión</h3>
+            <form id="form-config" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">URL Base de la API</label>
+                    <input type="url" id="cfg-base-url" class="field-input" value="https://secure.alterestate.com" placeholder="https://secure.alterestate.com">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">API Token</label>
+                    <input type="password" id="cfg-api-token" class="field-input" placeholder="Token de autenticación de AlterEstate">
+                </div>
+                <div class="flex gap-3">
+                    <button type="submit" class="btn-action-solid bg-dlab-primary text-white">
+                        <i class="bx bx-save"></i> Guardar Configuración
+                    </button>
+                    <button type="button" onclick="probarConexion()" class="btn-action-outline">
+                        <i class="bx bx-transfer"></i> Probar Conexión
+                    </button>
+                </div>
+                <div id="config-result" class="hidden text-xs mt-2 p-3 rounded-lg"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TAB: LOG -->
+    <div id="section-log" class="hidden space-y-4">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200">
+                <h3 class="font-bold text-slate-800"><i class="bx bx-history mr-1"></i> Historial de Sincronizaciones</h3>
+            </div>
+            <div class="p-4">
+                <table id="tabla-log" class="w-full text-sm" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Operación</th>
+                            <th>Estado</th>
+                            <th>Procesados</th>
+                            <th>Creados</th>
+                            <th>Actualizados</th>
+                            <th>Fallidos</th>
+                            <th>Duración</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ─── Tab Navigation ───────────────────────────────────────────────────────────
+function cambiarTab(tab) {
+    document.querySelectorAll('[id^="section-"]').forEach(s => s.classList.add('hidden'));
+    document.querySelectorAll('.tab-ae-btn').forEach(b => {
+        b.classList.remove('border-slate-800', 'text-slate-900');
+        b.classList.add('border-transparent', 'text-slate-500');
+    });
+    document.getElementById('section-' + tab).classList.remove('hidden');
+    const btn = document.getElementById('tab-btn-' + tab);
+    btn.classList.remove('border-transparent', 'text-slate-500');
+    btn.classList.add('border-slate-800', 'text-slate-900');
+    if (tab === 'propiedades') cargarPropiedades();
+    if (tab === 'agentes') cargarAgentes();
+    if (tab === 'catalogos') cargarCatalogos();
+    if (tab === 'datos') cargarDatosImportados();
+    if (tab === 'config') cargarConfig();
+    if (tab === 'log') cargarLog();
+}
+
+// ─── API Helper ───────────────────────────────────────────────────────────────
+async function api(method, path, body = null) {
+    const opts = { method, headers: {'Content-Type': 'application/json'} };
+    if (body) opts.body = JSON.stringify(body);
+    const resp = await fetch('/api/alterestate' + path, opts);
+    return resp.json();
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+function freshnessColor(status) {
+    const colors = { reciente: 'text-green-600', ok: 'text-blue-600', antiguo: 'text-amber-600', muy_antiguo: 'text-red-600', desconocido: 'text-slate-400' };
+    return colors[status] || 'text-slate-400';
+}
+function freshnessBadge(status) {
+    const badges = { reciente: 'bg-green-100 text-green-700', ok: 'bg-blue-100 text-blue-700', antiguo: 'bg-amber-100 text-amber-700', muy_antiguo: 'bg-red-100 text-red-700', desconocido: 'bg-slate-100 text-slate-500' };
+    return badges[status] || 'bg-slate-100 text-slate-500';
+}
+function formatDatetime(dt) {
+    if (!dt) return '—';
+    try {
+        const d = new Date(dt);
+        return d.toLocaleDateString('es-DO') + ' ' + d.toLocaleTimeString('es-DO', {hour:'2-digit', minute:'2-digit'});
+    } catch(e) { return dt; }
+}
+
+async function cargarDashboard() {
+    try {
+        const r = await api('GET', '/status');
+        const s = r.sync_stats || {};
+        const byType = s.by_type || {};
+        const counts = r.table_counts || {};
+        const fresh = r.freshness || {};
+        const lastSyncs = r.last_syncs || {};
+
+        // ─── Banner de estado ──────────────────────────────────────────────────
+        const dot = document.getElementById('ae-status-dot');
+        const estadoEl = document.getElementById('kpi-estado');
+        const lastSyncText = document.getElementById('ae-last-sync-text');
+        const totalRecords = document.getElementById('ae-total-records');
+        const freshnessGlobal = document.getElementById('ae-freshness-global');
+
+        if (r.has_config) {
+            dot.className = 'w-3 h-3 rounded-full bg-green-500';
+            estadoEl.textContent = '🟢 Conectado a AlterEstate';
+        } else {
+            dot.className = 'w-3 h-3 rounded-full bg-red-500';
+            estadoEl.textContent = '🔴 Sin configurar';
+        }
+
+        const lastFull = lastSyncs['sync_alterestate'] || lastSyncs['configurar_alterestate'];
+        lastSyncText.textContent = lastFull ? 'Ultimo sync: ' + formatDatetime(lastFull) : 'Nunca sincronizado';
+
+        const total = (counts.proyectos || 0) + (counts.entidades || 0) + (counts.paises || 0) + (counts.ciudades || 0) + (counts.sectores || 0);
+        totalRecords.textContent = total + ' registros en DB';
+
+        // Freshness global: la mas antigua
+        const freshValues = Object.values(fresh).filter(f => f.hours !== null);
+        if (freshValues.length) {
+            const worst = freshValues.reduce((a, b) => a.hours > b.hours ? a : b);
+            freshnessGlobal.className = 'text-xs font-semibold mt-0.5 ' + freshnessColor(worst.status);
+            freshnessGlobal.textContent = 'Data: ' + worst.text;
+        }
+
+        // ─── KPI Cards ────────────────────────────────────────────────────────
+        document.getElementById('kpi-propiedades').textContent = counts.proyectos || (byType.property || {}).count || 0;
+        document.getElementById('kpi-agentes').textContent = counts.entidades || (byType.agent || {}).count || 0;
+        document.getElementById('kpi-paises').textContent = counts.paises || (byType.country || {}).count || 0;
+        document.getElementById('kpi-ciudades').textContent = counts.ciudades || (byType.city || {}).count || 0;
+        document.getElementById('kpi-sectores').textContent = counts.sectores || (byType.sector || {}).count || 0;
+
+        // Sub-text de freshness por KPI
+        const entityMap = { propiedades: 'property', agentes: 'agent', paises: 'country', ciudades: 'city', sectores: 'sector' };
+        for (const [el, entityType] of Object.entries(entityMap)) {
+            const f = fresh[entityType];
+            const subEl = document.getElementById('kpi-' + el + '-sync');
+            if (f && subEl) {
+                subEl.className = 'text-[10px] mt-0.5 font-semibold ' + freshnessColor(f.status);
+                subEl.textContent = f.text;
+            }
+        }
+
+        // ─── Tabla resumen ─────────────────────────────────────────────────────
+        const entities = [
+            { key: 'property', label: 'Propiedades', table: 'proyectos', icon: 'bx-building-house', color: 'blue' },
+            { key: 'agent', label: 'Agentes', table: 'entidades', icon: 'bx-user', color: 'green' },
+            { key: 'country', label: 'Paises', table: 'cat_paises', icon: 'bx-globe', color: 'amber' },
+            { key: 'city', label: 'Ciudades', table: 'cat_ciudades', icon: 'bx-map', color: 'indigo' },
+            { key: 'sector', label: 'Sectores', table: 'cat_sectores', icon: 'bx-map-pin', color: 'rose' },
+        ];
+
+        const tbody = document.getElementById('ae-sync-table-body');
+        tbody.innerHTML = entities.map(e => {
+            const mapping = byType[e.key] || {};
+            const cnt = counts[e.table] || mapping.count || 0;
+            const mapCount = mapping.count || 0;
+            const lastSync = mapping.last_sync;
+            const f = fresh[e.key] || {};
+            return `<tr class="border-b border-slate-50 hover:bg-slate-50">
+                <td class="py-2.5 font-semibold text-slate-700"><i class="bx ${e.icon} mr-1 text-${e.color}-500"></i> ${e.label}</td>
+                <td class="text-center py-2.5 font-mono">${cnt}</td>
+                <td class="text-center py-2.5 font-mono">${mapCount}</td>
+                <td class="text-center py-2.5 text-slate-500">${lastSync ? formatDatetime(lastSync) : '—'}</td>
+                <td class="text-center py-2.5"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${freshnessBadge(f.status || 'desconocido')}">${f.text || 'Sin sync'}</span></td>
+            </tr>`;
+        }).join('');
+
+    } catch(e) {
+        document.getElementById('kpi-estado').textContent = '⚠️ Error de conexion';
+        document.getElementById('ae-status-dot').className = 'w-3 h-3 rounded-full bg-amber-500';
+        console.error('Dashboard error:', e);
+    }
+}
+
+// ─── Sync ─────────────────────────────────────────────────────────────────────
+async function ejecutarSync(entity) {
+    const progress = document.getElementById('sync-progress');
+    const bar = document.getElementById('sync-bar');
+    const status = document.getElementById('sync-status');
+    progress.classList.remove('hidden');
+    bar.style.width = '30%';
+    status.textContent = 'Sincronizando ' + entity + '...';
+
+    try {
+        const endpoint = entity === 'all' ? '/sync' : '/sync/' + entity;
+        const r = await api('POST', endpoint, entity === 'all' ? {} : {});
+        bar.style.width = '100%';
+        if (r.error) {
+            status.textContent = '❌ Error: ' + r.error;
+            bar.classList.remove('bg-dlab-cta');
+            bar.classList.add('bg-red-500');
+        } else {
+            status.textContent = '✅ Sincronización completada';
+            bar.classList.add('bg-dlab-cta');
+            bar.classList.remove('bg-red-500');
+            cargarDashboard();
+        }
+    } catch(e) {
+        bar.style.width = '100%';
+        status.textContent = '❌ Error de conexión';
+        bar.classList.remove('bg-dlab-cta');
+        bar.classList.add('bg-red-500');
+    }
+    setTimeout(() => { progress.classList.add('hidden'); bar.style.width = '0%'; }, 5000);
+}
+
+// ─── Propiedades ──────────────────────────────────────────────────────────────
+async function cargarPropiedades() {
+    const r = await api('GET', '/properties');
+    const data = r.properties || [];
+    const tbody = document.querySelector('#tabla-propiedades tbody');
+    if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-slate-400 py-6">Sin propiedades — ejecutar sync primero</td></tr>';
+        return;
+    }
+    tbody.innerHTML = data.map(p => `
+        <tr class="hover:bg-slate-50">
+            <td class="font-medium">${p.nombre || '—'}</td>
+            <td>${p.tipo_inmueble || '—'}</td>
+            <td>${p.municipio || '—'}</td>
+            <td>${p.sector || '—'}</td>
+            <td>${p.precio_min ? '$' + Number(p.precio_min).toLocaleString() : '—'}</td>
+            <td>${p.precio_max ? '$' + Number(p.precio_max).toLocaleString() : '—'}</td>
+            <td><span class="badge-pill ${p.etapa === 'Entregado' ? 'badge-aprobado' : 'badge-pendiente'}">${p.etapa || '—'}</span></td>
+            <td class="text-[10px] text-slate-400">${p.ae_created_at ? 'AE: ' + p.ae_created_at.substring(0,10) : '—'}</td>
+        </tr>
+    `).join('');
+}
+
+// ─── Agentes ──────────────────────────────────────────────────────────────────
+async function cargarAgentes() {
+    const r = await api('GET', '/agents-list');
+    const data = r.agents || [];
+    const tbody = document.querySelector('#tabla-agentes tbody');
+    if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-slate-400 py-6">Sin agentes — ejecutar sync primero</td></tr>';
+        return;
+    }
+    tbody.innerHTML = data.map(a => `
+        <tr class="hover:bg-slate-50">
+            <td class="font-medium">${a.nombre || '—'}</td>
+            <td>${a.email || '—'}</td>
+            <td>${a.telefono || '—'}</td>
+            <td>${a.posicion || '—'}</td>
+            <td>${a.empresa || '—'}</td>
+            <td class="text-[10px] text-slate-400">${a.fecha_ingreso || '—'}</td>
+            <td><span class="badge-pill ${a.activo ? 'badge-aprobado' : 'badge-cancelado'}">${a.activo ? 'Activo' : 'Inactivo'}</span></td>
+        </tr>
+    `).join('');
+}
+
+// ─── Leads ────────────────────────────────────────────────────────────────────
+document.getElementById('form-lead').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const data = {
+        nombre: document.getElementById('lead-nombre').value,
+        apellido: document.getElementById('lead-apellido').value,
+        email: document.getElementById('lead-email').value,
+        telefono: document.getElementById('lead-telefono').value,
+        mensaje: document.getElementById('lead-mensaje').value,
+    };
+    const r = await api('POST', '/send-lead', data);
+    if (r.success) {
+        Swal.fire('Éxito', 'Lead enviado a AlterEstate', 'success');
+        this.reset();
+    } else {
+        Swal.fire('Error', r.error || 'Error al enviar lead', 'error');
+    }
+});
+
+// ─── Catálogos ────────────────────────────────────────────────────────────────
+async function cargarCatalogos() {
+    try {
+        const resp = await fetch('/api/catalogos');
+        const data = await resp.json();
+        renderLista('lista-paises', data.cat_paises || [], 'nombre');
+        renderLista('lista-tipos', data.cat_tipos_inmueble || [], 'nombre');
+        renderLista('lista-monedas', data.cat_monedas || [], 'codigo');
+        renderLista('lista-estados', data.cat_estados_unidad || [], 'nombre');
+        renderLista('lista-amenidades', data.cat_amenidades_db || [], 'nombre');
+        renderLista('lista-listados', data.cat_tipos_listado || [], 'nombre');
+    } catch(e) {
+        console.error('Error cargando catálogos:', e);
+    }
+}
+
+function renderLista(id, items, key) {
+    const el = document.getElementById(id);
+    if (!items.length) {
+        el.innerHTML = '<span class="text-slate-400">Sin datos — ejecutar sync primero</span>';
+        return;
+    }
+    el.innerHTML = items.map(i => `<div class="py-1 border-b border-slate-100">${i[key] || i.nombre || i.codigo}</div>`).join('');
+}
+
+// ─── Datos Importados ─────────────────────────────────────────────────────────
+async function cargarDatosImportados() {
+    try {
+        const r = await api('GET', '/imported-data');
+        if (!r.success) return;
+        const data = r.data;
+
+        for (const [key, cfg] of Object.entries({
+            paises: { head: 'datos-paises-head', body: 'datos-paises-body', count: 'datos-paises-count' },
+            ciudades: { head: 'datos-ciudades-head', body: 'datos-ciudades-body', count: 'datos-ciudades-count' },
+            sectores: { head: 'datos-sectores-head', body: 'datos-sectores-body', count: 'datos-sectores-count' },
+        })) {
+            const info = data[key];
+            if (!info) continue;
+            const thead = document.getElementById(cfg.head);
+            const tbody = document.getElementById(cfg.body);
+            const countEl = document.getElementById(cfg.count);
+
+            countEl.textContent = `(${info.total} total)`;
+
+            thead.innerHTML = '<tr class="border-b border-slate-200">' +
+                info.columns.map(c => `<th class="text-left py-2 px-3 font-semibold text-slate-600">${c}</th>`).join('') +
+                '</tr>';
+
+            if (!info.rows.length) {
+                tbody.innerHTML = `<tr><td colspan="${info.columns.length}" class="text-center py-4 text-slate-400">Sin datos</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = info.rows.map(row => {
+                return '<tr class="hover:bg-slate-50">' +
+                    info.columns.map((c, i) => {
+                        let val = Object.values(row)[i];
+                        if (val === null || val === undefined) val = '-';
+                        if (typeof val === 'number') val = val.toLocaleString();
+                        return `<td class="py-2 px-3 text-slate-700">${val}</td>`;
+                    }).join('') +
+                    '</tr>';
+            }).join('');
+        }
+    } catch(e) {
+        console.error('Error cargando datos importados:', e);
+    }
+}
+
+// ─── Configuración ────────────────────────────────────────────────────────────
+async function cargarConfig() {
+    const r = await api('GET', '/config');
+    if (r.config) {
+        document.getElementById('cfg-base-url').value = r.config.base_url || '';
+    }
+}
+
+document.getElementById('form-config').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const data = {
+        base_url: document.getElementById('cfg-base-url').value,
+        api_token: document.getElementById('cfg-api-token').value,
+    };
+    const r = await api('POST', '/config', data);
+    const result = document.getElementById('config-result');
+    result.classList.remove('hidden');
+    if (r.success) {
+        result.className = 'text-xs mt-2 p-3 rounded-lg bg-green-50 text-green-700';
+        result.textContent = '✅ Configuración guardada correctamente';
+    } else {
+        result.className = 'text-xs mt-2 p-3 rounded-lg bg-red-50 text-red-700';
+        result.textContent = '❌ ' + (r.error || 'Error al guardar');
+    }
+});
+
+async function probarConexion() {
+    const r = await api('POST', '/test');
+    const result = document.getElementById('config-result');
+    result.classList.remove('hidden');
+    const conn = r.connection || {};
+    const auth = r.authentication || {};
+    if (conn.connected && auth.authenticated) {
+        result.className = 'text-xs mt-2 p-3 rounded-lg bg-green-50 text-green-700';
+        result.textContent = `✅ Conectado (${conn.elapsed_ms}ms) — Autenticado`;
+    } else {
+        result.className = 'text-xs mt-2 p-3 rounded-lg bg-red-50 text-red-700';
+        result.textContent = `❌ ${conn.error || auth.error || 'Error de conexión'}`;
+    }
+}
+
+// ─── Log ──────────────────────────────────────────────────────────────────────
+async function cargarLog() {
+    try {
+        const resp = await fetch('/api/alterestate/stats');
+        const data = await resp.json();
+        const tbody = document.querySelector('#tabla-log tbody');
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-slate-400 py-8">Logs disponibles próximamente</td></tr>';
+    } catch(e) {}
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+cargarDashboard();
+</script>
+{% endblock %}

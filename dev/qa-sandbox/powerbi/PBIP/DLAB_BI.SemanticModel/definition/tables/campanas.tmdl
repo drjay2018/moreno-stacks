@@ -1,0 +1,133 @@
+table campanas
+	lineageTag: 419dd9a5-d964-478a-b5f2-c98166393ac0
+
+	column id
+		dataType: double
+		lineageTag: e7c0c4ed-d0f4-4c59-b77a-ab674dd0706a
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column nombre
+		dataType: string
+		lineageTag: bb9ddfff-43a5-4510-8582-450eb4b17383
+		summarizeBy: none
+		sourceColumn: nombre
+
+		annotation SummarizationSetBy = Automatic
+
+	column canal
+		dataType: string
+		lineageTag: a49c30f2-24fa-4dca-bca7-cf41f69f82b8
+		summarizeBy: none
+		sourceColumn: canal
+
+		annotation SummarizationSetBy = Automatic
+
+	column proyecto_id
+		dataType: double
+		lineageTag: 3e6f55ac-67fa-4d8c-bfe9-3f079d677ddc
+		summarizeBy: sum
+		sourceColumn: proyecto_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fecha_inicio
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: fabfbeb6-61ce-4b09-acec-648c4f57034a
+		summarizeBy: none
+		sourceColumn: fecha_inicio
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column fecha_fin
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: d4528355-4d2c-4c35-b095-9fd44d201490
+		summarizeBy: none
+		sourceColumn: fecha_fin
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column monto_invertido
+		dataType: double
+		lineageTag: 5fffab57-0967-4c93-98fa-7be201d3f7d9
+		summarizeBy: sum
+		sourceColumn: monto_invertido
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column activo
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: f8e54d81-839a-4757-b395-b82ddad35692
+		summarizeBy: none
+		sourceColumn: activo
+
+		annotation SummarizationSetBy = Automatic
+
+	column impresiones
+		dataType: double
+		lineageTag: afde3a35-d162-4b98-91c3-54d1b6fe30b2
+		summarizeBy: sum
+		sourceColumn: impresiones
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column clics
+		dataType: double
+		lineageTag: a428f6b5-e24b-41ed-889a-aee271beb869
+		summarizeBy: sum
+		sourceColumn: clics
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column leads_generados
+		dataType: double
+		lineageTag: 1ffb8420-cdcf-4d19-ba6d-863e82a88712
+		summarizeBy: sum
+		sourceColumn: leads_generados
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column alcance
+		dataType: double
+		lineageTag: 42de80cb-37ef-4070-88e6-caf9f0ae93c7
+		summarizeBy: sum
+		sourceColumn: alcance
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	partition campanas = m
+		mode: import
+		source =
+				let
+				    Origen = Odbc.DataSource("driver={SQLite3 ODBC Driver};database=H:\Mi unidad\Proyecto - CRM Inmobiliaria\dlab-data\data\dlab.db;notxn=1;dsn=SQLite3 Datasource", [HierarchicalNavigation=true, SqlCapabilities=[LimitClauseKind=LimitClauseKind.Limit]]),
+				    campanas_Table = Origen{[Name="campanas",Kind="Table"]}[Data]
+				in
+				    campanas_Table
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

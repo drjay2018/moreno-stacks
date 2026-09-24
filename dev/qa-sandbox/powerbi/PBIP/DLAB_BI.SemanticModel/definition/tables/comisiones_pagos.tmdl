@@ -1,0 +1,108 @@
+table comisiones_pagos
+	lineageTag: 353bfe58-576d-4959-b962-7a848e6ee2a2
+
+	column id
+		dataType: double
+		lineageTag: 1b1f996c-04d2-47ae-8c99-18c346a257c5
+		summarizeBy: none
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column entidad_id
+		dataType: double
+		lineageTag: a6c4017c-9e9e-46fa-8301-29e6e2b6abf2
+		summarizeBy: none
+		sourceColumn: entidad_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column transaccion_id
+		dataType: double
+		lineageTag: 7fcac6b9-df8f-4c1a-8e65-b8d10db9e4cd
+		summarizeBy: none
+		sourceColumn: transaccion_id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column monto
+		dataType: double
+		lineageTag: c888b2d5-8489-4c8e-a113-4abc72dd0a9a
+		summarizeBy: none
+		sourceColumn: monto
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column fecha_generacion
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 318f3f93-a93c-43ea-9a91-851c4aa0af86
+		summarizeBy: none
+		sourceColumn: fecha_generacion
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column fecha_maxima_pago
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: bc864e4c-d947-4dd5-a55b-be33d86eaf3e
+		summarizeBy: none
+		sourceColumn: fecha_maxima_pago
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column fecha_aprobacion_ceo
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 951e72fb-d93a-42f1-83d4-84bdae42333f
+		summarizeBy: none
+		sourceColumn: fecha_aprobacion_ceo
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column fecha_pago
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 2fa3596c-8117-47fd-bb23-2f66b14fa03b
+		summarizeBy: none
+		sourceColumn: fecha_pago
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column estado
+		dataType: string
+		lineageTag: 52764a4a-35bb-4cde-8690-783362f9b611
+		summarizeBy: none
+		sourceColumn: estado
+
+		annotation SummarizationSetBy = Automatic
+
+	partition comisiones_pagos = m
+		mode: import
+		source =
+				let
+				    Origen = Odbc.DataSource("driver={SQLite3 ODBC Driver};database=H:\Mi unidad\Proyecto - CRM Inmobiliaria\dlab-data\data\dlab.db;notxn=1;dsn=SQLite3 Datasource", [HierarchicalNavigation=true, SqlCapabilities=[LimitClauseKind=LimitClauseKind.Limit]]),
+				    comisiones_pagos_Table = Origen{[Name="comisiones_pagos",Kind="Table"]}[Data]
+				in
+				    comisiones_pagos_Table
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

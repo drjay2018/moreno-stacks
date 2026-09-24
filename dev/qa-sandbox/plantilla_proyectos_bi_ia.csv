@@ -1,0 +1,101 @@
+nombre,contraparte_id,tipo_inmueble,etapa,provincia,municipio,unidades_totales,fecha_entrega_estimada,financiamiento,activo
+Residencial Teodoro Village 0,1,Solar,Listo para entrega,Samaná,Santo Domingo Este,161,2028-01-15,0,1
+Residencial Estela Residences 1,1,Solar,En Construcción,La Vega,Santo Domingo Este,45,2028-10-03,1,1
+Residencial Yeni Residences 2,1,Apartamento,En Planos,La Romana,Santo Domingo Este,43,2027-07-16,0,1
+Residencial Fidel Tower 3,1,Apartamento,En Planos,Santo Domingo,Santo Domingo Este,199,2027-06-17,1,1
+Residencial Juan Plaza 4,1,Local Comercial,Listo para entrega,La Romana,Santo Domingo Este,33,2026-12-05,0,1
+Residencial Mario Residences 5,1,Casa,En Planos,Distrito Nacional,Santo Domingo Este,148,2026-12-21,1,1
+Residencial Ángela Gardens 6,1,Casa,En Planos,La Vega,Santo Domingo Este,23,2029-06-04,1,1
+Residencial Isabel Village 7,1,Solar,En Planos,Distrito Nacional,Santo Domingo Este,55,2026-12-27,1,1
+Residencial Federico Gardens 8,1,Apartamento,Listo para entrega,Samaná,Santo Domingo Este,44,2028-12-31,1,1
+Residencial Luis Manuel Gardens 9,1,Casa,Listo para entrega,Samaná,Santo Domingo Este,125,2028-08-24,0,1
+Residencial Porfirio Gardens 10,1,Solar,En Construcción,La Vega,Santo Domingo Este,126,2029-06-04,0,1
+Residencial Emiliano Gardens 11,1,Solar,En Construcción,Santo Domingo,Santo Domingo Este,54,2027-02-05,1,1
+Residencial Ana Village 12,1,Penthouse,En Construcción,La Vega,Santo Domingo Este,150,2027-03-18,0,1
+Residencial Laura Views 13,1,Penthouse,Listo para entrega,Distrito Nacional,Santo Domingo Este,74,2026-12-29,1,1
+Residencial Abelardo Plaza 14,1,Casa,En Construcción,La Vega,Santo Domingo Este,48,2027-11-06,1,1
+Residencial René Residences 15,1,Penthouse,Listo para entrega,Santiago,Santo Domingo Este,99,2026-11-26,0,1
+Residencial Alejandra Tower 16,1,Penthouse,En Planos,La Altagracia,Santo Domingo Este,122,2027-09-11,0,1
+Residencial Cristina Plaza 17,1,Solar,En Construcción,La Altagracia,Santo Domingo Este,67,2028-05-16,1,1
+Residencial Alfonso Residences 18,1,Casa,En Construcción,Samaná,Santo Domingo Este,179,2028-03-25,0,1
+Residencial Amanda Residences 19,1,Solar,En Construcción,Puerto Plata,Santo Domingo Este,123,2027-11-15,1,1
+Residencial Israel Plaza 20,1,Villa,En Construcción,Distrito Nacional,Santo Domingo Este,84,2029-03-22,0,1
+Residencial Ernesto Residences 21,1,Casa,Listo para entrega,La Altagracia,Santo Domingo Este,172,2028-04-04,1,1
+Residencial María José Village 22,1,Local Comercial,Listo para entrega,Puerto Plata,Santo Domingo Este,183,2027-07-28,0,1
+Residencial Gabino Plaza 23,1,Solar,En Planos,La Romana,Santo Domingo Este,147,2029-04-13,0,1
+Residencial Renato Views 24,1,Villa,Listo para entrega,Puerto Plata,Santo Domingo Este,85,2027-01-26,0,1
+Residencial Timoteo Tower 25,1,Solar,Listo para entrega,Puerto Plata,Santo Domingo Este,52,2029-03-21,1,1
+Residencial Jos Village 26,1,Apartamento,En Planos,Santo Domingo,Santo Domingo Este,118,2028-09-25,1,1
+Residencial Fabiola Plaza 27,1,Villa,En Planos,La Altagracia,Santo Domingo Este,79,2027-01-12,0,1
+Residencial Ilse Tower 28,1,Casa,En Planos,La Romana,Santo Domingo Este,73,2028-06-14,1,1
+Residencial Maximiliano Views 29,1,Solar,En Construcción,La Altagracia,Santo Domingo Este,158,2026-12-03,1,1
+Residencial Mitzy Plaza 30,1,Penthouse,Listo para entrega,Santo Domingo,Santo Domingo Este,30,2027-02-15,0,1
+Residencial Benito Tower 31,1,Casa,En Construcción,Samaná,Santo Domingo Este,23,2029-04-15,1,1
+Residencial Aldo Tower 32,1,Casa,En Construcción,Samaná,Santo Domingo Este,107,2027-12-13,1,1
+Residencial Jorge Luis Tower 33,1,Apartamento,Listo para entrega,Distrito Nacional,Santo Domingo Este,37,2026-12-25,1,1
+Residencial Héctor Residences 34,1,Villa,En Planos,Samaná,Santo Domingo Este,43,2027-06-22,0,1
+Residencial Agustín Views 35,1,Apartamento,En Planos,Santiago,Santo Domingo Este,32,2028-04-20,0,1
+Residencial Frida Residences 36,1,Casa,Listo para entrega,La Romana,Santo Domingo Este,57,2028-07-22,0,1
+Residencial Rodrigo Tower 37,1,Apartamento,En Planos,Samaná,Santo Domingo Este,179,2027-04-13,0,1
+Residencial Omar Gardens 38,1,Solar,En Construcción,Puerto Plata,Santo Domingo Este,48,2029-01-13,0,1
+Residencial Joaquín Residences 39,1,Apartamento,En Planos,Santo Domingo,Santo Domingo Este,108,2029-03-16,1,1
+Residencial Leonel Village 40,1,Local Comercial,Listo para entrega,Santo Domingo,Santo Domingo Este,40,2028-01-05,1,1
+Residencial Leticia Residences 41,1,Local Comercial,En Construcción,La Altagracia,Santo Domingo Este,126,2026-09-25,0,1
+Residencial Francisca Gardens 42,1,Penthouse,En Construcción,La Vega,Santo Domingo Este,174,2027-07-27,0,1
+Residencial Ángela Plaza 43,1,Villa,En Planos,Santiago,Santo Domingo Este,83,2028-09-01,1,1
+Residencial Alvaro Gardens 44,1,Villa,Listo para entrega,Distrito Nacional,Santo Domingo Este,97,2028-06-06,1,1
+Residencial Claudia Tower 45,1,Apartamento,En Construcción,La Vega,Santo Domingo Este,199,2027-12-06,1,1
+Residencial Gerónimo Village 46,1,Casa,En Construcción,La Romana,Santo Domingo Este,61,2028-05-21,0,1
+Residencial Rufino Tower 47,1,Casa,En Planos,La Romana,Santo Domingo Este,67,2028-12-18,0,1
+Residencial Abel Views 48,1,Penthouse,Listo para entrega,Santiago,Santo Domingo Este,111,2028-05-30,0,1
+Residencial Alfonso Village 49,1,Apartamento,Listo para entrega,La Altagracia,Santo Domingo Este,162,2029-03-10,1,1
+Residencial Isabel Views 50,1,Apartamento,Listo para entrega,Samaná,Santo Domingo Este,172,2028-10-13,1,1
+Residencial Cristobal Residences 51,1,Penthouse,Listo para entrega,Samaná,Santo Domingo Este,30,2028-08-15,1,1
+Residencial Abril Village 52,1,Solar,En Construcción,La Altagracia,Santo Domingo Este,64,2027-07-04,1,1
+Residencial Francisca Gardens 53,1,Villa,En Construcción,Santiago,Santo Domingo Este,177,2029-01-06,0,1
+Residencial Aurelio Village 54,1,Apartamento,Listo para entrega,Puerto Plata,Santo Domingo Este,129,2028-03-13,1,1
+Residencial Gerónimo Residences 55,1,Casa,En Construcción,Samaná,Santo Domingo Este,194,2027-07-04,1,1
+Residencial Carlota Village 56,1,Apartamento,Listo para entrega,Santiago,Santo Domingo Este,42,2027-03-11,0,1
+Residencial Elsa Tower 57,1,Villa,En Planos,La Vega,Santo Domingo Este,153,2029-03-23,0,1
+Residencial Ilse Tower 58,1,Casa,En Construcción,La Vega,Santo Domingo Este,133,2029-06-04,0,1
+Residencial Abigail Village 59,1,Casa,En Construcción,La Vega,Santo Domingo Este,31,2026-12-31,0,1
+Residencial Magdalena Tower 60,1,Penthouse,En Construcción,La Altagracia,Santo Domingo Este,167,2026-10-07,1,1
+Residencial Francisco Residences 61,1,Solar,En Construcción,Puerto Plata,Santo Domingo Este,79,2026-10-22,0,1
+Residencial Guadalupe Plaza 62,1,Local Comercial,En Construcción,La Vega,Santo Domingo Este,71,2026-12-14,1,1
+Residencial Jorge Tower 63,1,Villa,En Planos,La Vega,Santo Domingo Este,178,2028-04-06,0,1
+Residencial Abraham Village 64,1,Local Comercial,Listo para entrega,La Vega,Santo Domingo Este,188,2028-08-02,1,1
+Residencial María Elena Residences 65,1,Casa,En Planos,Distrito Nacional,Santo Domingo Este,145,2027-04-06,1,1
+Residencial Esperanza Residences 66,1,Apartamento,En Construcción,La Vega,Santo Domingo Este,200,2027-02-17,1,1
+Residencial Jonás Views 67,1,Apartamento,Listo para entrega,Santo Domingo,Santo Domingo Este,123,2027-05-13,0,1
+Residencial Marisela Village 68,1,Penthouse,En Planos,Distrito Nacional,Santo Domingo Este,44,2028-01-20,0,1
+Residencial Sofía Village 69,1,Casa,En Planos,La Altagracia,Santo Domingo Este,176,2029-03-19,0,1
+Residencial Lorena Plaza 70,1,Casa,Listo para entrega,Samaná,Santo Domingo Este,38,2027-12-15,0,1
+Residencial Ángela Plaza 71,1,Villa,Listo para entrega,Samaná,Santo Domingo Este,86,2027-09-09,1,1
+Residencial Vicente Plaza 72,1,Villa,En Planos,La Altagracia,Santo Domingo Este,73,2027-08-04,1,1
+Residencial Jaime Village 73,1,Villa,Listo para entrega,La Romana,Santo Domingo Este,176,2029-04-29,1,1
+Residencial Sofía Tower 74,1,Solar,Listo para entrega,La Altagracia,Santo Domingo Este,69,2027-07-21,0,1
+Residencial Berta Village 75,1,Apartamento,En Construcción,Samaná,Santo Domingo Este,95,2029-04-01,0,1
+Residencial Judith Views 76,1,Villa,En Construcción,Samaná,Santo Domingo Este,22,2027-12-12,1,1
+Residencial Oswaldo Views 77,1,Apartamento,Listo para entrega,Santo Domingo,Santo Domingo Este,10,2027-05-26,1,1
+Residencial Carmen Village 78,1,Solar,En Planos,La Romana,Santo Domingo Este,154,2029-07-27,1,1
+Residencial Ignacio Plaza 79,1,Apartamento,En Planos,La Altagracia,Santo Domingo Este,154,2028-08-10,0,1
+Residencial Emiliano Gardens 80,1,Villa,Listo para entrega,La Romana,Santo Domingo Este,54,2026-10-02,1,1
+Residencial Olivia Village 81,1,Villa,En Construcción,Santiago,Santo Domingo Este,67,2027-06-02,0,1
+Residencial Sergio Plaza 82,1,Apartamento,Listo para entrega,Distrito Nacional,Santo Domingo Este,179,2028-12-07,0,1
+Residencial Rolando Tower 83,1,Penthouse,En Construcción,Distrito Nacional,Santo Domingo Este,196,2027-08-26,1,1
+Residencial Lorena Views 84,1,Apartamento,Listo para entrega,Santo Domingo,Santo Domingo Este,197,2027-08-20,1,1
+Residencial Alicia Views 85,1,Penthouse,En Planos,Puerto Plata,Santo Domingo Este,111,2027-04-04,0,1
+Residencial Itzel Residences 86,1,Casa,En Construcción,Puerto Plata,Santo Domingo Este,121,2026-09-21,0,1
+Residencial Victoria Tower 87,1,Local Comercial,En Planos,La Romana,Santo Domingo Este,64,2028-09-08,1,1
+Residencial Ignacio Tower 88,1,Villa,Listo para entrega,Samaná,Santo Domingo Este,122,2027-08-08,0,1
+Residencial Úrsula Village 89,1,Local Comercial,En Construcción,Distrito Nacional,Santo Domingo Este,166,2027-09-02,1,1
+Residencial Alonso Residences 90,1,Apartamento,En Planos,Santo Domingo,Santo Domingo Este,35,2026-11-16,0,1
+Residencial Juan Tower 91,1,Casa,En Construcción,Distrito Nacional,Santo Domingo Este,177,2027-12-18,1,1
+Residencial Pedro Views 92,1,Villa,En Construcción,Samaná,Santo Domingo Este,83,2029-08-15,1,1
+Residencial Ricardo Village 93,1,Solar,En Construcción,Santo Domingo,Santo Domingo Este,120,2027-08-06,1,1
+Residencial Mario Gardens 94,1,Casa,En Construcción,La Altagracia,Santo Domingo Este,154,2027-07-21,0,1
+Residencial Daniel Gardens 95,1,Solar,En Construcción,Samaná,Santo Domingo Este,27,2028-04-18,1,1
+Residencial Iván Tower 96,1,Villa,Listo para entrega,Samaná,Santo Domingo Este,187,2029-01-08,1,1
+Residencial María Teresa Village 97,1,Apartamento,En Planos,Santo Domingo,Santo Domingo Este,26,2028-07-17,1,1
+Residencial José Carlos Views 98,1,Local Comercial,Listo para entrega,La Romana,Santo Domingo Este,32,2029-04-26,0,1
+Residencial Hugo Village 99,1,Apartamento,Listo para entrega,Santiago,Santo Domingo Este,60,2026-09-16,0,1

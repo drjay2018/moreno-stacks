@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}API-ClaroDom | {{ dlab_empresa }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900">API-ClaroDom</h1>
+        <p class="text-sm text-slate-500">Integración con ClaroDom — Configuración, prueba de conexión y estado.</p>
+    </div>
+
+    <!-- Pestañas -->
+    <div class="flex flex-wrap border-b border-slate-200 gap-1">
+        <button onclick="cambiarTab('estado')" id="tab-btn-estado" class="tab-cd-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-slate-800 text-slate-900 whitespace-nowrap transition-colors">
+            <i class="bx bx-dashboard"></i> Estado
+        </button>
+        <button onclick="cambiarTab('config')" id="tab-btn-config" class="tab-cd-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700 whitespace-nowrap transition-colors">
+            <i class="bx bx-cog"></i> Configuración
+        </button>
+    </div>
+
+    <!-- TAB: ESTADO -->
+    <div id="section-estado" class="space-y-6">
+        <!-- Banner de estado general -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div id="cd-status-dot" class="w-3 h-3 rounded-full bg-slate-300"></div>
+                    <div>
+                        <div id="cd-estado" class="text-sm font-bold text-slate-900">Verificando...</div>
+                        <div id="cd-ultimo-evento" class="text-xs text-slate-500 mt-0.5">—</div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div id="cd-base-url" class="text-xs text-slate-500">—</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones rápidas -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <h3 class="font-bold text-slate-800 mb-4"><i class="bx bx-transfer mr-1"></i> Acciones</h3>
+            <div class="flex flex-wrap gap-3">
+                <button onclick="probarConexion()" class="btn-action-solid bg-dlab-primary text-white hover:bg-dlab-primary/90">
+                    <i class="bx bx-transfer"></i> Probar Conexión y Auth
+                </button>
+                <button onclick="cargarEstado()" class="btn-action-outline">
+                    <i class="bx bx-refresh"></i> Refrescar Estado
+                </button>
+            </div>
+            <div id="test-result" class="hidden text-xs mt-4 p-3 rounded-lg space-y-2"></div>
+        </div>
+    </div>
+
+    <!-- TAB: CONFIGURACIÓN -->
+    <div id="section-config" class="hidden space-y-4">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+            <h3 class="font-bold text-slate-800 mb-4"><i class="bx bx-cog mr-1"></i> Configuración de la Conexión</h3>
+            <form id="form-config" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">URL Base de la API</label>
+                    <input type="url" id="cfg-base-url" class="field-input" placeholder="https://api.clarodom.example">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">API Token (JWT)</label>
+                    <input type="password" id="cfg-api-token" class="field-input" placeholder="Token de autenticación de ClaroDom" autocomplete="off">
+                    <p id="cfg-api-token-hint" class="text-[11px] text-slate-400 mt-1 hidden">Token actual: <span id="cfg-api-token-hint-valor"></span>. Deja este campo vacío para conservarlo; escribe uno nuevo solo si quieres reemplazarlo.</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Formato del Header Authorization</label>
+                    <select id="cfg-auth-scheme" class="field-input">
+                        <option value="bearer">Bearer &lt;token&gt;</option>
+                        <option value="token">Token &lt;token&gt;</option>
+                        <option value="raw">&lt;token&gt; (sin prefijo)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Ruta de Prueba (opcional)</label>
+                    <input type="text" id="cfg-test-path" class="field-input" placeholder="/v5/cliente/buscar" >
+                    <p class="text-[11px] text-slate-400 mt-1">Endpoint usado para probar conexión y auth. Dejar "/" para usar la raíz.</p>
+                </div>
+                <div class="flex gap-3">
+                    <button type="submit" class="btn-action-solid bg-dlab-primary text-white">
+                        <i class="bx bx-save"></i> Guardar Configuración
+                    </button>
+                </div>
+                <div id="config-result" class="hidden text-xs mt-2 p-3 rounded-lg"></div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ─── Tab Navigation ───────────────────────────────────────────────────────────
+function cambiarTab(tab) {
+    document.querySelectorAll('[id^="section-"]').forEach(s => s.classList.add('hidden'));
+    document.querySelectorAll('.tab-cd-btn').forEach(b => {
+        b.classList.remove('border-slate-800', 'text-slate-900');
+        b.classList.add('border-transparent', 'text-slate-500');
+    });
+    document.getElementById('section-' + tab).classList.remove('hidden');
+    const btn = document.getElementById('tab-btn-' + tab);
+    btn.classList.remove('border-transparent', 'text-slate-500');
+    btn.classList.add('border-slate-800', 'text-slate-900');
+    if (tab === 'config') cargarConfig();
+    if (tab === 'estado') cargarEstado();
+}
+
+// ─── API Helper ───────────────────────────────────────────────────────────────
+async function api(method, path, body = null) {
+    const opts = { method, headers: {'Content-Type': 'application/json'} };
+    if (body) opts.body = JSON.stringify(body);
+    const resp = await fetch('/api/clarodom' + path, opts);
+    return resp.json();
+}
+
+function formatDatetime(dt) {
+    if (!dt) return '—';
+    try {
+        const d = new Date(dt);
+        return d.toLocaleDateString('es-DO') + ' ' + d.toLocaleTimeString('es-DO', {hour:'2-digit', minute:'2-digit'});
+    } catch(e) { return dt; }
+}
+
+function setResult(el, ok, msg) {
+    el.classList.remove('hidden');
+    if (ok) {
+        el.className = 'text-xs mt-4 p-3 rounded-lg space-y-2 bg-green-50 text-green-700';
+    } else {
+        el.className = 'text-xs mt-4 p-3 rounded-lg space-y-2 bg-red-50 text-red-700';
+    }
+    el.innerHTML = msg;
+}
+
+// ─── Estado ───────────────────────────────────────────────────────────────────
+async function cargarEstado() {
+    try {
+        const r = await api('GET', '/status');
+        const dot = document.getElementById('cd-status-dot');
+        const estadoEl = document.getElementById('cd-estado');
+        const evtEl = document.getElementById('cd-ultimo-evento');
+        const urlEl = document.getElementById('cd-base-url');
+
+        // El semáforo verde solo se enciende cuando el último /test confirmó
+        // conectividad Y autenticación reales (r.connected). Tener
+        // configuración guardada (r.has_config) no es suficiente: solo
+        // significa que se guardó una base_url, no que la conexión funcione.
+        if (r.connected) {
+            dot.className = 'w-3 h-3 rounded-full bg-green-500';
+            estadoEl.textContent = 'Conectado a ClaroDom';
+        } else if (r.has_config) {
+            dot.className = 'w-3 h-3 rounded-full bg-amber-500';
+            estadoEl.textContent = 'Configurado — conexión no verificada';
+        } else {
+            dot.className = 'w-3 h-3 rounded-full bg-red-500';
+            estadoEl.textContent = 'Sin configurar';
+        }
+
+        const events = r.last_events || {};
+        const lastTest = events['test_clarodom'] || events['configurar_clarodom'];
+        evtEl.textContent = lastTest ? 'Ultima actividad: ' + formatDatetime(lastTest) : 'Sin actividad registrada';
+
+        const cfg = await api('GET', '/config');
+        urlEl.textContent = (cfg.config && cfg.config.base_url) ? cfg.config.base_url : 'URL base no configurada';
+    } catch(e) {
+        document.getElementById('cd-estado').textContent = '⚠️ Error de conexión';
+        document.getElementById('cd-status-dot').className = 'w-3 h-3 rounded-full bg-amber-500';
+        console.error('Estado error:', e);
+    }
+}
+
+// ─── Configuración ────────────────────────────────────────────────────────────
+async function cargarConfig() {
+    const r = await api('GET', '/config');
+    if (r.config) {
+        document.getElementById('cfg-base-url').value = r.config.base_url || '';
+        document.getElementById('cfg-test-path').value = r.config.test_path || '';
+        document.getElementById('cfg-auth-scheme').value = r.config.auth_scheme || 'bearer';
+        // El campo de token NUNCA se prellena con el valor enmascarado: se
+        // deja vacío a propósito. "Vacío al guardar" significa
+        // inequívocamente "no cambiar el token existente" (ver submit del
+        // formulario). El valor enmascarado solo se muestra como texto
+        // informativo junto al campo, nunca dentro del input.
+        const tokenInput = document.getElementById('cfg-api-token');
+        tokenInput.value = '';
+        const hint = document.getElementById('cfg-api-token-hint');
+        const hintValor = document.getElementById('cfg-api-token-hint-valor');
+        const tokenActual = r.config.api_token;
+        if (tokenActual && tokenActual !== '(no configurado)') {
+            hintValor.textContent = tokenActual;
+            hint.classList.remove('hidden');
+        } else {
+            hint.classList.add('hidden');
+        }
+    }
+}
+
+document.getElementById('form-config').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const tokenField = document.getElementById('cfg-api-token').value;
+    const data = {
+        base_url: document.getElementById('cfg-base-url').value,
+        test_path: document.getElementById('cfg-test-path').value || '/',
+        auth_scheme: document.getElementById('cfg-auth-scheme').value || 'bearer',
+    };
+    // El campo nunca contiene el valor enmascarado (ver cargarConfig): si
+    // esta vacío, el usuario no quiere cambiar el token existente y no se
+    // envía la clave; si tiene contenido, es un token nuevo real.
+    if (tokenField) {
+        data.api_token = tokenField;
+    }
+    const r = await api('POST', '/config', data);
+    const result = document.getElementById('config-result');
+    result.classList.remove('hidden');
+    if (r.success) {
+        result.className = 'text-xs mt-2 p-3 rounded-lg bg-green-50 text-green-700';
+        result.textContent = '✅ Configuración guardada correctamente';
+    } else {
+        result.className = 'text-xs mt-2 p-3 rounded-lg bg-red-50 text-red-700';
+        result.textContent = '❌ ' + (r.error || 'Error al guardar');
+    }
+});
+
+async function probarConexion() {
+    const result = document.getElementById('test-result');
+    result.classList.remove('hidden');
+    result.className = 'text-xs mt-4 p-3 rounded-lg space-y-2 bg-slate-50 text-slate-600';
+    result.innerHTML = '<div>Probando conexión...</div>';
+
+    // Enviar token nuevo si se escribio (para validar antes de guardar).
+    // El campo nunca contiene el valor enmascarado (ver cargarConfig), así
+    // que basta con comprobar que no esté vacío.
+    const body = {};
+    const tokenField = document.getElementById('cfg-api-token').value;
+    if (tokenField) {
+        body.api_token = tokenField;
+    }
+
+    const r = await api('POST', '/test', body);
+    const conn = r.connection || {};
+    const auth = r.authentication || {};
+
+    const parts = [];
+    parts.push('<div><strong>Conexión:</strong> ' + (conn.connected ? '✅ OK' : '❌ Falló') + (conn.elapsed_ms ? ' (' + conn.elapsed_ms + 'ms)' : '') + (conn.error ? ' — ' + conn.error : '') + '</div>');
+    parts.push('<div><strong>Autenticación:</strong> ' + (auth.authenticated ? '✅ OK' : '❌ Falló') + (auth.error ? ' — ' + auth.error : '') + '</div>');
+    if (auth.note) parts.push('<div class="text-slate-400">' + auth.note + '</div>');
+
+    const ok = conn.connected && auth.authenticated;
+    setResult(result, ok, parts.join(''));
+
+    cargarEstado();
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+cargarEstado();
+</script>
+{% endblock %}

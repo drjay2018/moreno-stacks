@@ -1,0 +1,52 @@
+{
+    "name": "Dlab Data Ejecutivo",
+    "dataColors": [
+        "#5B8DBE", 
+        "#4A9E7C", 
+        "#D9A441", 
+        "#C4574B", 
+        "#8B95A1", 
+        "#2E353D"
+    ],
+    "background": "#14181C",
+    "foreground": "#EDEFF2",
+    "tableAccent": "#5B8DBE",
+    "visualStyles": {
+        "*": {
+            "*": {
+                "outspace": [{"color": {"solid": {"color": "#14181C"}}}],
+                "background": [{"show": true, "color": {"solid": {"color": "#1C2228"}}, "transparency": 0}],
+                "border": [{"show": true, "color": {"solid": {"color": "#2E353D"}}, "radius": 6}],
+                "visualHeader": [{"show": false}]
+            }
+        },
+        "page": {
+            "*": {
+                "background": [{"color": {"solid": {"color": "#14181C"}}, "transparency": 0}],
+                "outspace": [{"color": {"solid": {"color": "#14181C"}}, "transparency": 0}]
+            }
+        }
+    },
+    "textClasses": {
+        "label": {
+            "fontFace": "Inter",
+            "fontSize": 10,
+            "color": "#8B95A1"
+        },
+        "callout": {
+            "fontFace": "'IBM Plex Sans', 'Inter Tight', sans-serif",
+            "fontSize": 24,
+            "color": "#EDEFF2"
+        },
+        "title": {
+            "fontFace": "'IBM Plex Sans', 'Inter Tight', sans-serif",
+            "fontSize": 14,
+            "color": "#EDEFF2"
+        },
+        "header": {
+            "fontFace": "Inter",
+            "fontSize": 12,
+            "color": "#EDEFF2"
+        }
+    }
+}

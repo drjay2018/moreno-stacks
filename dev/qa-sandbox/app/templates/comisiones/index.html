@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mb-6 flex justify-between items-end">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-800 tracking-tight">Liquidación de Comisiones</h1>
+        <p class="text-sm text-slate-500 mt-1">Gestión de pagos de comisiones a asesores y terceros (P7)</p>
+    </div>
+</div>
+
+<div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+    <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-4">
+        <h2 class="text-lg font-semibold text-slate-800">Comisiones Pendientes y Pagadas</h2>
+        <div class="relative">
+            <input type="text" id="searchInput" onkeyup="filtrarLocal()" placeholder="Buscar en lista..." class="field-input pl-9 max-w-xs text-sm">
+            <span class="absolute left-3 top-2.5 text-slate-400"><i class="bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg' aria-hidden='true"></i></span>
+        </div>
+    </div>
+    
+    <div id="contador-modulo" class="text-sm font-semibold text-slate-600 mb-2">Total de registros: <span id="total-badge">0</span></div>
+    <div id="table-container" class="overflow-x-auto min-h-[300px]">
+        <p class="text-center text-slate-400 py-8">Cargando datos...</p>
+    </div>
+</div>
+
+<!-- DataTables + jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+
+<script>
+    let dtComisiones = null;
+
+    $(document).ready(() => {
+        cargarComisiones();
+    });
+
+    async function cargarComisiones() {
+        const container = document.getElementById('table-container');
+        container.innerHTML = '<div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm mt-4"><table id="dt-comisiones" class="w-full text-left text-sm text-slate-600"><thead class="bg-slate-50 text-xs uppercase font-bold text-slate-500 border-b border-slate-200"><tr>' +
+            '<th class="px-4 py-3">Cierre</th><th class="px-4 py-3">Inmueble</th><th class="px-4 py-3">Beneficiario</th><th class="px-4 py-3">Hito</th><th class="px-4 py-3">Monto</th><th class="px-4 py-3">SLA Fecha</th><th class="px-4 py-3">Estado</th><th class="px-4 py-3">Acciones</th>' +
+            '</tr></thead><tbody class="divide-y divide-slate-100"></tbody></table></div>';
+
+        if (dtComisiones) { try { dtComisiones.destroy(); } catch(e){} dtComisiones = null; }
+
+        dtComisiones = $('#dt-comisiones').DataTable({
+            serverSide: true,
+            processing: true,
+            ajax: {
+                url: '/api/comisiones/comisiones',
+                type: 'GET'
+            },
+            columns: [
+                { data: 'transaccion', render: function(d){ return '<span class="font-mono font-bold text-amber-600">'+(d||'&#x2014;')+'</span>'; } },
+                { data: null, render: function(d,t,r){ 
+                    let nom = r.nombre_propiedad || ''; let num = r.numero_inmueble || '';
+                    return '<span class="text-slate-700">' + (nom||'-') + '</span>' + (num ? ' <span class="text-slate-400">#'+num+'</span>' : '');
+                }},
+                { data: 'entidad', render: function(d){ return '<span class="font-semibold text-slate-800">'+(d||'')+'</span>'; } },
+                { data: 'hito', render: function(d){ return '<span class="px-2 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-700">Hito '+(d||'?')+'</span>'; } },
+                { data: 'monto_comision', className: 'text-right font-medium', render: function(d){ return '<strong class="text-emerald-700">$' + Number(d||0).toLocaleString() + '</strong>'; } },
+                { data: 'estado_pago', render: function(d){
+                    var badgeCls = 'badge-proceso';
+                    if(d === 'VENCIDA') badgeCls = 'badge-rechazado';
+                    else if(d === 'EN FECHA') badgeCls = 'badge-proceso';
+                    else if(d === 'PAGADA') badgeCls = 'badge-aprobado';
+                    return '<span class="badge-pill '+badgeCls+'">'+d+'</span>';
+                }},
+                { data: 'estado', render: function(d){
+                    var badgeCls = 'badge-proceso';
+                    if(d === 'pendiente_aprobacion') badgeCls = 'badge-proceso';
+                    else if(d === 'aprobado') badgeCls = 'badge-aprobado';
+                    else if(d === 'pagado') badgeCls = 'badge-aprobado';
+                    return '<span class="badge-pill '+badgeCls+'">'+(d||'').replace('_',' ')+'</span>';
+                }},
+                { data: null, orderable: false, className: 'text-right', render: function(d,t,r){
+                    let btns = '';
+                    // Aprobar (simulado)
+                    if (r.estado === 'pendiente_aprobacion') {
+                        btns += '<button onclick="aprobarComision('+r.id+')" class="px-2 py-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 text-xs font-bold rounded mr-2">Aprobar</button>';
+                    } else if (r.estado === 'aprobado') {
+                        btns += '<button onclick="pagarComision('+r.id+')" class="px-2 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold rounded mr-2">Pagar / Liquidar</button>';
+                    }
+                    return btns;
+                }}
+            ],
+            pageLength: 20,
+            deferRender: true,
+            order: [[0,'desc']],
+            language: {
+                search: 'Buscar:', lengthMenu: 'Mostrar _MENU_',
+                info: '_START_-_END_ de _TOTAL_', zeroRecords: 'Sin resultados',
+                paginate: { first:'«', last:'»', next:'›', previous:'‹' },
+                processing: 'Cargando datos...'
+            },
+            dom: '<"flex items-center justify-between mb-4 flex-wrap gap-2"lf>rt<"flex items-center justify-between mt-4 flex-wrap gap-2"ip>',
+            drawCallback: function(settings) {
+                const badge = document.getElementById('total-badge');
+                if (badge) badge.innerText = settings.fnRecordsTotal();
+            }
+        });
+    }
+
+    function filtrarLocal() {
+        if (dtComisiones) dtComisiones.search(document.getElementById('searchInput').value).draw();
+    }
+
+    async function aprobarComision(id) {
+        if(!confirm('¿Confirmar aprobación de esta liquidación de comisión?')) return;
+        try {
+            const res = await fetch('/api/comisiones/' + id + '/aprobar', { method: 'POST' });
+            const d = await res.json();
+            if(d.success) { alert('Aprobada.'); cargarComisiones(); }
+            else { showToast(d.error, 'error'); }
+        } catch(e) { alert('Error: ' + e.message); }
+    }
+
+    async function pagarComision(id) {
+        if(!confirm('¿Confirmar pago y liquidación de esta comisión?')) return;
+        try {
+            const res = await fetch('/api/comisiones/' + id + '/pagar', {
+                method: 'POST', headers: {'Content-Type': 'application/json'}
+            });
+            const d = await res.json();
+            if (d.success) {
+                alert('Liquidación registrada con éxito.');
+                cargarComisiones();
+            } else { showToast(d.error, 'error'); }
+        } catch (err) { alert('Error: ' + err.message); }
+    }
+</script>
+{% endblock %}

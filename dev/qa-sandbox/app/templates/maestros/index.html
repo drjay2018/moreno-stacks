@@ -1,0 +1,1237 @@
+{% extends "base.html" %}
+
+{% block title %}Datos Maestros | DLab Data App{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Datos Maestros</h1>
+            <p class="text-sm text-slate-500">Gestión de catálogos principales con alta individual y paginación en servidor.</p>
+        </div>
+        <div id="btn-alta-container">
+            <a href="{{ url_for('maestros_views.cliente_wizard') }}" class="bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm px-4 py-2 rounded-lg transition-colors shadow-sm inline-flex items-center gap-1">
+                <i class="bx bx-plus-circle"></i> Wizard Alta Cliente
+            </a>
+        </div>
+    </div>
+
+    <!-- Pestañas -->
+    <div class="flex border-b border-slate-200 gap-2">
+        <button onclick="cambiarTab('clientes')" id="tab-clientes" class="tab-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-amber-600 text-amber-600"><i class="bx bx-user"></i> Clientes</button>
+        <button onclick="cambiarTab('empleados')" id="tab-empleados" class="tab-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700"><i class="bx bx-briefcase"></i> Empleados</button>
+        <button onclick="cambiarTab('constructoras')" id="tab-constructoras" class="tab-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700"><i class="bx bx-building-house"></i> Constructoras</button>
+        <button onclick="cambiarTab('proyectos')" id="tab-proyectos" class="tab-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700"><i class="bx bx-buildings"></i> Proyectos</button>
+        <button onclick="cambiarTab('proveedores')" id="tab-proveedores" class="tab-btn py-2.5 px-4 font-semibold text-sm border-b-2 border-transparent text-slate-500 hover:text-slate-700"><i class="bx bx-truck"></i> Proveedores</button>
+    </div>
+
+    <!-- Contenido de Tabla Dynamic -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <div id="contador-modulo" class="text-sm font-semibold text-slate-600 mb-2">Total de registros: <span id="total-badge">0</span></div>
+        <div id="tab-content" class="overflow-x-auto">
+            <p class="text-center text-slate-400 py-8">Cargando catálogo...</p>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ALTA EMPLEADO -->
+<div id="modal-empleado" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <h3 id="titulo-modal-empleado" class="text-lg font-bold text-slate-900">Alta de Empleado / Asesor</h3>
+        <form id="form-empleado" onsubmit="guardarEmpleado(event)" class="space-y-4">
+            <input type="hidden" id="emp-id" value="">
+            <div class="space-y-3">
+                <div>
+                    <label for="emp-nombre" class="block text-xs font-semibold text-slate-600 mb-1">Nombre *</label>
+                    <input type="text" id="emp-nombre" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label for="emp-cedula" class="block text-xs font-semibold text-slate-600 mb-1">Cédula *</label>
+                    <input type="text" id="emp-cedula" required class="w-full border border-slate-300 rounded-lg p-2 text-sm font-mono focus:border-amber-500 focus:ring-amber-500">
+                </div>
+                <div>
+                    <label for="emp-rol" class="block text-xs font-semibold text-slate-600 mb-1">Rol *</label>
+                    <select id="emp-rol" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                        <option value="Asesor Ventas">Asesor Ventas</option>
+                        <option value="Gerente Comercial">Gerente Comercial</option>
+                        <option value="Gerente Financiera">Gerente Financiera</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+                <div>
+                  <div>
+                      <label for="emp-nivel" class="block text-xs font-semibold text-slate-600 mb-1">Categoría (Inmobiliaria) *</label>
+                      <select id="emp-nivel" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                          <option value="Asesor interno - Inmobiliario">Asesor interno - Inmobiliario</option>
+                          <option value="Asesor interno - Junior">Asesor interno - Junior</option>
+                          <option value="Asesor interno - Senior">Asesor interno - Senior</option>
+                          <option value="Asesor externo (Broker físico)">Asesor externo (Broker físico)</option>
+                          <option value="Agencia (Persona jurídica)">Agencia (Persona jurídica)</option>
+                          <option value="Referidor de cliente">Referidor de cliente</option>
+                      </select>
+                  </div>
+                  <div>
+                      <label for="emp-tipo-persona" class="block text-xs font-semibold text-slate-600 mb-1">Tipo Entidad</label>
+                      <select id="emp-tipo-persona" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                          <option value="Física">Física</option>
+                          <option value="Jurídica">Jurídica</option>
+                      </select>
+                  </div>
+                  <div>
+                      <label for="emp-aplica-itbis" class="block text-xs font-semibold text-slate-600 mb-1">Aplica ITBIS?</label>
+                      <select id="emp-aplica-itbis" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                          <option value="true">Sí</option>
+                          <option value="false">No</option>
+                      </select>
+                  </div>
+<label for="emp-estatus" class="block text-xs font-semibold text-slate-600 mb-1">Estatus</label>
+                    <select id="emp-estatus" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                        <option value="1">Activo</option>
+                        <option value="0">Inactivo</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="emp-comision" class="block text-xs font-semibold text-slate-600 mb-1">Comisión Base (%)</label>
+                    <input type="number" step="0.01" id="emp-comision" value="0" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                </div>
+            </div>
+
+                  <div class="grid grid-cols-2 gap-3">
+                      <div>
+                          <label for="emp-fecha-nacimiento" class="block text-xs font-semibold text-slate-600 mb-1">Fecha Nacimiento</label>
+                          <input type="date" id="emp-fecha-nacimiento" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                      </div>
+                      <div>
+                          <label for="emp-fecha-ingreso" class="block text-xs font-semibold text-slate-600 mb-1">Fecha Ingreso</label>
+                          <input type="date" id="emp-fecha-ingreso" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                      </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                      <div>
+                          <label for="emp-vehiculo" class="block text-xs font-semibold text-slate-600 mb-1">Posee Vehículo?</label>
+                          <select id="emp-vehiculo" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                              <option value="0">No</option>
+                              <option value="1">Sí</option>
+                          </select>
+                      </div>
+                      <div>
+                          <label for="emp-vehiculo-datos" class="block text-xs font-semibold text-slate-600 mb-1">Modelo / Año</label>
+                          <input type="text" id="emp-vehiculo-datos" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500" placeholder="Ej. Toyota Corolla 2021">
+                      </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                      <div>
+                          <label for="emp-provincia" class="block text-xs font-semibold text-slate-600 mb-1">Provincia</label>
+                          <select id="emp-provincia" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500" onchange="cargarMunicipiosModal('emp')">
+                              <option value="">Seleccione provincia...</option>
+                          </select>
+                      </div>
+                      <div>
+                          <label for="emp-municipio" class="block text-xs font-semibold text-slate-600 mb-1">Municipio</label>
+                          <select id="emp-municipio" onchange="onMunicipioChange('emp')" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                              <option value="">Seleccione municipio...</option>
+                          </select>
+                      </div>
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                      <div>
+                          <label for="emp-sector" class="block text-xs font-semibold text-slate-600 mb-1">Sector</label>
+                          <select id="emp-sector" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                              <option value="">Seleccione sector...</option>
+                          </select>
+                      </div>
+                      <div>
+                          <label for="emp-direccion" class="block text-xs font-semibold text-slate-600 mb-1">Dirección</label>
+                          <input type="text" id="emp-direccion" placeholder="Calle, #, Edificio, Piso, Apart." class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                      </div>
+                  </div>
+
+            <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+                <button type="button" onclick="cerrarModal('modal-empleado')" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancelar</button>
+                <button type="submit" data-loop="true" class="px-4 py-2 bg-dlab-cyan text-white text-xs font-semibold rounded-lg hover:bg-dlab-primary transition-colors">Guardar y Agregar Otro</button>
+                <button type="submit" class="px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-lg hover:bg-slate-800 transition-colors">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL ALTA / EDICION CONSTRUCTORA -->
+<div id="modal-constructora" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <h3 id="titulo-modal-constructora" class="text-lg font-bold text-slate-900">Alta de Constructora</h3>
+        <form id="form-constructora" onsubmit="guardarConstructora(event)" class="space-y-4">
+            <input type="hidden" id="con-id" value="">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Columna Izquierda -->
+                <div class="space-y-3">
+                    <h4 class="text-sm font-semibold text-slate-800 border-b pb-1 mb-2">Datos Legales y Generales</h4>
+                    <div>
+                        <label for="con-nombre" class="block text-xs font-semibold text-slate-600 mb-1">Nombre Constructora *</label>
+                        <input type="text" id="con-nombre" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label for="con-rnc" class="block text-xs font-semibold text-slate-600 mb-1">RNC</label>
+                        <input type="text" id="con-rnc" placeholder="130000000" class="w-full border border-slate-300 rounded-lg p-2 text-sm font-mono focus:border-amber-500 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label for="con-rep-legal" class="block text-xs font-semibold text-slate-600 mb-1">Representante Legal</label>
+                        <input type="text" id="con-rep-legal" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label for="con-especialidad" class="block text-xs font-semibold text-slate-600 mb-1">Especialidad</label>
+                        <select id="con-especialidad" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                            <option value="Residencial">Residencial</option>
+                            <option value="Comercial">Comercial</option>
+                            <option value="Turistico">Turistico</option>
+                            <option value="Mixto">Mixto</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="con-estatus" class="block text-xs font-semibold text-slate-600 mb-1">Estatus</label>
+                        <select id="con-estatus" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                            <option value="1">Activo</option>
+                            <option value="0">Inactivo</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Columna Derecha -->
+                <div class="space-y-3">
+                    <h4 class="text-sm font-semibold text-slate-800 border-b pb-1 mb-2">Contacto y Ubicacion</h4>
+                    <div>
+                        <label for="con-contacto" class="block text-xs font-semibold text-slate-600 mb-1">Contacto Principal</label>
+                        <input type="text" id="con-contacto" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label for="con-telefono" class="block text-xs font-semibold text-slate-600 mb-1">Telefono Principal</label>
+                        <input type="text" id="con-telefono" placeholder="(809) 000-0000" class="w-full border border-slate-300 rounded-lg p-2 text-sm font-mono focus:border-amber-500 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label for="con-email" class="block text-xs font-semibold text-slate-600 mb-1">Correo Electronico</label>
+                        <input type="email" id="con-email" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                    </div>
+                    <div>
+                        <label for="con-provincia" class="block text-xs font-semibold text-slate-600 mb-1">Provincia / Municipio</label>
+                        <select id="con-provincia" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                            <option value="">Seleccione provincia...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="con-direccion" class="block text-xs font-semibold text-slate-600 mb-1">Direccion Fisica</label>
+                        <textarea id="con-direccion" rows="2" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+                <button type="button" onclick="cerrarModal('modal-constructora')" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancelar</button>
+                <button type="submit" data-loop="true" class="px-4 py-2 bg-dlab-cyan text-white text-xs font-semibold rounded-lg hover:bg-dlab-primary transition-colors">Guardar y Agregar Otro</button>
+                <button type="submit" class="px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-lg hover:bg-slate-800 transition-colors">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL ALTA PROVEEDOR -->
+<div id="modal-proveedor" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <h3 id="titulo-modal-proveedor" class="text-lg font-bold text-slate-900">Alta de Proveedor</h3>
+        <form id="form-proveedor" onsubmit="guardarProveedor(event)" class="space-y-4">
+            <input type="hidden" id="prov-id" value="">
+            <div class="space-y-3">
+                <div>
+                    <label for="prov-razon" class="block text-xs font-semibold text-slate-600 mb-1">Razón Social *</label>
+                    <input type="text" id="prov-razon" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+                <div>
+                    <label for="prov-ruc" class="block text-xs font-semibold text-slate-600 mb-1">RNC / Cédula</label>
+                    <input type="text" id="prov-ruc" class="w-full border border-slate-300 rounded-lg p-2 text-sm font-mono">
+                </div>
+                <div>
+                    <label for="prov-telefono" class="block text-xs font-semibold text-slate-600 mb-1">Teléfono</label>
+                    <input type="text" id="prov-telefono" class="w-full border border-slate-300 rounded-lg p-2 text-sm font-mono">
+                </div>
+                <div>
+                    <label for="prov-email" class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
+                    <input type="email" id="prov-email" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+                <div>
+                    <label for="prov-direccion" class="block text-xs font-semibold text-slate-600 mb-1">Dirección</label>
+                    <textarea id="prov-direccion" rows="2" class="w-full border border-slate-300 rounded-lg p-2 text-sm"></textarea>
+                </div>
+                <div>
+                    <label for="prov-descripcion" class="block text-xs font-semibold text-slate-600 mb-1">Descripción</label>
+                    <textarea id="prov-descripcion" rows="2" class="w-full border border-slate-300 rounded-lg p-2 text-sm" placeholder="Ej: Servicios de plomería, Agencia de Marketing..."></textarea>
+                </div>
+                <div>
+                    <label for="prov-estado" class="block text-xs font-semibold text-slate-600 mb-1">Estado</label>
+                    <select id="prov-estado" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+                <button type="button" onclick="cerrarModal('modal-proveedor')" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancelar</button>
+                <button type="submit" data-loop="true" class="px-4 py-2 bg-dlab-cyan text-white text-xs font-semibold rounded-lg hover:bg-dlab-primary transition-colors">Guardar y Agregar Otro</button>
+                <button type="submit" class="px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-lg hover:bg-slate-800 transition-colors">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL ALTA PROYECTO -->
+<div id="modal-proyecto" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-4xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+        <h3 id="titulo-modal-proyecto" class="text-lg font-bold text-slate-900">Alta de Proyecto Inmobiliario</h3>
+        <form id="form-proyecto" onsubmit="guardarProyecto(event)" class="space-y-4">
+            <input type="hidden" id="pro-id" value="">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Columna Izquierda: Datos Generales -->
+                <div class="space-y-3">
+                    <h4 class="text-sm font-semibold text-slate-800 border-b pb-1 mb-2 flex items-center gap-1.5">
+                        <i class="bx bx-info-circle text-amber-600"></i> Datos Generales
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="sm:col-span-2">
+                            <label for="pro-nombre" class="block text-xs font-semibold text-slate-600 mb-1">Nombre Proyecto *</label>
+                            <input type="text" id="pro-nombre" required class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                        </div>
+                        <div>
+                            <label for="pro-tipo" class="block text-xs font-semibold text-slate-600 mb-1">Tipo Inmueble</label>
+                            <select id="pro-tipo" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                                <option value="SOLAR">SOLAR</option>
+                                <option value="CASA">CASA</option>
+                                <option value="APARTAMENTO" selected>APARTAMENTO</option>
+                                <option value="Villa">Villa</option>
+                                <option value="Plaza Comercial">Plaza Comercial</option>
+                                <option value="Hotel">Hotel</option>
+                                <option value="Penthouse">Penthouse</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="pro-etapa" class="block text-xs font-semibold text-slate-600 mb-1">Etapa</label>
+                            <input type="text" id="pro-etapa" value="En Planos" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label for="pro-unidades" class="block text-xs font-semibold text-slate-600 mb-1">No. Apt / Casa (Unidades Totales)</label>
+                            <input type="number" id="pro-unidades" value="24" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label for="pro-encargado" class="block text-xs font-semibold text-slate-600 mb-1">Encargado de Proyectos</label>
+                            <select id="pro-encargado" class="w-full border border-slate-300 rounded-lg p-2 text-sm select2-emp">
+                                <option value="">Seleccione encargado...</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label for="pro-constructora" class="block text-xs font-semibold text-slate-600 mb-1">Constructora</label>
+                            <select id="pro-constructora" class="w-full border border-slate-300 rounded-lg p-2 text-sm select2-con">
+                                <option value="">Seleccione constructora...</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Derecha: Ubicación y Captación -->
+                <div class="space-y-3">
+                    <h4 class="text-sm font-semibold text-slate-800 border-b pb-1 mb-2 flex items-center gap-1.5">
+                        <i class="bx bx-map-pin text-amber-600"></i> Ubicación y Captación
+                    </h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label for="pro-provincia" class="block text-xs font-semibold text-slate-600 mb-1">Provincia</label>
+                            <select id="pro-provincia" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500" onchange="cargarMunicipiosModal('pro')">
+                                <option value="">Seleccione provincia...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="pro-municipio" class="block text-xs font-semibold text-slate-600 mb-1">Municipio</label>
+                            <select id="pro-municipio" onchange="onMunicipioChange('pro')" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                                <option value="">Seleccione municipio...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="pro-sector" class="block text-xs font-semibold text-slate-600 mb-1">Sector</label>
+                            <select id="pro-sector" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                                <option value="">Seleccione sector...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="pro-direccion" class="block text-xs font-semibold text-slate-600 mb-1">Dirección</label>
+                            <input type="text" id="pro-direccion" placeholder="Calle, #, Edificio, Piso, Apart." class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                        </div>
+                        <div>
+                            <label for="pro-financiamiento" class="block text-xs font-semibold text-slate-600 mb-1">Financiamiento</label>
+                            <select id="pro-financiamiento" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                                <option value="1">Si</option>
+                                <option value="0">No</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="pro-banco" class="block text-xs font-semibold text-slate-600 mb-1">Institución Bancaria</label>
+                            <select id="pro-banco" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                                <option value="">-- Seleccionar Institución --</option>
+                                <option value="Banreservas">Banreservas</option>
+                                <option value="Scotiabank">Scotiabank</option>
+                                <option value="Banco Popular">Banco Popular</option>
+                                <option value="Banco BHD">Banco BHD</option>
+                                <option value="ANAP">ANAP</option>
+                                <option value="APAP">APAP</option>
+                                <option value="Banco Santa Cruz">Banco Santa Cruz</option>
+                                <option value="Banco Caribe">Banco Caribe</option>
+                                <option value="Banco Vimenca">Banco Vimenca</option>
+                                <option value="Banco Promerica">Banco Promerica</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="pro-captacion" class="block text-xs font-semibold text-slate-600 mb-1">Fecha Captación</label>
+                            <input type="date" id="pro-captacion" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                        </div>
+                        <div>
+                            <label for="pro-captador" class="block text-xs font-semibold text-slate-600 mb-1">Captador</label>
+                            <select id="pro-captador" class="w-full border border-slate-300 rounded-lg p-2 text-sm select2-emp">
+                                <option value="">Seleccione captador...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="pro-correos" class="block text-xs font-semibold text-slate-600 mb-1">Correos Registros de Ventas</label>
+                            <input type="text" id="pro-correos" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                        </div>
+                        <div>
+                            <label for="pro-forma" class="block text-xs font-semibold text-slate-600 mb-1">Forma de Registros</label>
+                            <input type="text" id="pro-forma" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                        </div>
+                        <div>
+                            <label for="pro-exclusivo" class="block text-xs font-semibold text-slate-600 mb-1">¿Es Exclusivo?</label>
+                            <select id="pro-exclusivo" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-amber-500 focus:ring-amber-500">
+                                <option value="true">Sí (Exclusivo)</option>
+                                <option value="false">No (Compartido)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+                <button type="button" onclick="cerrarModal('modal-proyecto')" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-slate-900 text-white text-xs font-semibold rounded-lg hover:bg-slate-800 transition-colors">Guardar Proyecto</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // ─── Estado global ──────────────────────────────────────────────────────────
+    let tabActiva = 'clientes';
+    let dtInstance = null; // Instancia activa de DataTable
+
+    // ─── Modales ────────────────────────────────────────────────────────────────
+    function abrirModal(id) {
+        if (id === 'modal-constructora') {
+            if (!document.getElementById('con-id').value) { document.getElementById('titulo-modal-constructora').innerText = 'Alta de Constructora'; document.getElementById('form-constructora').reset(); }
+        } else if (id === 'modal-empleado') {
+            if (!document.getElementById('emp-id').value) { document.getElementById('titulo-modal-empleado').innerText = 'Alta de Empleado'; document.getElementById('form-empleado').reset(); }
+        } else if (id === 'modal-proyecto') {
+            if (!document.getElementById('pro-id').value) { document.getElementById('titulo-modal-proyecto').innerText = 'Alta de Proyecto'; document.getElementById('form-proyecto').reset(); }
+        }
+        const el = document.getElementById(id);
+        if (el) {
+            el.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function cerrarModal(id) {
+        if (id === 'modal-constructora') { document.getElementById('con-id').value = ''; }
+        else if (id === 'modal-empleado') { document.getElementById('emp-id').value = ''; }
+        else if (id === 'modal-proyecto') { document.getElementById('pro-id').value = ''; }
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+        const anyOpen = Array.from(document.querySelectorAll('[id^="modal-"]')).some(m => !m.classList.contains('hidden'));
+        if (!anyOpen) document.body.style.overflow = '';
+    }
+
+    // ─── Pestañas ───────────────────────────────────────────────────────────────
+    function cambiarTab(tab) {
+        tabActiva = tab;
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('border-amber-600', 'text-amber-600');
+            btn.classList.add('border-transparent', 'text-slate-500');
+        });
+
+        const target = document.getElementById('tab-' + tab);
+        if (target) {
+            target.classList.remove('border-transparent', 'text-slate-500');
+            target.classList.add('border-amber-600', 'text-amber-600');
+        }
+
+        actualizarBotonAlta(tab);
+        cargarDatosTab(tab);
+    }
+
+    function actualizarBotonAlta(tab) {
+        const container = document.getElementById('btn-alta-container');
+        const cls = 'bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm px-4 py-2 rounded-lg transition-colors shadow-sm';
+        if (tab === 'clientes') {
+            container.innerHTML = '<a href="{{ url_for("maestros_views.cliente_wizard") }}" class="' + cls + ' inline-flex items-center gap-1"><i class="bx bx-plus-circle"></i> Wizard Alta Cliente</a>';
+        } else if (tab === 'empleados') {
+            container.innerHTML = '<button onclick="abrirModal(\'modal-empleado\')" class="' + cls + '"><i class="bx bx-plus-circle"></i> Alta Empleado</button>';
+        } else if (tab === 'constructoras') {
+            container.innerHTML = '<button onclick="abrirModal(\'modal-constructora\')" class="' + cls + '"><i class="bx bx-plus-circle"></i> Alta Constructora</button>';
+        } else if (tab === 'proyectos') {
+            container.innerHTML = '<button onclick="abrirModal(\'modal-proyecto\')" class="' + cls + '"><i class="bx bx-plus-circle"></i> Alta Proyecto</button>';
+        } else if (tab === 'proveedores') {
+            container.innerHTML = '<button onclick="abrirModal(\'modal-proveedor\')" class="' + cls + '"><i class="bx bx-plus-circle"></i> Alta Proveedor</button>';
+        }
+    }
+
+    // ─── Carga de datos con DataTables ──────────────────────────────────────────
+    async function cargarDatosTab(tab) {
+        const container = document.getElementById('tab-content');
+        container.innerHTML = '<p class="text-center text-slate-400 py-10 animate-pulse">Cargando catalogo...</p>';
+
+        // Destruir instancia anterior si existe
+        if (dtInstance) {
+            try { dtInstance.destroy(); } catch(e) {}
+            dtInstance = null;
+        }
+
+        try {
+            let thead = '';
+            let columns = [];
+
+            if (tab === 'clientes') {
+                thead = '<tr><th class="px-4 py-3">Nombre</th><th class="px-4 py-3">Cedula</th><th class="px-4 py-3">Telefono</th><th class="px-4 py-3">Email</th><th class="px-4 py-3">Ubicacion</th><th class="px-4 py-3">Acciones</th></tr>';
+                columns = [
+                    { data: null, render: function(d,t,r){ return '<span class="font-semibold text-slate-900">'+r.nombre+' '+r.apellido+'</span>'; } },
+                    { data: 'cedula', defaultContent: '&#x2014;', render: function(d){ return '<span class="font-mono text-xs">'+(d||'&#x2014;')+'</span>'; } },
+                    { data: 'telefono', defaultContent: '&#x2014;' },
+                    { data: 'email', defaultContent: '&#x2014;' },
+                    { data: null, render: function(d,t,r){ return r.provincia || r.municipio || r.pais || '&#x2014;'; } },
+                    { data: null, orderable: false, className: 'text-right',
+                      render: function(d,t,r){
+                        return '<button onclick="editarCliente('+r.id+',\''+escHtml(r.nombre)+'\',\''+escHtml(r.apellido)+'\',\''+escHtml(r.telefono)+'\',\''+escHtml(r.email)+'\')" class="text-slate-400 hover:text-amber-600 mr-2" title="Editar"><i class="bx bx-edit"></i> Editar</button>'
+                              +'<button onclick="borrarItem(\'clientes\','+r.id+')" class="text-slate-400 hover:text-rose-600" title="Borrar"><i class="bx bx-trash"></i> Borrar</button>';
+                      }
+                    }
+                ];
+            } else if (tab === 'empleados') {
+                thead = '<tr><th class="px-4 py-3">Codigo</th><th class="px-4 py-3">Nombre</th><th class="px-4 py-3">Cedula</th><th class="px-4 py-3">Posicion</th><th class="px-4 py-3">Nivel / Estado AEI</th><th class="px-4 py-3">Acciones</th></tr>';
+                columns = [
+                    { data: 'codigo', render: function(d){ return '<span class="font-mono font-bold text-amber-600">'+(d||'')+'</span>'; } },
+                    { data: null, render: function(d,t,r){ return '<span class="font-semibold text-slate-900">'+r.nombre+' '+r.apellido+'</span>'; } },
+                    { data: 'cedula', defaultContent: '&#x2014;', render: function(d){ return '<span class="font-mono text-xs">'+(d||'&#x2014;')+'</span>'; } },
+                    { data: 'posicion', defaultContent: '&#x2014;' },
+                    { data: null, render: function(d,t,r){
+                        let res = '<div class="text-xs text-slate-600">'+r.nivel+'</div>';
+                        if (r.estado_aei) {
+                            let bCls = 'bg-slate-100 text-slate-700';
+                            if(r.estado_aei === 'VENCIDO') bCls = 'bg-rose-100 text-rose-800';
+                            if(r.estado_aei === 'POR VENCER') bCls = 'bg-amber-100 text-amber-800';
+                            if(r.estado_aei === 'VIGENTE') bCls = 'bg-emerald-100 text-emerald-800';
+                            res += '<div class="mt-1"><span class="px-2 py-0.5 rounded text-[10px] font-bold '+bCls+'">'+r.estado_aei+'</span></div>';
+                        }
+                        return res;
+                    }},
+                    { data: null, orderable: false, className: 'text-right',
+                      render: function(d,t,r){
+                        return '<button onclick="editarItem(\'empleados\','+r.id+',\''+escHtml(r.nombre)+'\',\''+escHtml(r.apellido)+'\')" class="text-slate-400 hover:text-amber-600 mr-2" title="Editar"><i class="bx bx-edit"></i> Editar</button>'
+                              +'<button onclick="borrarItem(\'empleados\','+r.id+')" class="text-slate-400 hover:text-rose-600" title="Borrar"><i class="bx bx-trash"></i> Borrar</button>';
+                      }
+                    }
+                ];
+            } else if (tab === 'constructoras') {
+                thead = '<tr><th class="px-4 py-3">Nombre</th><th class="px-4 py-3">RNC / Contacto</th><th class="px-4 py-3">Ubicacion</th><th class="px-4 py-3">Estatus</th><th class="px-4 py-3">Acciones</th></tr>';
+                columns = [
+                    { data: null, render: function(d,t,r){
+                        return '<div class="font-semibold text-slate-900">'+r.nombre+'</div>'
+                              +'<div class="text-xs text-slate-500">'+(r.especialidad||'Sin especialidad')+'</div>';
+                    }},
+                    { data: null, render: function(d,t,r){
+                        return '<div class="font-mono text-xs text-slate-700">'+(r.rnc||'&#x2014;')+'</div>'
+                              +'<div class="text-xs"><i class="bx bx-user"></i> '+(r.contacto||'&#x2014;')+'</div>'
+                              +'<div class="text-xs"><i class="bx bx-phone"></i> '+(r.telefono||'&#x2014;')+'</div>';
+                    }},
+                    { data: null, render: function(d,t,r){
+                        return '<div class="text-xs font-medium text-slate-700">'+(r.provincia||'&#x2014;')+'</div>'
+                              +'<div class="text-xs text-slate-500 truncate max-w-xs">'+(r.direccion||'&#x2014;')+'</div>';
+                    }},
+                    { data: 'activo', render: function(d){
+                        return d ? '<span class="px-2 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-800">Activo</span>'
+                                 : '<span class="px-2 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-600">Inactivo</span>';
+                    }},
+                    { data: null, orderable: false, className: 'text-right',
+                      render: function(d,t,r){
+                        var safeJson = JSON.stringify(r).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                        return '<button onclick="abrirEditarConstructora(' + safeJson + ')" class="text-slate-400 hover:text-amber-600 mr-2" title="Editar"><i class="bx bx-edit"></i> Editar</button>'
+                              +'<button onclick="borrarItem(\'constructoras\','+r.id+')" class="text-slate-400 hover:text-rose-600" title="Borrar"><i class="bx bx-trash"></i> Borrar</button>';
+                      }
+                    }
+                ];
+            } else if (tab === 'proyectos') {
+                thead = '<tr><th class="px-4 py-3">Proyecto</th><th class="px-4 py-3">Constructora</th><th class="px-4 py-3">Etapa</th><th class="px-4 py-3">Tipo</th><th class="px-4 py-3">Unidades</th><th class="px-4 py-3">Acciones</th></tr>';
+                columns = [
+                    { data: 'nombre', render: function(d){ return '<span class="font-semibold text-slate-900">'+(d||'')+'</span>'; } },
+                    { data: 'constructora', defaultContent: '&#x2014;' },
+                    { data: 'etapa', defaultContent: '&#x2014;' },
+                    { data: 'tipo_inmueble', defaultContent: '&#x2014;' },
+                    { data: 'unidades_totales', className: 'text-right font-medium', render: function(d){ return '<span class="font-bold text-slate-700">'+(d||'&#x2014;')+'</span>'; } },
+                    { data: null, orderable: false, className: 'text-right',
+                      render: function(d,t,r){
+                        var safeJson = JSON.stringify(r).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                        return '<button onclick="abrirEditarProyecto(' + safeJson + ')" class="text-slate-400 hover:text-amber-600 mr-2" title="Editar"><i class="bx bx-edit"></i> Editar</button>'
+                              +'<button onclick="borrarItem(\'proyectos\','+r.id+')" class="text-slate-400 hover:text-rose-600" title="Borrar"><i class="bx bx-trash"></i> Borrar</button>';
+                      }
+                    }
+                ];
+            } else if (tab === 'proveedores') {
+                thead = '<tr><th class="px-4 py-3">Razón Social</th><th class="px-4 py-3">RUC</th><th class="px-4 py-3">Teléfono</th><th class="px-4 py-3">Email</th><th class="px-4 py-3">Estado</th><th class="px-4 py-3">Acciones</th></tr>';
+                columns = [
+                    { data: 'razon_social', render: function(d){ return '<span class="font-semibold text-slate-900">'+(d||'')+'</span>'; } },
+                    { data: 'ruc', defaultContent: '&#x2014;', render: function(d){ return '<span class="font-mono text-xs">'+(d||'&#x2014;')+'</span>'; } },
+                    { data: 'telefono', defaultContent: '&#x2014;' },
+                    { data: 'email', defaultContent: '&#x2014;' },
+                    { data: 'estado', render: function(d){
+                        let badge = d === 'activo' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800';
+                        return '<span class="px-2 py-1 rounded text-xs font-semibold ' + badge + '">' + (d||'').toUpperCase() + '</span>';
+                    }},
+                    { data: null, orderable: false, className: 'text-right',
+                      render: function(d,t,r){
+                        var safeJson = JSON.stringify(r).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
+                        return '<button onclick="abrirEditarProveedor(' + safeJson + ')" class="text-slate-400 hover:text-amber-600 mr-2" title="Editar"><i class="bx bx-edit"></i> Editar</button>'
+                              +'<button onclick="borrarItem(\'proveedores\','+r.id+')" class="text-slate-400 hover:text-rose-600" title="Borrar"><i class="bx bx-trash"></i> Borrar</button>';
+                      }
+                    }
+                ];
+            }
+
+            container.innerHTML = '<div class="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm mt-4"><table id="dt-tabla" class="w-full text-left text-sm text-slate-600"><thead class="bg-slate-50 text-xs uppercase font-bold text-slate-500 border-b border-slate-200">'
+                + thead + '</thead><tbody class="divide-y divide-slate-100"></tbody></table></div>';
+
+            dtInstance = $('#dt-tabla').DataTable({
+                serverSide: true,
+                processing: true,
+                ajax: {
+                    url: '/api/maestros/' + tab,
+                    type: 'GET'
+                },
+                columns: columns,
+                pageLength: 25,
+                deferRender: true,
+                order: [[0, 'asc']],
+                language: {
+                    search: "Buscar:",
+                    processing: "Cargando...",
+                    lengthMenu: "Mostrar _MENU_ registros",
+                    info: "Mostrando _START_ a _END_ de _TOTAL_ registros",
+                    infoEmpty: "Sin registros",
+                    zeroRecords: '<div class="py-12 flex flex-col items-center justify-center text-slate-400"><div class="text-4xl mb-3"><i class="bx bx-folder-open" style="font-size:2rem"></i></div><p class="font-medium">Sin resultados</p><p class="text-sm">No se encontraron registros que coincidan con la búsqueda.</p></div>',
+                    emptyTable: '<div class="py-12 flex flex-col items-center justify-center text-slate-400"><div class="text-4xl mb-3"><i class="bx bx-inbox" style="font-size:2rem"></i></div><p class="font-medium text-slate-500">Catálogo Vacío</p><p class="text-sm">No hay registros guardados en este catálogo aún.</p></div>',
+                    paginate: { first: "«", last: "»", next: "›", previous: "‹" }
+                },
+                dom: '<"flex items-center justify-between mb-4 flex-wrap gap-2"lf>rt<"flex items-center justify-between mt-4 flex-wrap gap-2"ip>',
+                drawCallback: function(settings) {
+                    const badge = document.getElementById('total-badge');
+                    if (badge) {
+                        badge.innerText = settings.fnRecordsTotal();
+                    }
+                }
+            });
+
+        } catch (err) {
+            console.error('Error cargando tab:', err);
+            container.innerHTML = '<p class="text-center text-rose-500 py-10">Error al cargar datos: ' + err.message + '</p>';
+        }
+    }
+
+    // ─── Helpers ─────────────────────────────────────────────────────────────────
+    function escHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // ─── CRUD Empleados ──────────────────────────────────────────────────────────
+    async function guardarEmpleado(e) {
+        e.preventDefault();
+        const id = document.getElementById('emp-id').value;
+        const nombreCompleto = document.getElementById('emp-nombre').value.trim();
+        const parts = nombreCompleto.split(' ');
+        const nombre = parts[0] || '';
+        const apellido = parts.slice(1).join(' ') || '';
+        const payload = {
+            nombre: nombre,
+            apellido: apellido,
+            cedula: document.getElementById('emp-cedula').value,
+            rol: document.getElementById('emp-rol').value,
+            nivel: document.getElementById('emp-nivel').value,
+            tipo_persona: document.getElementById('emp-tipo-persona').value,
+            aplica_itbis: document.getElementById('emp-aplica-itbis').value === 'true',
+            comision_base: parseFloat(document.getElementById('emp-comision').value || 0),
+            estatus: parseInt(document.getElementById('emp-estatus').value),
+            fecha_nacimiento: document.getElementById('emp-fecha-nacimiento').value || null,
+            fecha_ingreso: document.getElementById('emp-fecha-ingreso').value || null,
+            posee_vehiculo: parseInt(document.getElementById('emp-vehiculo').value || 0),
+            vehiculo_datos: document.getElementById('emp-vehiculo-datos').value || '',
+            provincia: document.getElementById('emp-provincia').value || '',
+            municipio: document.getElementById('emp-municipio').value || '',
+            sector: getSectorValueModal('emp') || '',
+            direccion: document.getElementById('emp-direccion').value || ''
+        };
+        
+        const url = id ? '/api/maestros/empleados/' + id : '/api/maestros/empleados';
+        const method = id ? 'PUT' : 'POST';
+        try {
+            const res = await fetch(url, { method: method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const d = await res.json();
+            if (d.success) { 
+                showToast('OK: ' + d.message, 'success'); 
+                cargarDatosTab('empleados'); 
+                if (e.submitter && e.submitter.getAttribute('data-loop') === 'true') { 
+                    document.getElementById('form-empleado').reset(); 
+                    document.getElementById('emp-id').value=''; 
+                } else { 
+                    cerrarModal('modal-empleado'); 
+                } 
+            } else { 
+                showToast(d.error, 'error'); 
+            }
+        } catch (error) {
+            showToast("Error de conexión al servidor.", "error");
+        }
+    }
+
+    function abrirEditarEmpleado(c) {
+        document.getElementById('titulo-modal-empleado').innerText = 'Editar Empleado';
+        document.getElementById('emp-id').value = c.id || '';
+        document.getElementById('emp-nombre').value = (c.nombre + ' ' + (c.apellido || '')).trim();
+        document.getElementById('emp-cedula').value = c.cedula || '';
+        document.getElementById('emp-rol').value = c.rol || 'Asesor Ventas';
+        document.getElementById('emp-nivel').value = c.nivel || 'Asesor interno - Inmobiliario';
+        document.getElementById('emp-tipo-persona').value = c.tipo_persona || 'Física';
+        document.getElementById('emp-aplica-itbis').value = c.aplica_itbis ? 'true' : 'false';
+        document.getElementById('emp-comision').value = c.comision_base || '';
+        document.getElementById('emp-estatus').value = c.activo !== undefined ? c.activo : 1;
+        document.getElementById('emp-fecha-nacimiento').value = c.fecha_nacimiento || '';
+        document.getElementById('emp-fecha-ingreso').value = c.fecha_ingreso || '';
+        document.getElementById('emp-vehiculo').value = c.posee_vehiculo || 0;
+        document.getElementById('emp-vehiculo-datos').value = c.vehiculo_datos || '';
+        document.getElementById('emp-direccion').value = c.direccion || '';
+        document.getElementById('emp-provincia').value = c.provincia || '';
+        cargarMunicipios('emp');
+        document.getElementById('emp-municipio').value = c.municipio || '';
+
+        document.getElementById('modal-empleado').classList.remove('hidden');
+    }
+
+    function toggleEmpresa(tipo) {
+        const container = document.getElementById('container-empresa');
+        if (tipo === 'Externo') {
+            container.classList.remove('hidden');
+            // Load inmobiliarias if not loaded yet
+            const sel = document.getElementById('emp-empresa');
+            if (sel && sel.options.length <= 1) {
+                fetch('/api/maestros/inmobiliarias')
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d.success) {
+                            d.items.forEach(item => {
+                                const opt = document.createElement('option');
+                                opt.value = item.nombre;
+                                opt.textContent = item.nombre;
+                                sel.appendChild(opt);
+                            });
+                        }
+                    }).catch(() => {});
+            }
+        } else {
+            container.classList.add('hidden');
+            const sel = document.getElementById('emp-empresa');
+            if (sel) sel.value = 'INDEPENDIENTE';
+        }
+    }
+
+    // ─── CRUD Constructoras ──────────────────────────────────────────────────────
+    async function guardarConstructora(e) {
+        e.preventDefault();
+        const id = document.getElementById('con-id').value;
+        const payload = {
+            nombre: document.getElementById('con-nombre').value,
+            rnc: document.getElementById('con-rnc').value,
+            representante_legal: document.getElementById('con-rep-legal').value,
+            especialidad: document.getElementById('con-especialidad').value,
+            activo: parseInt(document.getElementById('con-estatus').value),
+            contacto: document.getElementById('con-contacto').value,
+            telefono: document.getElementById('con-telefono').value,
+            email: document.getElementById('con-email').value,
+            provincia: document.getElementById('con-provincia').value,
+            direccion: document.getElementById('con-direccion').value
+        };
+        const url = id ? '/api/maestros/constructoras/' + id : '/api/maestros/constructoras';
+        const method = id ? 'PUT' : 'POST';
+        try {
+            const res = await fetch(url, { method: method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const d = await res.json();
+            if (d.success) { showToast('OK: ' + d.message, 'success'); cargarDatosTab('constructoras'); if (e.submitter && e.submitter.getAttribute('data-loop') === 'true') { document.getElementById('form-constructora').reset(); document.getElementById('con-id').value=''; } else { cerrarModal('modal-constructora'); } }
+            else { showToast(d.error, 'error'); }
+        } catch (error) {
+            showToast("Error de conexión al servidor.", "error");
+        }
+    }
+
+    function abrirEditarConstructora(c) {
+        document.getElementById('titulo-modal-constructora').innerText = 'Editar Constructora';
+        document.getElementById('con-id').value = c.id || '';
+        document.getElementById('con-nombre').value = c.nombre || '';
+        document.getElementById('con-rnc').value = c.rnc || '';
+        document.getElementById('con-rep-legal').value = c.representante_legal || '';
+        document.getElementById('con-especialidad').value = c.especialidad || '';
+        document.getElementById('con-estatus').value = c.activo ? '1' : '0';
+        document.getElementById('con-contacto').value = c.contacto || '';
+        document.getElementById('con-telefono').value = c.telefono || '';
+        document.getElementById('con-email').value = c.email || '';
+        document.getElementById('con-provincia').value = c.provincia || '';
+        document.getElementById('con-direccion').value = c.direccion || '';
+        document.getElementById('modal-constructora').classList.remove('hidden');
+    }
+
+    // ─── CRUD Proyectos ──────────────────────────────────────────────────────────
+    function getSectorValue(prefix) {
+        const sel = document.getElementById(prefix + '-sector');
+        if (!sel) return '';
+        if (sel.value === '__custom__') {
+            const custom = document.getElementById(prefix + '-sector_custom');
+            return custom ? custom.value : '';
+        }
+        return sel.value;
+    }
+
+    async function guardarProyecto(e) {
+        e.preventDefault();
+        const id = document.getElementById('pro-id').value;
+        const payload = {
+            nombre: document.getElementById('pro-nombre').value,
+            tipo_inmueble: document.getElementById('pro-tipo').value,
+            etapa: document.getElementById('pro-etapa').value,
+            unidades_totales: parseInt(document.getElementById('pro-unidades').value || 0),
+            encargado_id: document.getElementById('pro-encargado').value,
+            contraparte_id: document.getElementById('pro-constructora').value,
+            provincia: document.getElementById('pro-provincia').value,
+            municipio: document.getElementById('pro-municipio').value,
+            sector: getSectorValueModal('pro'),
+            direccion: document.getElementById('pro-direccion').value,
+            financiamiento: document.getElementById('pro-financiamiento').value,
+            institucion_bancaria: document.getElementById('pro-banco').value,
+            fecha_captacion: document.getElementById('pro-captacion').value,
+            captador_id: document.getElementById('pro-captador').value,
+            correos_ventas: document.getElementById('pro-correos').value,
+            forma_registro: document.getElementById('pro-forma').value,
+            es_exclusivo: document.getElementById('pro-exclusivo').value === 'true'
+        };
+        const url = id ? '/api/maestros/proyectos/' + id : '/api/maestros/proyectos';
+        const method = id ? 'PUT' : 'POST';
+        try {
+            const res = await fetch(url, { method: method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const d = await res.json();
+            if (d.success) { showToast('OK: ' + d.message, 'success'); cerrarModal('modal-proyecto'); cargarDatosTab('proyectos'); }
+            else { showToast(d.error, 'error'); }
+        } catch (error) {
+            showToast("Error de conexión al servidor.", "error");
+        }
+    }
+
+    function oldAbrirEditar_ignore(c) {
+        document.getElementById('titulo-modal-proyecto').innerText = 'Editar Proyecto';
+        document.getElementById('pro-id').value = c.id || '';
+        document.getElementById('pro-nombre').value = c.nombre || '';
+        document.getElementById('pro-tipo').value = c.tipo_inmueble || 'APARTAMENTO';
+        document.getElementById('pro-etapa').value = c.etapa || 'En Planos';
+        document.getElementById('pro-unidades').value = c.unidades_totales || '24';
+        document.getElementById('pro-encargado').value = c.encargado_id || '';
+        document.getElementById('pro-constructora').value = c.contraparte_id || '';
+        document.getElementById('pro-provincia').value = c.provincia || '';
+        document.getElementById('pro-municipio').value = c.municipio || '';
+        document.getElementById('pro-sector').value = c.sector || '';
+        document.getElementById('pro-direccion').value = c.direccion || '';
+        document.getElementById('pro-financiamiento').value = c.financiamiento ? '1' : '0';
+        document.getElementById('pro-banco').value = c.institucion_bancaria || '';
+        document.getElementById('pro-captacion').value = c.fecha_captacion || '';
+        document.getElementById('pro-captador').value = c.captador_id || '';
+        document.getElementById('pro-correos').value = c.correos_ventas || '';
+        document.getElementById('pro-forma').value = c.forma_registro || '';
+        document.getElementById('modal-proyecto').classList.remove('hidden');
+    }
+
+    // ─── Editar cliente con modal prompt ─────────────────────────────────────────
+    function editarCliente(id, nombre, apellido, telefono, email) {
+        document.getElementById('edit-cli-id').value = id;
+        document.getElementById('edit-cli-nombre').value = nombre || '';
+        document.getElementById('edit-cli-apellido').value = apellido || '';
+        document.getElementById('edit-cli-telefono').value = telefono || '';
+        document.getElementById('edit-cli-email').value = email || '';
+        document.getElementById('modal-editar-cliente').classList.remove('hidden');
+    }
+    
+    async function guardarEdicionCliente(e) {
+        e.preventDefault();
+        const id = document.getElementById('edit-cli-id').value;
+        const payload = { 
+            nombre: document.getElementById('edit-cli-nombre').value, 
+            apellido: document.getElementById('edit-cli-apellido').value, 
+            telefono: document.getElementById('edit-cli-telefono').value, 
+            email: document.getElementById('edit-cli-email').value 
+        };
+        try {
+            const res = await fetch('/api/maestros/clientes/' + id, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const d = await res.json();
+            if (d.success) { 
+                showToast('Cliente actualizado.', 'success'); 
+                document.getElementById('modal-editar-cliente').classList.add('hidden');
+                cargarDatosTab('clientes'); 
+            } else { showToast(d.error, 'error'); }
+        } catch(e) { showToast('Error de conexion.', 'error'); }
+    }
+
+    // ─── Editar generico ─────────────────────────────────────────────────────────
+    function editarItem(tab, id, nombre, apellido) {
+        // Empleados usa el modal completo (rol, nivel, cedula, fechas, etc.) en vez del generico
+        if (tab === 'empleados') {
+            const rowData = dtInstance.rows().data().toArray().find(r => r.id === id);
+            if (rowData) {
+                abrirEditarEmpleado(rowData);
+                return;
+            }
+        }
+        document.getElementById('edit-gen-tab').value = tab;
+        document.getElementById('edit-gen-id').value = id;
+        document.getElementById('edit-gen-nombre').value = nombre || '';
+        if (apellido !== undefined && apellido !== '') {
+            document.getElementById('edit-gen-apellido-container').classList.remove('hidden');
+            document.getElementById('edit-gen-apellido').value = apellido;
+        } else {
+            document.getElementById('edit-gen-apellido-container').classList.add('hidden');
+            document.getElementById('edit-gen-apellido').value = '';
+        }
+        document.getElementById('modal-editar-generico').classList.remove('hidden');
+    }
+
+    async function guardarEdicionGenerica(e) {
+        e.preventDefault();
+        const tab = document.getElementById('edit-gen-tab').value;
+        const id = document.getElementById('edit-gen-id').value;
+        const payload = { nombre: document.getElementById('edit-gen-nombre').value.trim() };
+        
+        if (!document.getElementById('edit-gen-apellido-container').classList.contains('hidden')) {
+            payload.apellido = document.getElementById('edit-gen-apellido').value.trim();
+        }
+        try {
+            const res = await fetch('/api/maestros/' + tab + '/' + id, { method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const d = await res.json();
+            if (d.success) { 
+                showToast('Registro actualizado.', 'success');
+                document.getElementById('modal-editar-generico').classList.add('hidden');
+                cargarDatosTab(tab); 
+            } else { showToast(d.error, 'error'); }
+        } catch(e) { showToast('Error de conexion.', 'error'); }
+    }
+
+    // ─── Borrar generico ─────────────────────────────────────────────────────────
+    function borrarItem(tab, id) {
+        confirmarAccion('¿Seguro que desea borrar este registro? Esta acción es irreversible.', async () => {
+            try {
+                const res = await fetch('/api/maestros/' + tab + '/' + id, { method: 'DELETE' });
+                const d = await res.json();
+                if (d.success) { cargarDatosTab(tab); }
+                else { showToast(d.error, 'warning'); }
+            } catch(e) { showToast('Error de conexion al intentar borrar.', 'error'); }
+        });
+    }
+
+    
+    let catalogosGlobales = {};
+    
+    async function inicializarCatalogosProyectos() {
+        try {
+            const res = await fetch('/api/catalogos');
+            const data = await res.json();
+            if (data.success) {
+                catalogosGlobales = data;
+                // Cargar provincias de RD por defecto en todos los modales
+                const geo = data.geo_data || {};
+                const rdData = geo['Dominican Republic'] || geo['República Dominicana'] || {};
+                const provincias = rdData.provincias || data.provincias_rd || [];
+                [ 'pro-provincia', 'emp-provincia', 'con-provincia' ].forEach(id => {
+                    const selectProv = document.getElementById(id);
+                    if (!selectProv) return;
+                    selectProv.innerHTML = '<option value="">Seleccione provincia...</option>';
+                    provincias.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p; opt.text = p;
+                        selectProv.appendChild(opt);
+                    });
+                });
+            }
+        } catch(e) { console.error('Error cargando catalogos', e); }
+    }
+
+    function cargarMunicipiosModal(prefix) {
+        const pais = 'Dominican Republic';
+        const prov = document.getElementById(prefix + '-provincia').value;
+        const geo = catalogosGlobales.geo_data || {};
+        const ciudades = geo[pais]?.ciudades?.[prov] || [];
+        const selectMun = document.getElementById(prefix + '-municipio');
+        selectMun.innerHTML = '<option value="">Seleccione municipio...</option>';
+        ciudades.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m; opt.text = m;
+            selectMun.appendChild(opt);
+        });
+        cargarSectores(prefix, '');
+    }
+
+    function cargarSectores(prefix, municipio) {
+        const selectSector = document.getElementById(prefix + '-sector');
+        if (!selectSector) return;
+        selectSector.innerHTML = '<option value="">Seleccione sector...</option>';
+        if (!municipio) return;
+        const sectores = catalogosGlobales.sectores_por_ciudad?.[municipio] || [];
+        sectores.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s; opt.text = s;
+            selectSector.appendChild(opt);
+        });
+        const optFree = document.createElement('option');
+        optFree.value = '__custom__'; optFree.text = '✏️ Otro (escribir)';
+        selectSector.appendChild(optFree);
+    }
+
+    function onMunicipioChange(prefix) {
+        const muni = document.getElementById(prefix + '-municipio').value;
+        cargarSectores(prefix, muni);
+    }
+
+    function getSectorValueModal(prefix) {
+        const sel = document.getElementById(prefix + '-sector');
+        if (!sel) return '';
+        if (sel.value === '__custom__') {
+            const custom = document.getElementById(prefix + '-sector_custom');
+            return custom ? custom.value : '';
+        }
+        return sel.value;
+    }
+
+    function initSelect2Proyectos() {
+        $('.select2-emp').select2({
+            dropdownParent: $('#modal-proyecto'),
+            ajax: {
+                url: '/api/maestros/empleados',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return { buscar: params.term || '', per_page: 20 };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.items.map(i => ({ id: i.id, text: i.nombre + ' ' + i.apellido + ' (' + i.cedula + ')' }))
+                    };
+                },
+                cache: true
+            },
+            placeholder: 'Seleccione un empleado...',
+            minimumInputLength: 0,
+            allowClear: true
+        });
+
+        $('.select2-con').select2({
+            dropdownParent: $('#modal-proyecto'),
+            ajax: {
+                url: '/api/maestros/constructoras',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return { buscar: params.term || '', per_page: 20 };
+                },
+                processResults: function (data) {
+                    let items = data.items || data.constructoras || data;
+                    if(!Array.isArray(items)) items = items.items || [];
+                    return {
+                        results: items.map(i => ({ id: i.id, text: i.nombre }))
+                    };
+                },
+                cache: true
+            },
+            placeholder: 'Seleccione una constructora...',
+            minimumInputLength: 0,
+            allowClear: true
+        });
+    }
+
+    // Sobrescribir abrirEditarProyecto para Select2
+    function abrirEditarProyecto(c) {
+        document.getElementById('titulo-modal-proyecto').innerText = 'Editar Proyecto';
+        document.getElementById('pro-id').value = c.id || '';
+        document.getElementById('pro-nombre').value = c.nombre || '';
+        document.getElementById('pro-tipo').value = c.tipo_inmueble || 'APARTAMENTO';
+        document.getElementById('pro-etapa').value = c.etapa || 'En Planos';
+        document.getElementById('pro-unidades').value = c.unidades_totales || '24';
+        
+        // Populate Provincia first so Municipios load
+        document.getElementById('pro-provincia').value = c.provincia || '';
+        actualizarMunicipiosProyecto();
+        document.getElementById('pro-municipio').value = c.municipio || '';
+        
+        document.getElementById('pro-sector').value = c.sector || '';
+        document.getElementById('pro-direccion').value = c.direccion || '';
+        document.getElementById('pro-financiamiento').value = c.financiamiento ? '1' : '0';
+        document.getElementById('pro-banco').value = c.institucion_bancaria || '';
+        document.getElementById('pro-captacion').value = c.fecha_captacion || '';
+        document.getElementById('pro-correos').value = c.correos_ventas || '';
+        document.getElementById('pro-forma').value = c.forma_registro || '';
+        document.getElementById('pro-exclusivo').value = (c.es_exclusivo === true || c.es_exclusivo === 1 || c.es_exclusivo === '1') ? 'true' : 'false';
+
+        if (c.encargado_id) {
+            let encName = c.encargado_nombre || ('ID: ' + c.encargado_id);
+            let opt = new Option(encName, c.encargado_id, true, true);
+            $('#pro-encargado').append(opt).trigger('change');
+        } else {
+            $('#pro-encargado').val(null).trigger('change');
+        }
+
+        if (c.captador_id) {
+            let capName = c.captador_nombre || ('ID: ' + c.captador_id);
+            let opt = new Option(capName, c.captador_id, true, true);
+            $('#pro-captador').append(opt).trigger('change');
+        } else {
+            $('#pro-captador').val(null).trigger('change');
+        }
+
+        if (c.contraparte_id) {
+            let conName = c.constructora || ('ID: ' + c.contraparte_id);
+            let opt = new Option(conName, c.contraparte_id, true, true);
+            $('#pro-constructora').append(opt).trigger('change');
+        } else {
+            $('#pro-constructora').val(null).trigger('change');
+        }
+
+        document.getElementById('modal-proyecto').classList.remove('hidden');
+    }
+
+    // ─── CRUD Proveedores ───────────────────────────────────────────────────────
+    async function guardarProveedor(e) {
+        e.preventDefault();
+        const id = document.getElementById('prov-id').value;
+        const ruc = document.getElementById('prov-ruc').value;
+
+        if (ruc && ruc !== "0000000000") {
+            try {
+                // Check duplicate RUC via GET using datatables endpoint
+                const res = await fetch(`/api/maestros/proveedores?columns[0][data]=ruc&columns[0][search][value]=${ruc}&search[value]=${ruc}`);
+                const data = await res.json();
+                if (data.data && data.data.some(p => p.ruc === ruc && String(p.id) !== String(id))) {
+                    showToast('El RNC ya se encuentra registrado.', 'warning');
+                    return;
+                }
+            } catch (err) {
+                console.error("Error al validar RNC", err);
+            }
+        }
+
+        const payload = {
+            razon_social: document.getElementById('prov-razon').value,
+            ruc: ruc,
+            telefono: document.getElementById('prov-telefono').value,
+            email: document.getElementById('prov-email').value,
+            direccion: document.getElementById('prov-direccion').value,
+            descripcion: document.getElementById('prov-descripcion').value,
+            estado: document.getElementById('prov-estado').value
+        };
+        const url = id ? '/api/maestros/proveedores/' + id : '/api/maestros/proveedores';
+        const method = id ? 'PUT' : 'POST';
+        try {
+            const res = await fetch(url, { method: method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+            const d = await res.json();
+            if (d.success) { showToast('OK: ' + d.message, 'success'); cargarDatosTab('proveedores'); if (e.submitter && e.submitter.getAttribute('data-loop') === 'true') { document.getElementById('form-proveedor').reset(); document.getElementById('prov-id').value=''; } else { cerrarModal('modal-proveedor'); } }
+            else { showToast(d.error, 'error'); }
+        } catch (error) {
+            showToast("Error de conexión al servidor.", "error");
+        }
+    }
+
+    function abrirEditarProveedor(c) {
+        document.getElementById('titulo-modal-proveedor').innerText = 'Editar Proveedor';
+        document.getElementById('prov-id').value = c.id || '';
+        document.getElementById('prov-razon').value = c.razon_social || '';
+        document.getElementById('prov-ruc').value = c.ruc || '';
+        document.getElementById('prov-telefono').value = c.telefono || '';
+        document.getElementById('prov-email').value = c.email || '';
+        document.getElementById('prov-direccion').value = c.direccion || '';
+        document.getElementById('prov-descripcion').value = c.descripcion || '';
+        document.getElementById('prov-estado').value = c.estado || 'activo';
+        
+        document.getElementById('modal-proveedor').classList.remove('hidden');
+    }
+
+    // ─── Init ────────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarDatosTab('clientes');
+        inicializarCatalogosProyectos();
+        initSelect2Proyectos();
+    });
+</script>
+<!-- MODAL EDITAR CLIENTE -->
+<div id="modal-editar-cliente" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
+        <h3 class="text-lg font-bold text-slate-900">Editar Cliente</h3>
+        <form id="form-editar-cliente" onsubmit="guardarEdicionCliente(event)" class="space-y-4">
+            <input type="hidden" id="edit-cli-id" value="">
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre</label>
+                    <input type="text" id="edit-cli-nombre" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Apellido</label>
+                    <input type="text" id="edit-cli-apellido" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Teléfono</label>
+                    <input type="text" id="edit-cli-telefono" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
+                    <input type="email" id="edit-cli-email" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+                <button type="button" onclick="document.getElementById('modal-editar-cliente').classList.add('hidden')" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancelar</button>
+                <button type="submit" class="px-4 py-2 text-sm font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-lg">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL EDITAR GENERICO -->
+<div id="modal-editar-generico" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4">
+        <h3 class="text-lg font-bold text-slate-900">Editar Registro</h3>
+        <form id="form-editar-generico" onsubmit="guardarEdicionGenerica(event)" class="space-y-4">
+            <input type="hidden" id="edit-gen-tab" value="">
+            <input type="hidden" id="edit-gen-id" value="">
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre</label>
+                <input type="text" id="edit-gen-nombre" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+            </div>
+            <div id="edit-gen-apellido-container" class="hidden">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Apellido</label>
+                <input type="text" id="edit-gen-apellido" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
+            </div>
+            <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+                <button type="button" onclick="document.getElementById('modal-editar-generico').classList.add('hidden')" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">Cancelar</button>
+                <button type="submit" class="px-4 py-2 text-sm font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-lg">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

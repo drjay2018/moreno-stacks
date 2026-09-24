@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/dlab_favicon.png') }}">
+    <title>Login - {{ dlab_empresa }}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&family=Inter:wght@400;500;600&family=Space+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              dlab: {
+                primary: '#0B3D4E',
+                cta: '#B4E600',
+                dark: '#1E1E1E',
+                light: '#F5F5F0',
+                cyan: '#3FA9C9'
+              }
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              display: ['Space Grotesk', 'sans-serif'],
+              mono: ['Space Mono', 'monospace'],
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-dlab-primary min-h-screen flex items-center justify-center relative overflow-hidden">
+    <!-- Decoración de fondo -->
+    <div class="absolute inset-0 bg-dlab-dark opacity-10"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-dlab-primary via-dlab-primary/80 to-transparent"></div>
+
+    <div class="relative z-10 w-full max-w-md p-8">
+        <div class="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl shadow-2xl">
+            <div class="text-center mb-8">
+                <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo" class="h-20 w-auto mx-auto mb-4 object-contain">
+                <!-- <h1 class="text-3xl font-display font-bold text-white mb-2">{{ dlab_empresa }}</h1> -->
+                <p class="text-dlab-light/70 text-sm mt-4">Inicia sesión en tu plataforma BI</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="mb-4 p-3 rounded-lg text-sm font-semibold 
+                            {% if category == 'error' %}bg-rose-500/20 border border-rose-500/50 text-rose-200
+                            {% else %}bg-emerald-500/20 border border-emerald-500/50 text-emerald-200{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('auth_views.login') }}" method="POST" class="space-y-5">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div>
+                    <label class="block text-dlab-light text-sm font-semibold mb-2" for="username">Usuario</label>
+                    <input type="text" id="username" name="username" required
+                           class="w-full bg-dlab-dark/50 border border-white/10 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-dlab-cyan focus:ring-1 focus:ring-dlab-cyan transition-colors"
+                           placeholder="Ingresa tu usuario">
+                </div>
+                <div>
+                    <label class="block text-dlab-light text-sm font-semibold mb-2" for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" required
+                           class="w-full bg-dlab-dark/50 border border-white/10 text-white rounded-lg px-4 py-3 focus:outline-none focus:border-dlab-cyan focus:ring-1 focus:ring-dlab-cyan transition-colors"
+                           placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full bg-dlab-cta hover:bg-dlab-cta/90 text-dlab-dark font-bold py-3 rounded-lg transition-colors mt-4">
+                    Iniciar Sesión
+                </button>
+            </form>
+        </div>
+        <p class="text-center text-white/50 text-xs mt-6">© 2026 {{ dlab_empresa }} BI App</p>
+    </div>
+</body>
+</html>

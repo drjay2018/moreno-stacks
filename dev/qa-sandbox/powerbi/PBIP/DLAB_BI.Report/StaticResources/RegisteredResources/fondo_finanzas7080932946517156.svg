@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="1280" height="720">
+    <style>
+        .title { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 26px; font-weight: 600; fill: #FFFFFF; }
+        .subtitle { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; font-weight: 400; fill: #8B949E; }
+        .card-title { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 16px; font-weight: 600; fill: #C9D1D9; }
+        .card-desc { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px; font-weight: 400; fill: #8B949E; }
+        .placeholder { font-family: 'Segoe UI', system-ui, sans-serif; font-size: 15px; font-weight: 400; fill: #484F58; text-anchor: middle; letter-spacing: 1px; }
+    </style>
+
+    <!-- Fondo Principal -->
+    <rect width="1280" height="720" fill="#171A1F"/>
+
+    <!-- Cabecera -->
+    <text x="40" y="55" class="title">Dashboard de Finanzas</text>
+    <text x="40" y="80" class="subtitle">Vista Ejecutiva - Junta Directiva</text>
+    
+    <circle cx="1230" cy="55" r="16" fill="#21252D" stroke="#2E353D" stroke-width="2"/>
+    <rect x="1110" y="45" width="90" height="20" rx="4" fill="#21252D" stroke="#2E353D" stroke-width="1"/>
+
+    <!-- 1. Indicador Rector General -->
+    <rect x="40" y="110" width="380" height="280" rx="12" fill="#21252D" stroke="#2E353D" stroke-width="2"/>
+    <text x="65" y="150" class="card-title">1. Indicador Rector General</text>
+    <text x="65" y="170" class="card-desc">SVG_Gauge_R</text>
+    <rect x="40" y="135" width="4" height="20" fill="#0078D4" rx="2"/>
+    <text x="230" y="260" class="placeholder">[ Espacio para el Gauge ]</text>
+
+    <!-- 2. Waterfall -->
+    <rect x="440" y="110" width="800" height="280" rx="12" fill="#21252D" stroke="#2E353D" stroke-width="2"/>
+    <text x="465" y="150" class="card-title">2. Desglose de Flujo (Waterfall)</text>
+    <text x="465" y="170" class="card-desc">Ingreso Bruto | Retención Neta | Gastos Operativos</text>
+    <rect x="440" y="135" width="4" height="20" fill="#107C41" rx="2"/>
+    <text x="840" y="260" class="placeholder">[ Espacio para Gráfico de Cascada ]</text>
+
+    <!-- 3. Matriz de Aging -->
+    <rect x="40" y="410" width="1200" height="270" rx="12" fill="#21252D" stroke="#2E353D" stroke-width="2"/>
+    <text x="65" y="450" class="card-title">3. Matriz de Aging de Cobros</text>
+    <text x="65" y="470" class="card-desc">Análisis de cartera &gt; 60 días</text>
+    <rect x="40" y="435" width="4" height="20" fill="#D83B01" rx="2"/>
+    <text x="640" y="560" class="placeholder">[ Espacio para Matriz / Tabla de Aging ]</text>
+
+</svg>

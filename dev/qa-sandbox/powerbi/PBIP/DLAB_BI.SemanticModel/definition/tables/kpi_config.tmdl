@@ -1,0 +1,97 @@
+table kpi_config
+	lineageTag: c568d005-cd2f-4c2e-84db-3da2e8ffc0ca
+
+	column id
+		dataType: double
+		lineageTag: 4da7c1d8-2ede-4ac6-b557-6deb93fcc003
+		summarizeBy: sum
+		sourceColumn: id
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column kpi_id
+		dataType: string
+		lineageTag: f9e1c06d-41d4-46bf-95a1-21947778d3ed
+		summarizeBy: none
+		sourceColumn: kpi_id
+
+		annotation SummarizationSetBy = Automatic
+
+	column nombre
+		dataType: string
+		lineageTag: 9bac5fa6-8356-49a5-b365-d51ea582f940
+		summarizeBy: none
+		sourceColumn: nombre
+
+		annotation SummarizationSetBy = Automatic
+
+	column categoria
+		dataType: string
+		lineageTag: 41696f6e-844c-4a7a-9ce6-0a54df424307
+		summarizeBy: none
+		sourceColumn: categoria
+
+		annotation SummarizationSetBy = Automatic
+
+	column unidad
+		dataType: string
+		lineageTag: fa4a3c47-97aa-4aaf-80ea-5fb3efbb1641
+		summarizeBy: none
+		sourceColumn: unidad
+
+		annotation SummarizationSetBy = Automatic
+
+	column meta
+		dataType: double
+		lineageTag: 35638210-eb5e-4479-a416-78bb14ce65da
+		summarizeBy: sum
+		sourceColumn: meta
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column umbral_amarillo
+		dataType: double
+		lineageTag: 675ea3d1-8559-48f6-b5d8-f4b2941a2477
+		summarizeBy: sum
+		sourceColumn: umbral_amarillo
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column umbral_rojo
+		dataType: double
+		lineageTag: e2e0cc12-c33c-4542-bc30-cdec38fe3aea
+		summarizeBy: sum
+		sourceColumn: umbral_rojo
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column mayor_es_mejor
+		dataType: boolean
+		formatString: """TRUE"";""TRUE"";""FALSE"""
+		lineageTag: 104bd804-6ea5-41ef-97e3-607c315a259f
+		summarizeBy: none
+		sourceColumn: mayor_es_mejor
+
+		annotation SummarizationSetBy = Automatic
+
+	partition kpi_config = m
+		mode: import
+		source =
+				let
+				    Origen = Odbc.DataSource("driver={SQLite3 ODBC Driver};database=H:\Mi unidad\Proyecto - CRM Inmobiliaria\dlab-data\data\dlab.db;notxn=1;dsn=SQLite3 Datasource", [HierarchicalNavigation=true, SqlCapabilities=[LimitClauseKind=LimitClauseKind.Limit]]),
+				    kpi_config_Table = Origen{[Name="kpi_config",Kind="Table"]}[Data]
+				in
+				    kpi_config_Table
+
+	annotation PBI_NavigationStepName = Navegación
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Reportería & Exportaciones | DLAB CRM{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900">Centro de Reportería & Exportaciones</h1>
+        <p class="text-sm text-slate-500">Generación de archivos consolidados para Power BI y contexto anonimizado para el Agente IA.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+            <h2 class="text-lg font-bold text-slate-900 flex items-center">
+                <svg class="inline w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                Exportación para Power BI
+            </h2>
+            <p class="text-xs text-slate-500">Genera archivos Parquet / JSON y un Resumen Ejecutivo en Excel.</p>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Período de Exportación</label>
+                <select id="export-period" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-slate-500 focus:ring-slate-500">
+                    <option value="historico">Histórico Completo</option>
+                    <option value="6_meses">Últimos 6 Meses</option>
+                    <option value="ultimo_mes">Último Mes</option>
+                </select>
+            </div>
+            <button onclick="generarBI(event)" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium text-sm py-2.5 rounded-lg transition-colors">
+                Generar Paquete BI Ahora
+            </button>
+            <!-- Log de resultado -->
+            <div id="log-container" class="hidden mt-4 pt-4 border-t border-slate-100" aria-live="polite">
+              <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Resultado</p>
+              <div id="log-content" class="w-full p-3 text-[11px] font-mono bg-slate-900 text-emerald-400 rounded-lg whitespace-pre-line"></div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+            <h2 class="text-lg font-bold text-slate-900 flex items-center">
+                <svg class="inline w-6 h-6 mr-2 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                Exportación para Agente IA
+            </h2>
+            <p class="text-xs text-slate-500">Genera datasets planos con anonimización defensiva para consultas por LLM.</p>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Período de Exportación</label>
+                <select id="export-period-ia" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-slate-500 focus:ring-slate-500">
+                    <option value="historico">Histórico Completo</option>
+                    <option value="6_meses">Últimos 6 Meses</option>
+                    <option value="ultimo_mes">Último Mes</option>
+                </select>
+            </div>
+            <button onclick="generarAgente(event)" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm py-2.5 rounded-lg transition-colors">
+                Generar Contexto Agente IA
+            </button>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+            <h2 class="text-lg font-bold text-slate-900 flex items-center">
+                <svg class="inline w-6 h-6 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Histórico Operativo (Excel)
+            </h2>
+            <p class="text-xs text-slate-500">Descarga un reporte consolidado con el histórico de Compras, Pagos a Proveedores, Cierres y Comisiones en pestañas separadas.</p>
+            <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Período de Exportación</label>
+                <select id="export-period-hist" class="w-full border border-slate-300 rounded-lg p-2 text-sm focus:border-slate-500 focus:ring-slate-500">
+                    <option value="historico">Histórico Completo</option>
+                    <option value="6_meses">Últimos 6 Meses</option>
+                    <option value="ultimo_mes">Último Mes</option>
+                </select>
+            </div>
+            <button onclick="generarHistoricoOperativo(event)" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm py-2.5 rounded-lg transition-colors">
+                Generar Histórico Operativo
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function generarBI(e) {
+        const btn = e.target;
+        const originalText = btn.innerText;
+        btn.innerText = "Generando exportación, por favor espera...";
+        btn.disabled = true;
+        
+        const period = document.getElementById('export-period').value;
+        try {
+            const res = await fetch('/api/exportaciones/generar-bi', { 
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ periodo: period })
+            });
+            const data = await res.json();
+            alert(data.message);
+        } catch (err) {
+            alert("Error de conexión al generar la exportación.");
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+    async function generarAgente(e) {
+        const btn = e.target;
+        const originalText = btn.innerText;
+        btn.innerText = "Generando contexto, por favor espera...";
+        btn.disabled = true;
+
+        const period = document.getElementById('export-period-ia').value;
+        try {
+            const res = await fetch('/api/exportaciones/generar-agente', { 
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ periodo: period })
+            });
+            const data = await res.json();
+            alert(data.message);
+        } catch (err) {
+            alert("Error de conexión al generar la exportación.");
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+    
+    async function generarHistoricoOperativo(e) {
+        const btn = e.target;
+        const originalText = btn.innerText;
+        btn.innerText = "Generando histórico, por favor espera...";
+        btn.disabled = true;
+        
+        const period = document.getElementById('export-period-hist').value;
+        try {
+            const res = await fetch('/api/exportaciones/generar-historico-operativo', { 
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ periodo: period })
+            });
+            let data;
+            try {
+                data = await res.json();
+            } catch {
+                const text = await res.text();
+                alert("Respuesta inesperada del servidor (HTTP " + res.status + "):\n" + text.substring(0, 300));
+                return;
+            }
+            if (data.success) {
+                alert("OK: " + data.message);
+            } else {
+                alert("Error: " + data.message);
+            }
+        } catch (err) {
+            alert("Error de red: " + err.message);
+        } finally {
+            btn.innerText = originalText;
+            btn.disabled = false;
+        }
+    }
+</script>
+{% endblock %}
